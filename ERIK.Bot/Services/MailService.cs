@@ -15,7 +15,7 @@ namespace ERIK.Bot.Services
 
         public void Start()
         {
-            SmtpClient SmtpServer = new SmtpClient("smtp.gmail.com");
+            SmtpClient SmtpServer = new SmtpClient("smtp.transip.email");
             SmtpServer.Port = 465;
             SmtpServer.EnableSsl = true;
             SmtpServer.Credentials =

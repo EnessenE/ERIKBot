@@ -80,7 +80,7 @@ namespace ERIK.Bot
             await provider.GetRequiredService<BotService>().Start();       // Start the startup service
             provider.GetRequiredService<ClientStatusModule>().Start();       // Start the startup service
 
-            provider.GetRequiredService<MailService>().Start();       // Start the startup service
+           // provider.GetRequiredService<MailService>().Start();       // Start the startup service
             await Task.Delay(-1);                               // Keep the program alive
         }
 
