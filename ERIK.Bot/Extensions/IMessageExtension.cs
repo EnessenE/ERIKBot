@@ -13,7 +13,7 @@ namespace ERIK.Bot.Extensions
         {
             Log log = new Log
             {
-                authorTag = message.Author.Username,
+                authorTag = message.Author.ToString(),
                 message = message.Content,
                 simplifiedTime = message.Timestamp.ToString("HH:mm:ss"),
                 edited = (message.EditedTimestamp != null)

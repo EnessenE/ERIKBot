@@ -26,9 +26,13 @@ namespace ERIK.Bot.Modules
 
 
         [Command("save")]
-        [Summary("Save the last [amount] messages in the selected text channel.")]
+        [Summary("Save the last [amount] messages in the selected text channel. Usage: !save [email] [amount (default 100)]")]
         public async Task SaveHistory(string email, int totalMessagesToCollect = 100)
         {
+            if (totalMessagesToCollect > 2500)
+            {
+                totalMessagesToCollect = 2500;
+            }
             var author = this.Context.Message.Author;
             var channel = this.Context.Channel;
             var guild = this.Context.Guild;
@@ -52,7 +56,7 @@ namespace ERIK.Bot.Modules
                             $"Successfully retrieved {messages.Count} messages in the selected channel.");
                         try
                         {
-                            string subject = $"Last {totalMessagesToCollect} in {channel.Name}.";
+                            string subject = $"Last {totalMessagesToCollect} chats in {channel.Name}.";
                             HistoryLogData data = new HistoryLogData
                             {
                                 subject = subject,
@@ -61,14 +65,14 @@ namespace ERIK.Bot.Modules
                                 channelId = channel.Id.ToString(),
                                 channelName = channel.Name,
                                 time = message.Timestamp.ToString(),
-                                totalMessages = totalMessagesToCollect,
-                                totalMessagesSaved = messages.Count,
+                                totalMessages = totalMessagesToCollect.ToString(),
+                                totalMessagesSaved = messages.Count.ToString(),
                                 requesterName = author.Username
                             };
 
                             data.logs = messages.ToLogList();
 
-                            _mailService.SendTemplateEmail(_options.HistoryTemplateId, email, email, data);
+                            _mailService.SendTemplateEmail(_options.HistoryTemplateId, email, data);
                         }
                         catch (Exception error)
                         {

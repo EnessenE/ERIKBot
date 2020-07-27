@@ -13,8 +13,8 @@ namespace ERIK.Bot.Models
         public string channelName { get; set; }
         public string channelId { get; set; }
         public string time { get; set; }
-        public int totalMessages { get; set; }
-        public int totalMessagesSaved { get; set; }
+        public string totalMessages { get; set; }
+        public string totalMessagesSaved { get; set; }
         public string requesterName { get; set; }
 
         public List<Log> logs { get; set; }
