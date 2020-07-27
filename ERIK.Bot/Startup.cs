@@ -33,12 +33,16 @@ namespace ERIK.Bot
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<DiscordBotSettings>(Configuration.GetSection("DiscordBot"));
-
-            services.AddTransient<BotService>();
-            services.AddTransient<MailService>();
-            services.AddTransient<ClientStatusModule>();
+            services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
+            services.Configure<Responses>(Configuration.GetSection("Responses"));
 
             services.AddSingleton<DiscordSocketClient>();
+
+            services.AddTransient<MailService>();
+            services.AddTransient<ClientStatusService>();
+
+            services.AddTransient<BotService>();
+
 
             //Add logging
             services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
@@ -66,7 +70,6 @@ namespace ERIK.Bot
                     .AllowAnyMethod()
                     .AllowAnyHeader();
             }));
-
             services.AddControllers();
         }
 
@@ -74,13 +77,12 @@ namespace ERIK.Bot
         {
             var services = new ServiceCollection();             // Create a new instance of a service collection
             ConfigureServices(services);
-
+            
             var provider = services.BuildServiceProvider();     // Build the service provider
 
-            await provider.GetRequiredService<BotService>().Start();       // Start the startup service
-            provider.GetRequiredService<ClientStatusModule>().Start();       // Start the startup service
+            await provider.GetRequiredService<BotService>().Start(provider);       // Start the startup service
+            provider.GetRequiredService<ClientStatusService>().Start();       // Start the startup service
 
-           // provider.GetRequiredService<MailService>().Start();       // Start the startup service
             await Task.Delay(-1);                               // Keep the program alive
         }
 

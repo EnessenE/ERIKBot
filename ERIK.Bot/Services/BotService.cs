@@ -17,14 +17,16 @@ namespace ERIK.Bot.Services
         private CommandService _commands;
         private readonly ILogger<BotService> _logger;
         private readonly DiscordBotSettings _botOptions;
+        private readonly IServiceProvider _services;
 
-        public BotService(ILogger<BotService> logger, IOptions<DiscordBotSettings> botOptions)
+        public BotService(ILogger<BotService> logger, IOptions<DiscordBotSettings> botOptions, IServiceProvider services)
         {
             _logger = logger;
+            _services = services;
             _botOptions = botOptions.Value;
         }
 
-        public async Task Start()
+        public async Task Start(IServiceProvider services)
         {
             _client = new DiscordSocketClient();
             CommandServiceConfig config = new CommandServiceConfig();
@@ -43,7 +45,7 @@ namespace ERIK.Bot.Services
             await _client.StartAsync();
 
             //Client has started
-            // Console.WriteLine($"I am {_client.CurrentUser.Username}.");
+            //_logger.LogInformation($"I am {_client.CurrentUser.Username}.");
 
 
             // Block this task until the program is closed.
@@ -63,7 +65,7 @@ namespace ERIK.Bot.Services
             // If you do not use Dependency Injection, pass null.
             // See Dependency Injection guide for more information.
             await _commands.AddModulesAsync(assembly: Assembly.GetEntryAssembly(),
-                                            services: null);
+                                            services: _services);
         }
 
         private async Task HandleCommandAsync(SocketMessage messageParam)
@@ -71,6 +73,8 @@ namespace ERIK.Bot.Services
             // Don't process the command if it was a system message
             var message = messageParam as SocketUserMessage;
             if (message == null) return;
+
+            _logger.LogInformation("[{time}]{author}: {content}", message.Timestamp.ToString("HH:mm:ss"), message.Author.Username, message.Content);
 
             // Create a number to track where the prefix ends and the command begins
             int argPos = 0;
@@ -92,14 +96,14 @@ namespace ERIK.Bot.Services
             var result = await _commands.ExecuteAsync(
                 context: context,
                 argPos: argPos,
-                services: null);
+                services: _services);
 
             // Optionally, we may inform the user if the command fails
             // to be executed; however, this may not always be desired,
             // as it may clog up the request queue should a user spam a
             // command.
-            // if (!result.IsSuccess)
-            // await context.Channel.SendMessageAsync(result.ErrorReason);
+             //if (!result.IsSuccess)
+             //await context.Channel.SendMessageAsync(result.ErrorReason);
         }
 
         private Task Log(LogMessage msg)
