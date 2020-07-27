@@ -3,16 +3,21 @@ using Discord.Commands;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ERIK.Bot.Configurations;
+using ERIK.Bot.Extensions;
+using Microsoft.Extensions.Options;
 
 namespace ERIK.Bot.Modules
 {
     public class MiscModule : ModuleBase<SocketCommandContext>
     {
         private readonly CommandService _commandService;
+        private readonly Responses _responses;
 
-        public MiscModule(CommandService commandService)
+        public MiscModule(CommandService commandService, IOptions<Responses> responses)
         {
             _commandService = commandService;
+            _responses = responses.Value;
         }
 
         [Command("help")]
@@ -31,6 +36,13 @@ namespace ERIK.Bot.Modules
             }
 
             await ReplyAsync("Here's a list of commands and their description: ", false, embedBuilder.Build());
+        }
+
+        [Command("ping")]
+        [Summary("Send a response")]
+        public async Task Pong()
+        {
+            await ReplyAsync(_responses.Pong.PickRandom());
         }
     }
 }
