@@ -2,21 +2,20 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using Discord.WebSocket;
 using ERIK.Bot.Extensions;
 using ERIK.Bot.Models;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
-namespace ERIK.Bot.Modules
+namespace ERIK.Bot.Services
 {
-    public class ClientStatusModule //: ModuleBase<SocketCommandContext>
+    public class ClientStatusService //: ModuleBase<SocketCommandContext>
     {
         private readonly DiscordSocketClient _client;
-        private ILogger<ClientStatusModule> _logger;
+        private readonly ILogger<ClientStatusService> _logger;
 
-        public ClientStatusModule(DiscordSocketClient client, ILogger<ClientStatusModule> logger)
+        public ClientStatusService(DiscordSocketClient client, ILogger<ClientStatusService> logger)
         {
             _client = client;
             _logger = logger;
