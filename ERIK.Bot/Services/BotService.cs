@@ -93,17 +93,26 @@ namespace ERIK.Bot.Services
 
             // Keep in mind that result does not indicate a return value
             // rather an object stating if the command executed successfully.
-            var result = await _commands.ExecuteAsync(
-                context: context,
-                argPos: argPos,
-                services: _services);
+            try
+            {
+                var result = await _commands.ExecuteAsync(
+                    context: context,
+                    argPos: argPos,
+                    services: _services);
+
+                if (!result.IsSuccess)
+                    await context.Channel.SendMessageAsync("Failed executing your command. \n" + result.ErrorReason);
+            }
+            catch (Exception error)
+            {
+                await context.Channel.SendMessageAsync("Failed executing your command. \n" + error.Message);
+            }
 
             // Optionally, we may inform the user if the command fails
             // to be executed; however, this may not always be desired,
             // as it may clog up the request queue should a user spam a
             // command.
-             //if (!result.IsSuccess)
-             //await context.Channel.SendMessageAsync(result.ErrorReason);
+
         }
 
         private Task Log(LogMessage msg)

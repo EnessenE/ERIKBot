@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord.WebSocket;
 using ERIK.Bot.Configurations;
+using ERIK.Bot.Context;
 using ERIK.Bot.Modules;
 using ERIK.Bot.Services;
 using Microsoft.AspNetCore.Builder;
@@ -34,6 +35,7 @@ namespace ERIK.Bot
         {
             services.Configure<DiscordBotSettings>(Configuration.GetSection("DiscordBot"));
             services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
+            services.Configure<SQLSettings>(Configuration.GetSection("SQLSettings"));
             services.Configure<Responses>(Configuration.GetSection("Responses"));
 
             services.AddSingleton<DiscordSocketClient>();
@@ -43,6 +45,10 @@ namespace ERIK.Bot
 
             services.AddTransient<BotService>();
 
+            services.AddTransient<EntityContext>();
+
+            //Add the DBContext
+            services.AddDbContext<EntityContext>();
 
             //Add logging
             services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
