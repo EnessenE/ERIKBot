@@ -100,8 +100,10 @@ namespace ERIK.Bot.Services
                     argPos: argPos,
                     services: _services);
 
-                if (!result.IsSuccess)
+                if (!result.IsSuccess && result.Error != CommandError.UnknownCommand)
+                {
                     await context.Channel.SendMessageAsync("Failed executing your command. \n" + result.ErrorReason);
+                }
             }
             catch (Exception error)
             {
