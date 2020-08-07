@@ -16,7 +16,6 @@ namespace ERIK.Bot.Extensions
             List<DiscordUser> joined = new List<DiscordUser>();
             List<DiscordUser> alt = new List<DiscordUser>();
             var embedB = new EmbedBuilder{
-                Title = savedmsg.Title,
                 Description = savedmsg.Description
             };
 
