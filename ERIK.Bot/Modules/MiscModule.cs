@@ -56,7 +56,7 @@ namespace ERIK.Bot.Modules
         {
             string response = string.Empty;
             string oldPrefix = "ERR";
-            Guild guild = _context.GetGuild(this.Context.Guild.Id.ToString());
+            Guild guild = _context.GetGuild(this.Context.Guild.Id);
             if (guild != null)
             {
                 oldPrefix = guild.Prefix;

@@ -38,12 +38,12 @@ namespace ERIK.Bot
             services.Configure<SQLSettings>(Configuration.GetSection("SQLSettings"));
             services.Configure<Responses>(Configuration.GetSection("Responses"));
 
-            services.AddSingleton<DiscordSocketClient>();
+           // services.AddSingleton<DiscordSocketClient>();
 
             services.AddTransient<MailService>();
-            services.AddTransient<ClientStatusService>();
 
             services.AddTransient<BotService>();
+            services.AddTransient<ReactionService>();
 
             services.AddTransient<EntityContext>();
 
@@ -87,7 +87,6 @@ namespace ERIK.Bot
             var provider = services.BuildServiceProvider();     // Build the service provider
 
             await provider.GetRequiredService<BotService>().Start(provider);       // Start the startup service
-            provider.GetRequiredService<ClientStatusService>().Start();       // Start the startup service
 
             await Task.Delay(-1);                               // Keep the program alive
         }

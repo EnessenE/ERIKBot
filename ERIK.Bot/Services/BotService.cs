@@ -1,13 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using ERIK.Bot.Configurations;
+using ERIK.Bot.Context;
+using ERIK.Bot.Extensions;
+using ERIK.Bot.Models;
 using ERIK.Bot.Modules;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 
 namespace ERIK.Bot.Services
 {
@@ -18,12 +25,16 @@ namespace ERIK.Bot.Services
         private readonly ILogger<BotService> _logger;
         private readonly DiscordBotSettings _botOptions;
         private readonly IServiceProvider _services;
+        private readonly EntityContext _context;
+        private ReactionService _reactionService;
 
-        public BotService(ILogger<BotService> logger, IOptions<DiscordBotSettings> botOptions, IServiceProvider services)
+        public BotService(ILogger<BotService> logger, IOptions<DiscordBotSettings> botOptions, IServiceProvider services, EntityContext context, ReactionService reactionService)
         {
             _logger = logger;
             _services = services;
             _botOptions = botOptions.Value;
+            _context = context;
+            _reactionService = reactionService;
         }
 
         public async Task Start(IServiceProvider services)
@@ -43,6 +54,7 @@ namespace ERIK.Bot.Services
 
             await _client.LoginAsync(TokenType.Bot, _botOptions.Token);
             await _client.StartAsync();
+            StartRandomStatusThread();
 
             //Client has started
             //_logger.LogInformation($"I am {_client.CurrentUser.Username}.");
@@ -55,6 +67,7 @@ namespace ERIK.Bot.Services
         {
             // Hook the MessageReceived event into our command handler
             _client.MessageReceived += HandleCommandAsync;
+            _client.ReactionAdded += HandleReaction;
 
             // Here we discover all of the command modules in the entry 
             // assembly and load them. Starting from Discord.NET 2.0, a
@@ -66,6 +79,11 @@ namespace ERIK.Bot.Services
             // See Dependency Injection guide for more information.
             await _commands.AddModulesAsync(assembly: Assembly.GetEntryAssembly(),
                                             services: _services);
+        }
+
+        private Task HandleReaction(Cacheable<IUserMessage, ulong> cachedMessage, ISocketMessageChannel channel, SocketReaction socketReaction)
+        {
+            return _reactionService.HandleReactionAsync(_client, cachedMessage, channel, socketReaction);
         }
 
         private async Task HandleCommandAsync(SocketMessage messageParam)
@@ -115,6 +133,47 @@ namespace ERIK.Bot.Services
             // as it may clog up the request queue should a user spam a
             // command.
 
+        }
+        
+        public void StartRandomStatusThread()
+        {
+
+            _logger.LogInformation("Starting the status setter!");
+            new Thread(() =>
+            {
+                Thread.Sleep(5000);
+                while (true)
+                {
+                    try
+                    {
+                        _logger.LogInformation("Attempting to set the status");
+
+                        string randomtext = LoadJson().PickRandom();
+                        _client.SetGameAsync(randomtext);
+                        _logger.LogInformation("Set the status to {msg}!", randomtext);
+
+                    }
+                    catch (Exception error)
+                    {
+                        _logger.LogWarning("Failed to set status");
+                    }
+                    Thread.Sleep(900000);
+
+                }
+            }).Start();
+        }
+
+        public List<string> LoadJson()
+        {
+            List<string> list = new List<string>();
+            using (StreamReader r = new StreamReader("status.json"))
+            {
+                string json = r.ReadToEnd();
+                var item = JsonConvert.DeserializeObject<RandomStatuses>(json);
+                list = item.statuses;
+            }
+
+            return list;
         }
 
         private Task Log(LogMessage msg)
