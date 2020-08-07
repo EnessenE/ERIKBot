@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using ERIK.Bot.Models.Reactions;
 using Discord;
 using Discord.Commands;
+using ERIK.Bot.Enums;
 
 namespace ERIK.Bot.Extensions
 {
@@ -12,24 +13,42 @@ namespace ERIK.Bot.Extensions
     {
         public static Embed ToEmbed(this SavedMessage savedmsg)
         {
-            //            var embedB = new EmbedBuilder
-            //            {
-            //                Title = savedmsg.Title,
-            //                Description = savedmsg.Description
-            //            };
-            //            embed.AddField("Field title",
-            //                "Field value. I also support [hyperlink markdown](https://example.com)!");
-            //            embed.WithAuthor(Context.Client.CurrentUser);
-            //            embedB.WithFooter(footer => footer.Text = "I am a footer.");
-            //            embedB.WithColor(Color.Blue);
-            //            embedB.WithTitle("I overwrote \"Hello world!\"");
-            //            embedB.WithDescription("I am a description.");
-            //            embedB.WithUrl("https://example.com");
-            //            embedB.WithCurrentTimestamp();
-            //            var embed = embedB.Build();
+            List<DiscordUser> joined = new List<DiscordUser>();
+            List<DiscordUser> alt = new List<DiscordUser>();
+            var embedB = new EmbedBuilder{
+                Title = savedmsg.Title,
+                Description = savedmsg.Description
+            };
 
-            //            return embed;
-            return null;
+            embedB.WithFooter(footer => footer.Text = "Kga lfg");
+            embedB.WithColor(Color.Green);
+
+            embedB.AddField("Activity:", savedmsg.Title, true);
+            embedB.AddField("Start Time:", savedmsg.Time, true);
+            embedB.AddField("ID", "No implementation", true);
+
+            embedB.WithDescription(savedmsg.Description);
+            if (savedmsg.Reactions != null && savedmsg.Reactions.Count != 0)
+            {
+                foreach (var item in savedmsg.Reactions)
+                {
+                    if (item.State.Equals(ReactionState.Joined)) { joined.Add(item.User); }
+                    else { alt.Add(item.User); }
+                }
+
+                embedB.AddField("Joined:", joined, true);
+                embedB.AddField("Alternatives:", alt, true);
+            }
+            else
+            {
+                embedB.AddField("Joined:", "no one joined up yet", true);
+                embedB.AddField("Alternatives:", "there are no alternatives", true);
+            }
+
+            embedB.WithCurrentTimestamp();
+            var embed = embedB.Build();
+
+            return embed;
         }
     }
 }
