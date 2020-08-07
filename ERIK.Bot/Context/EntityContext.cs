@@ -42,16 +42,43 @@ namespace ERIK.Bot.Context
             return result;
         }
 
+        public async Task<List<SavedMessage>> GetAllNonPublished(ulong guildId)
+        {
+            var result = SavedMessages.AsAsyncEnumerable().Where(a => a.Published == false && a.GuildId == guildId);
+            return await result.ToListAsync();
+        }
+
         public Guild GetGuild(ulong id)
         {
             var result = Guilds.Find(id);
-            return result;
+            if (result.Id > 0)
+            {
+                return result;
+            }
+            else
+            {
+                return null;
+            }
         }
 
-        public Guild CreateGuild(Guild guild)
+        public Guild GetOrCreateGuild(ulong id)
         {
-            Add(guild);
-            SaveChanges();
+            Guild guild = GetGuild(id);
+            if (guild != null)
+            {
+                return guild;
+            }
+            else
+            {
+                guild = new Guild()
+                {
+                    Id = id,
+                    Prefix = "!" //retrieve from appsettings
+                };
+                Add(guild);
+                SaveChanges();
+            }
+
             return guild;
         }
 

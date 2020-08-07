@@ -23,7 +23,9 @@ namespace ERIK.Bot.Migrations
                 columns: table => new
                 {
                     Id = table.Column<decimal>(nullable: false),
-                    Prefix = table.Column<string>(nullable: true)
+                    Prefix = table.Column<string>(nullable: true),
+                    LfgPrepublishChannelId = table.Column<decimal>(nullable: false),
+                    LfgPublishChannelId = table.Column<decimal>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -36,6 +38,7 @@ namespace ERIK.Bot.Migrations
                 {
                     MessageId = table.Column<decimal>(nullable: false),
                     IsFinished = table.Column<bool>(nullable: false),
+                    Published = table.Column<bool>(nullable: false),
                     Type = table.Column<int>(nullable: false)
                 },
                 constraints: table =>

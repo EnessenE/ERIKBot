@@ -25,6 +25,12 @@ namespace ERIK.Bot.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("decimal(20,0)");
 
+                    b.Property<decimal>("LfgPrepublishChannelId")
+                        .HasColumnType("decimal(20,0)");
+
+                    b.Property<decimal>("LfgPublishChannelId")
+                        .HasColumnType("decimal(20,0)");
+
                     b.Property<string>("Prefix")
                         .HasColumnType("nvarchar(max)");
 
@@ -75,6 +81,9 @@ namespace ERIK.Bot.Migrations
                         .HasColumnType("decimal(20,0)");
 
                     b.Property<bool>("IsFinished")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Published")
                         .HasColumnType("bit");
 
                     b.Property<int>("Type")

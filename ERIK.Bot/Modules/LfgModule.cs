@@ -7,6 +7,7 @@ using Discord.Commands;
 using ERIK.Bot.Configurations;
 using ERIK.Bot.Context;
 using ERIK.Bot.Enums;
+using ERIK.Bot.Models;
 using ERIK.Bot.Models.Reactions;
 using ERIK.Bot.Services;
 using Microsoft.Extensions.Options;
@@ -15,7 +16,7 @@ namespace ERIK.Bot.Modules
 {
     public class LfgModule : ModuleBase<SocketCommandContext>
     {
-        private EntityContext _context;
+        private readonly EntityContext _context;
 
         public LfgModule(EntityContext context)
         {
@@ -25,9 +26,9 @@ namespace ERIK.Bot.Modules
 
         [Command("lfg create")]
         [Summary("Save the last [amount] messages in the selected text channel. Usage: !save [email] [amount (default 100)]")]
-        public async Task CreateLfg()
+        public async Task CreateLfg(string activity, string desc, DateTime time)
         {
-            IUserMessage msg = await ReplyAsync("Created");
+            IUserMessage msg = await ReplyAsync($"Created {activity} - {desc} - {time.ToString("f")}");
 
             SavedMessage savedMessage = new SavedMessage
             {
@@ -45,5 +46,63 @@ namespace ERIK.Bot.Modules
 
             
         }
+
+        [Command("lfg prepublish")]
+        [Summary("Before publishing an LFG you can pre-create it in a channel")]
+        public async Task SetChannelPrePublish(IChannel channel)
+        {
+            Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
+            guild.LfgPrepublishChannelId = channel.Id;
+            _context.SaveChanges();
+            await ReplyAsync($"Set the new pre-publish channel to <@{channel.Id}>");
+        }
+
+
+        [Command("lfg normalchannel")]
+        [Summary("Before publishing an LFG you can pre-create it in a channel")]
+        public async Task SetChannelPublish(IChannel channel)
+        {
+            Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
+            guild.LfgPublishChannelId = channel.Id;
+            _context.SaveChanges();
+            await ReplyAsync($"Set the new publish channel to <@{channel.Id}>");
+        }
+
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Command("lfg publish")]
+        [Summary("Publish all current pre-published LFGs to the pre-selected publish channel")]
+        public async Task Publish()
+        {
+            List<SavedMessage> messages = await _context.GetAllNonPublished(this.Context.Guild.Id);
+            var targetChannel = _context.GetOrCreateGuild(this.Context.Guild.Id).LfgPublishChannelId;
+            if (messages != null && messages.Count > 0)
+            {
+                if (targetChannel > 0)
+                {
+                    var channel = this.Context.Client.GetChannel(targetChannel) as IMessageChannel;
+#warning Call method to post, and sort on time
+                    foreach (var message in messages)
+                    {
+                        message.Published = true;
+                        await channel.SendMessageAsync(message.MessageId.ToString());
+                    }
+
+                    _context.SaveChanges();
+                    await ReplyAsync("I successfully published all non published LFG posts for this guild.");
+                }
+                else
+                {
+                    await ReplyAsync("No publish channel set.");
+                }
+            }
+            else
+            {
+                await ReplyAsync("No posts to publish.");
+            }
+
+        }
+
+
+
     }
 }

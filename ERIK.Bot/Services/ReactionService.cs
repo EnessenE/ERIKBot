@@ -77,7 +77,10 @@ namespace ERIK.Bot.Services
             foreach (var reaction in trackedMessage.Reactions)
             {
                 var user = client.GetUser(reaction.User.Id);
-                content += reaction.State.ToString() + ": " + user.Username + ", ";
+                if (reaction.State != ReactionState.Left)
+                {
+                    content += reaction.State.ToString() + ": " + user.Username + ", ";
+                }
             }
             await message.ModifyAsync(m => { m.Content = content; });
 
