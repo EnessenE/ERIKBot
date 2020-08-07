@@ -56,24 +56,34 @@ namespace ERIK.Bot.Modules
         {
             string response = string.Empty;
             string oldPrefix = "ERR";
-            Guild guild = _context.GetGuild(this.Context.Guild.Id);
-            if (guild != null)
-            {
-                oldPrefix = guild.Prefix;
-                guild.Prefix = newPrefix;
-                response = "Saved the new prefix successfully.";
-            }
-            else
-            {
-                guild = new Guild()
-                {
-                    Id = this.Context.Guild.Id,
-                    Prefix = newPrefix
-                };
-                _context.CreateGuild(guild);
-                response = "An error occured, couldn't find settings for your guild.";
-            }
+            Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
+            response = "Saved the new prefix successfully.";
+                
             await ReplyAsync(response);
+        }
+
+        [Command("embed")]
+        public async Task SendRichEmbedAsync()
+        {
+            var embed = new EmbedBuilder
+            {
+                // Embed property can be set within object initializer
+                Title = "Hello world!",
+                Description = "I am a description set by initializer."
+            };
+            // Or with methods
+            embed.AddField("Field title",
+                "Field value. I also support [hyperlink markdown](https://example.com)!");
+            embed.WithAuthor(Context.Client.CurrentUser);
+            embed.WithFooter(footer => footer.Text = "I am a footer.");
+            embed.WithColor(Color.Blue);
+            embed.WithTitle("I overwrote \"Hello world!\"");
+            embed.WithDescription("I am a description.");
+            embed.WithUrl("https://example.com");
+            embed.WithCurrentTimestamp();
+            var built = embed.Build();
+            
+            await ReplyAsync(embed: built);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using ERIK.Bot.Enums;
 
@@ -14,6 +15,12 @@ namespace ERIK.Bot.Models.Reactions
         public ulong GuildId { get; set; }
         public bool IsFinished { get; set; }
         public bool Published { get; set; }
+
+        //LFG
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public DateTime Time { get; set; }
+        public ulong AuthorId { get; set; }
 
         public ReactionMessageType Type { get; set; }
 

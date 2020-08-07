@@ -7,6 +7,7 @@ using Discord.Commands;
 using ERIK.Bot.Configurations;
 using ERIK.Bot.Context;
 using ERIK.Bot.Enums;
+using ERIK.Bot.Extensions;
 using ERIK.Bot.Models;
 using ERIK.Bot.Models.Reactions;
 using ERIK.Bot.Services;
@@ -34,7 +35,10 @@ namespace ERIK.Bot.Modules
             {
                 MessageId = msg.Id, 
                 IsFinished = false, 
-                Type = ReactionMessageType.LFG
+                Type = ReactionMessageType.LFG,
+                Time = time,
+                Title = activity,
+                Description = desc,
                 GuildId = this.Context.Guild.Id
             };
 
@@ -76,11 +80,11 @@ namespace ERIK.Bot.Modules
                 if (targetChannel > 0)
                 {
                     var channel = this.Context.Client.GetChannel(targetChannel) as IMessageChannel;
-#warning Call method to post, and sort on time
                     foreach (var message in messages)
                     {
                         message.Published = true;
-                        await channel.SendMessageAsync(message.MessageId.ToString());
+                        IUserMessage sentMessage = await channel.SendMessageAsync(embed: message.ToEmbed());
+                        await ConnectMessage(message, sentMessage);
                     }
 
                     _context.SaveChanges();
