@@ -52,12 +52,12 @@ namespace ERIK.Bot.Migrations
 
             modelBuilder.Entity("ERIK.Bot.Models.Reactions.MessageReaction", b =>
                 {
-                    b.Property<Guid>("Guid")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal?>("SavedMessageMessageId")
-                        .HasColumnType("decimal(20,0)");
+                    b.Property<Guid?>("SavedMessageId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("State")
                         .HasColumnType("int");
@@ -65,9 +65,9 @@ namespace ERIK.Bot.Migrations
                     b.Property<decimal?>("UserId")
                         .HasColumnType("decimal(20,0)");
 
-                    b.HasKey("Guid");
+                    b.HasKey("Id");
 
-                    b.HasIndex("SavedMessageMessageId");
+                    b.HasIndex("SavedMessageId");
 
                     b.HasIndex("UserId");
 
@@ -76,9 +76,9 @@ namespace ERIK.Bot.Migrations
 
             modelBuilder.Entity("ERIK.Bot.Models.Reactions.SavedMessage", b =>
                 {
-                    b.Property<decimal>("MessageId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(20,0)");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("AuthorId")
                         .HasColumnType("decimal(20,0)");
@@ -101,26 +101,52 @@ namespace ERIK.Bot.Migrations
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("TrackedIds")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
-                    b.HasKey("MessageId");
+                    b.HasKey("Id");
 
                     b.ToTable("SavedMessages");
+                });
+
+            modelBuilder.Entity("ERIK.Bot.Models.Reactions.TrackedMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("ChannelId")
+                        .HasColumnType("decimal(20,0)");
+
+                    b.Property<decimal>("MessageId")
+                        .HasColumnType("decimal(20,0)");
+
+                    b.Property<Guid?>("SavedMessageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SavedMessageId");
+
+                    b.ToTable("TrackedMessage");
                 });
 
             modelBuilder.Entity("ERIK.Bot.Models.Reactions.MessageReaction", b =>
                 {
                     b.HasOne("ERIK.Bot.Models.Reactions.SavedMessage", null)
                         .WithMany("Reactions")
-                        .HasForeignKey("SavedMessageMessageId");
+                        .HasForeignKey("SavedMessageId");
 
                     b.HasOne("ERIK.Bot.Models.Reactions.DiscordUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("ERIK.Bot.Models.Reactions.TrackedMessage", b =>
+                {
+                    b.HasOne("ERIK.Bot.Models.Reactions.SavedMessage", null)
+                        .WithMany("TrackedIds")
+                        .HasForeignKey("SavedMessageId");
                 });
 #pragma warning restore 612, 618
         }

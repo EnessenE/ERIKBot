@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using ERIK.Bot.Enums;
 
 namespace ERIK.Bot.Models.Reactions
@@ -8,10 +9,11 @@ namespace ERIK.Bot.Models.Reactions
     public class SavedMessage
     {
         [Key]
-        public ulong MessageId { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public Guid Id { get; set; }
 
         public List<MessageReaction> Reactions { get; set; }
-        public List<ulong> TrackedIds { get; set; }
+        public List<TrackedMessage> TrackedIds { get; set; }
 
         public ulong GuildId { get; set; }
         public bool IsFinished { get; set; }

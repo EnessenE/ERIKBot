@@ -65,17 +65,5 @@ namespace ERIK.Bot.Modules
                 
             await ReplyAsync(response);
         }
-
-        [Command("embed")]
-        public async Task SendRichEmbedAsync()
-        {
-            SavedMessage savedmsg = new SavedMessage();
-            savedmsg.Title = "test title whoop!";
-            savedmsg.Description = "this is a discription to test this nice discriber with";
-            savedmsg.Time = DateTime.Now;
-            savedmsg.MessageId = 123456789;
-            Embed built = SavedMessageExtension.ToEmbed(savedmsg);
-            await ReplyAsync(embed: built);
-        }
     }
 }

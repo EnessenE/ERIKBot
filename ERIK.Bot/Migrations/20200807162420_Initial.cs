@@ -36,8 +36,7 @@ namespace ERIK.Bot.Migrations
                 name: "SavedMessages",
                 columns: table => new
                 {
-                    MessageId = table.Column<decimal>(nullable: false),
-                    TrackedIds = table.Column<string>(nullable: true),
+                    Id = table.Column<Guid>(nullable: false),
                     GuildId = table.Column<decimal>(nullable: false),
                     IsFinished = table.Column<bool>(nullable: false),
                     Published = table.Column<bool>(nullable: false),
@@ -49,26 +48,26 @@ namespace ERIK.Bot.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SavedMessages", x => x.MessageId);
+                    table.PrimaryKey("PK_SavedMessages", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "MessageReaction",
                 columns: table => new
                 {
-                    Guid = table.Column<Guid>(nullable: false),
+                    Id = table.Column<Guid>(nullable: false),
                     UserId = table.Column<decimal>(nullable: true),
                     State = table.Column<int>(nullable: false),
-                    SavedMessageMessageId = table.Column<decimal>(nullable: true)
+                    SavedMessageId = table.Column<Guid>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MessageReaction", x => x.Guid);
+                    table.PrimaryKey("PK_MessageReaction", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MessageReaction_SavedMessages_SavedMessageMessageId",
-                        column: x => x.SavedMessageMessageId,
+                        name: "FK_MessageReaction_SavedMessages_SavedMessageId",
+                        column: x => x.SavedMessageId,
                         principalTable: "SavedMessages",
-                        principalColumn: "MessageId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_MessageReaction_DiscordUsers_UserId",
@@ -78,15 +77,40 @@ namespace ERIK.Bot.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "TrackedMessage",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    MessageId = table.Column<decimal>(nullable: false),
+                    ChannelId = table.Column<decimal>(nullable: false),
+                    SavedMessageId = table.Column<Guid>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TrackedMessage", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TrackedMessage_SavedMessages_SavedMessageId",
+                        column: x => x.SavedMessageId,
+                        principalTable: "SavedMessages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
             migrationBuilder.CreateIndex(
-                name: "IX_MessageReaction_SavedMessageMessageId",
+                name: "IX_MessageReaction_SavedMessageId",
                 table: "MessageReaction",
-                column: "SavedMessageMessageId");
+                column: "SavedMessageId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MessageReaction_UserId",
                 table: "MessageReaction",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TrackedMessage_SavedMessageId",
+                table: "TrackedMessage",
+                column: "SavedMessageId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -98,10 +122,13 @@ namespace ERIK.Bot.Migrations
                 name: "MessageReaction");
 
             migrationBuilder.DropTable(
-                name: "SavedMessages");
+                name: "TrackedMessage");
 
             migrationBuilder.DropTable(
                 name: "DiscordUsers");
+
+            migrationBuilder.DropTable(
+                name: "SavedMessages");
         }
     }
 }

@@ -73,16 +73,12 @@ namespace ERIK.Bot.Services
             _context.RemoveReaction(trackedMessage, socketReaction.UserId);
             _context.AddReaction(trackedMessage, socketReaction.User.Value, state);
 
-            string content = "Reacted:";
-            foreach (var reaction in trackedMessage.Reactions)
+            foreach (var trackedId in trackedMessage.TrackedIds)
             {
-                var user = client.GetUser(reaction.User.Id);
-                if (reaction.State != ReactionState.Left)
-                {
-                    content += reaction.State.ToString() + ": " + user.Username + ", ";
-                }
+                var targetChannel = client.GetChannel(trackedId.ChannelId) as ITextChannel;
+                var targetMessage = await targetChannel.GetMessageAsync(trackedId.MessageId) as IUserMessage;
+                await targetMessage.ModifyAsync(m => { m.Embed = trackedMessage.ToEmbed(client); });
             }
-            await message.ModifyAsync(m => { m.Content = content; });
 
             //Clear new user reaction
             await message.RemoveReactionAsync(socketReaction.Emote, socketReaction.User.Value);

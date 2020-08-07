@@ -41,14 +41,9 @@ namespace ERIK.Bot.Context
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<SavedMessage>()
-                .Property(e => e.TrackedIds)
-                .HasConversion(
-                    v => JsonConvert.SerializeObject(v),
-                    v => JsonConvert.DeserializeObject<List<ulong>>(v));
         }
 
-        public SavedMessage GetMessage(ulong id)
+        public SavedMessage GetMessage(Guid id)
         {
             var result = SavedMessages.Find(id);
             return result;
@@ -56,10 +51,13 @@ namespace ERIK.Bot.Context
         
         public async Task<SavedMessage> GetMessageOnTrackIdAsync(ulong id)
         {
-            var data = SavedMessages.AsAsyncEnumerable().Where(a => a.TrackedIds.ContainsItem(id));
-            if (await data.AnyAsync())
+            var data = SavedMessages.Include(p => p.TrackedIds).ToList();
+            foreach (var msg in data)
             {
-                return await data.FirstAsync();
+                if (msg.TrackedIds.ContainsItem(id))
+                {
+                    return msg;
+                }
             }
 
             return null;
@@ -117,7 +115,7 @@ namespace ERIK.Bot.Context
 
         public void AddReaction(SavedMessage message, IUser user, ReactionState state)
         {
-            var retrievedMessage = GetMessage(message.MessageId);
+            var retrievedMessage = GetMessage(message.Id);
             var foundUser = DiscordUsers.Find(user.Id);
             if (foundUser == null)
             {
@@ -148,7 +146,7 @@ namespace ERIK.Bot.Context
         /// <param name="user"></param>
         public void RemoveReaction(SavedMessage message, ulong userId)
         {
-            var retrievedMessage = GetMessage(message.MessageId);
+            var retrievedMessage = GetMessage(message.Id);
             if (retrievedMessage.Reactions != null)
             {
                 var removalQueue = new List<MessageReaction>();
@@ -165,18 +163,6 @@ namespace ERIK.Bot.Context
                     retrievedMessage.Reactions.Remove(reaction);
                 }
             }
-        }
-
-        public bool IsTracked(ulong id)
-        {
-            bool result = false;
-            var message = GetMessage(id);
-            if (message != null && !message.IsFinished)
-            {
-                result = true;
-            }
-
-            return result;
         }
 
         public List<SavedMessage> GetAllGuilds()

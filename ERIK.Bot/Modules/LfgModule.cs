@@ -24,7 +24,7 @@ namespace ERIK.Bot.Modules
             _context = context;
         }
 
-        
+
         [Command("lfg create")]
         [Summary("Save the last [amount] messages in the selected text channel. Usage: !save [email] [amount (default 100)]")]
         public async Task CreateLfg(string activity, string desc, DateTime time)
@@ -39,13 +39,10 @@ namespace ERIK.Bot.Modules
                 GuildId = this.Context.Guild.Id
             };
 
-            IUserMessage msg = await ReplyAsync(embed: savedMessage.ToEmbed());
-            savedMessage.MessageId = msg.Id;
+            IUserMessage msg = await ReplyAsync(embed: savedMessage.ToEmbed(this.Context.Client));
 
-            savedMessage.TrackedIds = new List<ulong>
-            {
-                msg.Id
-            };
+            savedMessage.TrackedIds = new List<TrackedMessage>();
+            savedMessage.TrackedIds.Add(new TrackedMessage() { ChannelId = msg.Channel.Id, MessageId = msg.Id });
 
             _context.CreateMessage(savedMessage);
             await ConnectMessage(savedMessage, msg);
@@ -88,13 +85,19 @@ namespace ERIK.Bot.Modules
                     foreach (var message in messages)
                     {
                         message.Published = true;
-                        IUserMessage sentMessage = await channel.SendMessageAsync(embed: message.ToEmbed());
-                        message.TrackedIds.Add(sentMessage.Id);
+                        IUserMessage sentMessage = await channel.SendMessageAsync(embed: message.ToEmbed(this.Context.Client));
+                        message.TrackedIds.Add(new TrackedMessage()
+                        {
+                            ChannelId = sentMessage.Channel.Id,
+                            MessageId = sentMessage.Id
+                        });
+
                         await ConnectMessage(message, sentMessage);
+
+                        _context.UpdateRange(messages);
+                        _context.SaveChanges();
+                        await ReplyAsync("I successfully published all non published LFG posts for this guild.");
                     }
-                    _context.UpdateRange(messages);
-                    _context.SaveChanges();
-                    await ReplyAsync("I successfully published all non published LFG posts for this guild.");
                 }
                 else
                 {
