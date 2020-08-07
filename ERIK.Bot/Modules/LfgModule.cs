@@ -104,8 +104,8 @@ namespace ERIK.Bot.Modules
 
                         _context.UpdateRange(messages);
                         _context.SaveChanges();
-                        await ReplyAsync("I successfully published all non published LFG posts for this guild.");
                     }
+                    await ReplyAsync("I successfully published all non published LFG posts for this guild.");
                 }
                 else
                 {

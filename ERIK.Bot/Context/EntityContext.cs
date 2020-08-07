@@ -65,7 +65,7 @@ namespace ERIK.Bot.Context
 
         public async Task<List<SavedMessage>> GetAllNonPublished(ulong guildId)
         {
-            var result = SavedMessages.Where(a => a.Published == false && a.GuildId == guildId).Include(a => a.TrackedIds).ToList();
+            var result = SavedMessages.Where(a => a.Published == false && a.GuildId == guildId).Include(a => a.Reactions).Include(a => a.TrackedIds).ToList();
             return result;
         }
 
