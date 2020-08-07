@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ERIK.Bot.Migrations
 {
     [DbContext(typeof(EntityContext))]
-    [Migration("20200807132233_Initial")]
+    [Migration("20200807142450_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -80,6 +80,9 @@ namespace ERIK.Bot.Migrations
                 {
                     b.Property<decimal>("MessageId")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(20,0)");
+
+                    b.Property<decimal>("GuildId")
                         .HasColumnType("decimal(20,0)");
 
                     b.Property<bool>("IsFinished")

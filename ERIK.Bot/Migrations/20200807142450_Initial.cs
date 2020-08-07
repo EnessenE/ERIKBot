@@ -37,6 +37,7 @@ namespace ERIK.Bot.Migrations
                 columns: table => new
                 {
                     MessageId = table.Column<decimal>(nullable: false),
+                    GuildId = table.Column<decimal>(nullable: false),
                     IsFinished = table.Column<bool>(nullable: false),
                     Published = table.Column<bool>(nullable: false),
                     Type = table.Column<int>(nullable: false)

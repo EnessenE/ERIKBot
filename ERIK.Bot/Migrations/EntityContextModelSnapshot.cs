@@ -80,6 +80,9 @@ namespace ERIK.Bot.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("decimal(20,0)");
 
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("decimal(20,0)");
+
                     b.Property<bool>("IsFinished")
                         .HasColumnType("bit");
 

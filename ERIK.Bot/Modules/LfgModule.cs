@@ -35,16 +35,12 @@ namespace ERIK.Bot.Modules
                 MessageId = msg.Id, 
                 IsFinished = false, 
                 Type = ReactionMessageType.LFG
+                GuildId = this.Context.Guild.Id
             };
 
             _context.CreateMessage(savedMessage);
-            var checkMark = new Emoji("✔️");
-            var cross = new Emoji("❌");
-            var question = new Emoji("❓");
-            var reactions = new IEmote[] { checkMark, cross, question };
-            await msg.AddReactionsAsync(reactions); //One call saves data and doesnt hit the API rate limiting
+            await ConnectMessage(savedMessage, msg);
 
-            
         }
 
         [Command("lfg prepublish")]
@@ -102,7 +98,14 @@ namespace ERIK.Bot.Modules
 
         }
 
-
+        private async Task ConnectMessage(SavedMessage message, IUserMessage sentMessage)
+        {
+            var checkMark = new Emoji("✔️");
+            var cross = new Emoji("❌");
+            var question = new Emoji("❓");
+            var reactions = new IEmote[] { checkMark, cross, question };
+            await sentMessage.AddReactionsAsync(reactions); //One call saves data and doesn't hit the API rate limiting
+        }
 
     }
 }
