@@ -37,9 +37,14 @@ namespace ERIK.Bot.Migrations
                 columns: table => new
                 {
                     MessageId = table.Column<decimal>(nullable: false),
+                    TrackedIds = table.Column<string>(nullable: true),
                     GuildId = table.Column<decimal>(nullable: false),
                     IsFinished = table.Column<bool>(nullable: false),
                     Published = table.Column<bool>(nullable: false),
+                    Title = table.Column<string>(nullable: true),
+                    Description = table.Column<string>(nullable: true),
+                    Time = table.Column<DateTime>(nullable: false),
+                    AuthorId = table.Column<decimal>(nullable: false),
                     Type = table.Column<int>(nullable: false)
                 },
                 constraints: table =>

@@ -29,17 +29,22 @@ namespace ERIK.Bot.Modules
         [Summary("Save the last [amount] messages in the selected text channel. Usage: !save [email] [amount (default 100)]")]
         public async Task CreateLfg(string activity, string desc, DateTime time)
         {
-            IUserMessage msg = await ReplyAsync($"Created {activity} - {desc} - {time.ToString("f")}");
-
             SavedMessage savedMessage = new SavedMessage
             {
-                MessageId = msg.Id, 
-                IsFinished = false, 
+                IsFinished = false,
                 Type = ReactionMessageType.LFG,
                 Time = time,
                 Title = activity,
                 Description = desc,
                 GuildId = this.Context.Guild.Id
+            };
+
+            IUserMessage msg = await ReplyAsync(embed: savedMessage.ToEmbed());
+            savedMessage.MessageId = msg.Id;
+
+            savedMessage.TrackedIds = new List<ulong>
+            {
+                msg.Id
             };
 
             _context.CreateMessage(savedMessage);
@@ -84,9 +89,10 @@ namespace ERIK.Bot.Modules
                     {
                         message.Published = true;
                         IUserMessage sentMessage = await channel.SendMessageAsync(embed: message.ToEmbed());
+                        message.TrackedIds.Add(sentMessage.Id);
                         await ConnectMessage(message, sentMessage);
                     }
-
+                    _context.UpdateRange(messages);
                     _context.SaveChanges();
                     await ReplyAsync("I successfully published all non published LFG posts for this guild.");
                 }

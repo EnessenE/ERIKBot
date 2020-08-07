@@ -6,12 +6,14 @@ using System.Threading.Tasks;
 using Discord;
 using ERIK.Bot.Configurations;
 using ERIK.Bot.Enums;
+using ERIK.Bot.Extensions;
 using ERIK.Bot.Models;
 using ERIK.Bot.Models.Reactions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 
 namespace ERIK.Bot.Context
 {
@@ -36,10 +38,31 @@ namespace ERIK.Bot.Context
             optionsBuilder.UseSqlServer(_sqlSettings.Value.ConnectionString);
         }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<SavedMessage>()
+                .Property(e => e.TrackedIds)
+                .HasConversion(
+                    v => JsonConvert.SerializeObject(v),
+                    v => JsonConvert.DeserializeObject<List<ulong>>(v));
+        }
+
         public SavedMessage GetMessage(ulong id)
         {
             var result = SavedMessages.Find(id);
             return result;
+        }
+        
+        public async Task<SavedMessage> GetMessageOnTrackIdAsync(ulong id)
+        {
+            var data = SavedMessages.AsAsyncEnumerable().Where(a => a.TrackedIds.ContainsItem(id));
+            if (await data.AnyAsync())
+            {
+                return await data.FirstAsync();
+            }
+
+            return null;
         }
 
         public async Task<List<SavedMessage>> GetAllNonPublished(ulong guildId)
@@ -51,7 +74,7 @@ namespace ERIK.Bot.Context
         public Guild GetGuild(ulong id)
         {
             var result = Guilds.Find(id);
-            if (result.Id > 0)
+            if (result != null && result.Id > 0)
             {
                 return result;
             }

@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ERIK.Bot.Migrations
 {
     [DbContext(typeof(EntityContext))]
-    [Migration("20200807142450_Initial")]
+    [Migration("20200807154403_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -82,6 +82,12 @@ namespace ERIK.Bot.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("decimal(20,0)");
 
+                    b.Property<decimal>("AuthorId")
+                        .HasColumnType("decimal(20,0)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal>("GuildId")
                         .HasColumnType("decimal(20,0)");
 
@@ -90,6 +96,15 @@ namespace ERIK.Bot.Migrations
 
                     b.Property<bool>("Published")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime>("Time")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TrackedIds")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");

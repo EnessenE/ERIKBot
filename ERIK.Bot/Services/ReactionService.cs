@@ -39,7 +39,7 @@ namespace ERIK.Bot.Services
 
             _logger.LogInformation("A message was reacted on: {msg} by {author} with emoji {emoji}", message.Id, reaction.User.Value.Username, reaction.Emote.Name);
 
-            var trackedMessage = _context.GetMessage(message.Id);
+            var trackedMessage = await _context.GetMessageOnTrackIdAsync(message.Id);
             if (trackedMessage != null)
             {
                 _logger.LogInformation("Tracking this message!");

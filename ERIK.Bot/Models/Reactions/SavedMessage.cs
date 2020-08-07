@@ -11,6 +11,7 @@ namespace ERIK.Bot.Models.Reactions
         public ulong MessageId { get; set; }
 
         public List<MessageReaction> Reactions { get; set; }
+        public List<ulong> TrackedIds { get; set; }
 
         public ulong GuildId { get; set; }
         public bool IsFinished { get; set; }
