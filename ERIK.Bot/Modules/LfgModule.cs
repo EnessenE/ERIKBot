@@ -24,7 +24,7 @@ namespace ERIK.Bot.Modules
             _context = context;
         }
 
-
+        
         [Command("lfg create")]
         [Summary("Save the last [amount] messages in the selected text channel. Usage: !save [email] [amount (default 100)]")]
         public async Task CreateLfg(string activity, string desc, DateTime time)

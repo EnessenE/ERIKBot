@@ -9,6 +9,9 @@ using ERIK.Bot.Context;
 using ERIK.Bot.Extensions;
 using ERIK.Bot.Models;
 using Microsoft.Extensions.Options;
+using ERIK.Bot.Extensions;
+using ERIK.Bot.Models.Reactions;
+using System;
 
 namespace ERIK.Bot.Modules
 {
@@ -17,6 +20,7 @@ namespace ERIK.Bot.Modules
         private readonly CommandService _commandService;
         private readonly Responses _responses;
         private EntityContext _context;
+        
 
         public MiscModule(CommandService commandService, IOptions<Responses> responses, EntityContext context)
         {
@@ -65,24 +69,12 @@ namespace ERIK.Bot.Modules
         [Command("embed")]
         public async Task SendRichEmbedAsync()
         {
-            var embed = new EmbedBuilder
-            {
-                // Embed property can be set within object initializer
-                Title = "Hello world!",
-                Description = "I am a description set by initializer."
-            };
-            // Or with methods
-            embed.AddField("Field title",
-                "Field value. I also support [hyperlink markdown](https://example.com)!");
-            embed.WithAuthor(Context.Client.CurrentUser);
-            embed.WithFooter(footer => footer.Text = "I am a footer.");
-            embed.WithColor(Color.Blue);
-            embed.WithTitle("I overwrote \"Hello world!\"");
-            embed.WithDescription("I am a description.");
-            embed.WithUrl("https://example.com");
-            embed.WithCurrentTimestamp();
-            var built = embed.Build();
-            
+            SavedMessage savedmsg = new SavedMessage();
+            savedmsg.Title = "test title whoop!";
+            savedmsg.Description = "this is a discription to test this nice discriber with";
+            savedmsg.Time = DateTime.Now;
+            savedmsg.MessageId = 123456789;
+            Embed built = SavedMessageExtension.ToEmbed(savedmsg);
             await ReplyAsync(embed: built);
         }
     }
