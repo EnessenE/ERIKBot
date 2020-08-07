@@ -48,6 +48,13 @@ namespace ERIK.Bot.Context
             return result;
         }
 
+        public Guild CreateGuild(Guild guild)
+        {
+            Add(guild);
+            SaveChanges();
+            return guild;
+        }
+
         /// <summary>
         /// Automatically tracks it
         /// </summary>

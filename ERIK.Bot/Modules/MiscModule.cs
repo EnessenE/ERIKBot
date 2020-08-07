@@ -65,9 +65,14 @@ namespace ERIK.Bot.Modules
             }
             else
             {
+                guild = new Guild()
+                {
+                    Id = this.Context.Guild.Id,
+                    Prefix = newPrefix
+                };
+                _context.CreateGuild(guild);
                 response = "An error occured, couldn't find settings for your guild.";
             }
-
             await ReplyAsync(response);
         }
     }
