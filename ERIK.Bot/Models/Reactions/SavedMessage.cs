@@ -17,6 +17,7 @@ namespace ERIK.Bot.Models.Reactions
 
         public ulong GuildId { get; set; }
         public bool IsFinished { get; set; }
+        public bool Notified { get; set; }
         public bool Published { get; set; }
 
         //LFG

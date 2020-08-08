@@ -183,7 +183,7 @@ namespace ERIK.Bot.Modules
 
         }
 
-        private async Task ConnectMessage(SavedMessage message, IUserMessage sentMessage)
+        public async Task ConnectMessage(SavedMessage message, IUserMessage sentMessage)
         {
             var checkMark = new Emoji("✔️");
             var cross = new Emoji("❌");
