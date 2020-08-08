@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
+using Discord.WebSocket;
 using ERIK.Bot.Configurations;
 using ERIK.Bot.Context;
 using ERIK.Bot.Enums;
@@ -29,21 +30,21 @@ namespace ERIK.Bot.Modules
 
         [RequireUserPermission(GuildPermission.MentionEveryone)]
         [Command("lfg create", RunMode = RunMode.Async)]
-        [Summary("Save the last [amount] messages in the selected text channel. Usage: !save [email] [amount (default 100)]")]
+        [Summary("Create a LFG with Activity, Description, Start time and setup a time to publish the lfg")]
         public async Task CreateLfg()
         {
 
-            DateTime publishtime;
+            DateTime publishtime = new DateTime();
             Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
 
             await ReplyAsync("What is the activity?");
-            var title = await NextMessageAsync();
+            SocketMessage title = await NextMessageAsync();
             await ReplyAsync("Give me a description!");
-            var desc = await NextMessageAsync();
+            SocketMessage desc = await NextMessageAsync();
             await ReplyAsync("What time wil it start?");
-            var startTime = await NextMessageAsync();
+            SocketMessage startTime = await NextMessageAsync();
             await ReplyAsync("Do you want to publish this automatically? Y/N");
-            var response = await NextMessageAsync();
+            SocketMessage response = await NextMessageAsync();
             if (Convert.ToString(response) != "y")
             {
                 await ReplyAsync("Creating lfg!");
@@ -52,21 +53,20 @@ namespace ERIK.Bot.Modules
             else
             {
                 await ReplyAsync("When do you want to publish?");
-                var publishTime = await NextMessageAsync();
-                publishtime = Convert.ToDateTime(publishTime);
+                SocketMessage publishTime = await NextMessageAsync();
+                publishtime = Convert.ToDateTime(publishTime.Content);
             }
 
-            SavedMessage savedMessage = new SavedMessage
-            {
-                IsFinished = false,
-                AuthorId = this.Context.Message.Author.Id,
-                Type = ReactionMessageType.LFG,
-                Time = Convert.ToDateTime(startTime),
-                Title = Convert.ToString(title),
-                Description = Convert.ToString(desc),
-                PublishTime = publishtime,
-                GuildId = this.Context.Guild.Id
-            };
+            SavedMessage savedMessage;
+            savedMessage = new SavedMessage();
+            savedMessage.IsFinished = false;
+            savedMessage.AuthorId = this.Context.Message.Author.Id;
+            savedMessage.Type = ReactionMessageType.LFG;
+            savedMessage.Time = Convert.ToDateTime(startTime.Content);
+            savedMessage.Title = Convert.ToString(title);
+            savedMessage.Description = Convert.ToString(desc);
+            savedMessage.PublishTime = publishtime;
+            savedMessage.GuildId = this.Context.Guild.Id;
 
             if (this.Context.Channel.Id != guild.LfgPrepublishChannelId)
             {
