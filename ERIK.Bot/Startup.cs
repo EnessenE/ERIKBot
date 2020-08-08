@@ -48,8 +48,6 @@ namespace ERIK.Bot
             services.AddTransient<ReactionService>();
 
             services.AddTransient<EntityContext>();
-            services.AddTransient<LfgService>();
-            services.AddTransient<StatusService>();
 
             //Add the DBContext
             services.AddDbContext<EntityContext>();

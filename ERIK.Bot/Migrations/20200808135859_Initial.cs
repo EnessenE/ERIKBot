@@ -45,6 +45,7 @@ namespace ERIK.Bot.Migrations
                     Description = table.Column<string>(nullable: true),
                     Time = table.Column<DateTime>(nullable: false),
                     PublishTime = table.Column<DateTime>(nullable: false),
+                    JoinLimit = table.Column<int>(nullable: false),
                     AuthorId = table.Column<decimal>(nullable: false),
                     Type = table.Column<int>(nullable: false)
                 },

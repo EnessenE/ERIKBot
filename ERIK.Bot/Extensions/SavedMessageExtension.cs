@@ -82,8 +82,8 @@ namespace ERIK.Bot.Extensions
                     altMsg.Remove(altMsg.Length - 2);
                 }
 
-                embedB.AddField("Joined:", joinedMsg, true);
-                embedB.AddField("Alternatives:", altMsg, true);
+                embedB.AddField($"Joined ({savedMsg.TotalJoined}/{savedMsg.JoinLimit}):", joinedMsg, true);
+                embedB.AddField($"Alternatives ({savedMsg.TotalAlternate}):", altMsg, true);
             }
             else
             {

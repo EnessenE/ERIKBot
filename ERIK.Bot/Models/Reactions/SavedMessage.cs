@@ -25,9 +25,47 @@ namespace ERIK.Bot.Models.Reactions
         public string Description { get; set; }
         public DateTime Time { get; set; }
         public DateTime PublishTime { get; set; }
+        public int JoinLimit { get; set; }
+
+
         public ulong AuthorId { get; set; }
 
         public ReactionMessageType Type { get; set; }
 
+
+
+        [NotMapped]
+        public int TotalJoined
+        {
+            get
+            {
+                var total = 0;
+                foreach (var item in Reactions)
+                {
+                    if (item.State == ReactionState.Joined)
+                    {
+                        total += 1;
+                    }
+                }
+                return total;
+            }
+        }
+
+        [NotMapped]
+        public int TotalAlternate
+        {
+            get
+            {
+                var total = 0;
+                foreach (var item in Reactions)
+                {
+                    if (item.State == ReactionState.Alternate)
+                    {
+                        total += 1;
+                    }
+                }
+                return total;
+            }
+        }
     }
 }
