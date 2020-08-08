@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ERIK.Bot.Models
 {
@@ -6,6 +7,8 @@ namespace ERIK.Bot.Models
     {
         [Key]
         public ulong Id { get; set; }
+
+     
         public string Prefix { get; set; }
         public ulong LfgPrepublishChannelId { get; set; }
         public ulong LfgPublishChannelId { get; set; }

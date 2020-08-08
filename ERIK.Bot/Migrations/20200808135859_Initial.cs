@@ -39,10 +39,13 @@ namespace ERIK.Bot.Migrations
                     Id = table.Column<Guid>(nullable: false),
                     GuildId = table.Column<decimal>(nullable: false),
                     IsFinished = table.Column<bool>(nullable: false),
+                    Notified = table.Column<bool>(nullable: false),
                     Published = table.Column<bool>(nullable: false),
                     Title = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
                     Time = table.Column<DateTime>(nullable: false),
+                    PublishTime = table.Column<DateTime>(nullable: false),
+                    JoinLimit = table.Column<int>(nullable: false),
                     AuthorId = table.Column<decimal>(nullable: false),
                     Type = table.Column<int>(nullable: false)
                 },

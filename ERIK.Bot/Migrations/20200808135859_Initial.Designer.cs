@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ERIK.Bot.Migrations
 {
     [DbContext(typeof(EntityContext))]
-    [Migration("20200807162420_Initial")]
+    [Migration("20200808135859_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -93,6 +93,15 @@ namespace ERIK.Bot.Migrations
 
                     b.Property<bool>("IsFinished")
                         .HasColumnType("bit");
+
+                    b.Property<int>("JoinLimit")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Notified")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("PublishTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("Published")
                         .HasColumnType("bit");

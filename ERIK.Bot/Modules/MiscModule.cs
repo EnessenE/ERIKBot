@@ -1,21 +1,21 @@
 ﻿using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
+using Discord.Addons.Interactive;
 using System.Collections.Generic;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Discord.WebSocket;
+using Microsoft.Extensions.Options;
 using ERIK.Bot.Configurations;
 using ERIK.Bot.Context;
 using ERIK.Bot.Extensions;
 using ERIK.Bot.Models;
-using Microsoft.Extensions.Options;
-using ERIK.Bot.Extensions;
 using ERIK.Bot.Models.Reactions;
-using System;
 
 namespace ERIK.Bot.Modules
 {
-    public class MiscModule : ModuleBase<SocketCommandContext>
+    public class MiscModule : InteractiveBase
     {
         private readonly CommandService _commandService;
         private readonly Responses _responses;
@@ -54,6 +54,13 @@ namespace ERIK.Bot.Modules
             await ReplyAsync(_responses.Pong.PickRandom());
         }
 
+        [Command("martijn")]
+        [Summary("Gives details about martijn")]
+        public async Task Martijn()
+        {
+            await ReplyAsync(_responses.Martijn.PickRandom());
+        }
+
         [Command("prefix")]
         [Summary("Set the prefix")]
         public async Task Prefix(string newPrefix)
@@ -65,5 +72,18 @@ namespace ERIK.Bot.Modules
                 
             await ReplyAsync(response);
         }
+
+        [Command("reply", RunMode = RunMode.Async)]
+        [Summary("the bot talks back")]
+        public async Task response()
+        {
+            await ReplyAsync("What is 2+2?");
+            var response = await NextMessageAsync();
+            if (response != null)
+                await ReplyAsync($"You replied: {response.Content}");
+            else
+                await ReplyAsync("You did not reply before the timeout");
+        }
+
     }
 }

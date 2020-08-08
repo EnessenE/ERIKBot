@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Discord.Addons.Interactive;
 using Discord.WebSocket;
 using ERIK.Bot.Configurations;
 using ERIK.Bot.Context;
@@ -38,10 +39,11 @@ namespace ERIK.Bot
             services.Configure<SQLSettings>(Configuration.GetSection("SQLSettings"));
             services.Configure<Responses>(Configuration.GetSection("Responses"));
 
-           // services.AddSingleton<DiscordSocketClient>();
+            // services.AddSingleton<DiscordSocketClient>();
 
+            services.AddSingleton<IServiceCollection>(services);
             services.AddTransient<MailService>();
-
+            //services.AddSingleton<InteractiveService>();
             services.AddTransient<BotService>();
             services.AddTransient<ReactionService>();
 
@@ -83,7 +85,7 @@ namespace ERIK.Bot
         {
             var services = new ServiceCollection();             // Create a new instance of a service collection
             ConfigureServices(services);
-            
+
             var provider = services.BuildServiceProvider();     // Build the service provider
 
             await provider.GetRequiredService<BotService>().Start(provider);       // Start the startup service

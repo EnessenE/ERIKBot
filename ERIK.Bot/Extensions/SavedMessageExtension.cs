@@ -12,44 +12,54 @@ namespace ERIK.Bot.Extensions
 {
     public static class SavedMessageExtension
     {
-        public static Embed ToEmbed(this SavedMessage savedmsg, DiscordSocketClient client)
+        public static Embed ToEmbed(this SavedMessage savedMsg, DiscordSocketClient client)
         {
             List<string> joined = new List<string>();
             List<string> alt = new List<string>();
             var embedB = new EmbedBuilder
             {
-                Description = savedmsg.Description
+                Description = savedMsg.Description
             };
 
-            embedB.WithFooter(footer => footer.Text = "Kga lfg");
+            embedB.WithFooter(footer => footer.Text = savedMsg.Id.ToString());
             embedB.WithColor(Color.Green);
 
-            embedB.AddField("Activity:", savedmsg.Title, true);
-            embedB.AddField("Start Time:", savedmsg.Time, true);
-            embedB.AddField("ID", "No implementation", true);
+            //author
+            var author = client.GetUser(savedMsg.AuthorId);
+            var authorBuilder = new EmbedAuthorBuilder { Name = author.Username, IconUrl = author.GetAvatarUrl() };
 
-            embedB.WithDescription(savedmsg.Description);
-            if (savedmsg.Reactions != null && savedmsg.Reactions.Count != 0)
+            embedB.Author = authorBuilder;
+
+            embedB.AddField("Activity:", savedMsg.Title, true);
+            embedB.AddField("Start Time:", savedMsg.Time, true);
+
+            if (!savedMsg.Published)
             {
-                foreach (var item in savedmsg.Reactions)
+                embedB.AddField("Publish time", savedMsg.PublishTime);
+            }
+
+            embedB.WithDescription(savedMsg.Description);
+            if (savedMsg.Reactions != null && savedMsg.Reactions.Count != 0)
+            {
+                foreach (var item in savedMsg.Reactions)
                 {
                     var user = client.GetUser(item.User.Id);
                     switch (item.State)
                     {
                         case ReactionState.Joined:
-                        {
-                            joined.Add(user.Username);
-                            break;
-                        }
+                            {
+                                joined.Add(user.Username);
+                                break;
+                            }
                         case ReactionState.Alternate:
-                        {
-                            alt.Add(user.Username);
-                            break;
-                        }
+                            {
+                                alt.Add(user.Username);
+                                break;
+                            }
                     }
                 }
 
-                var joinedMsg = "no one joined yet";
+                var joinedMsg = "No one has joined yet";
                 if (joined.Count > 0)
                 {
                     joinedMsg = string.Empty;
@@ -61,7 +71,7 @@ namespace ERIK.Bot.Extensions
                 }
 
 
-                var altMsg = "there are no alternatives";
+                var altMsg = "There are no alternatives";
                 if (alt.Count > 0)
                 {
                     altMsg = string.Empty;
@@ -72,8 +82,8 @@ namespace ERIK.Bot.Extensions
                     altMsg.Remove(altMsg.Length - 2);
                 }
 
-                embedB.AddField("Joined:", joinedMsg, true);
-                embedB.AddField("Alternatives:", altMsg, true);
+                embedB.AddField($"Joined ({savedMsg.TotalJoined}/{savedMsg.JoinLimit}):", joinedMsg, true);
+                embedB.AddField($"Alternatives ({savedMsg.TotalAlternate}):", altMsg, true);
             }
             else
             {
