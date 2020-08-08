@@ -34,18 +34,19 @@ namespace ERIK.Bot.Modules
         public async Task CreateLfg()
         {
 
+            Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
+
             if (this.Context.Channel.Id != guild.LfgPrepublishChannelId)
             {
                 await ReplyAsync("This command can only be used in the pre-publish channel");
                 return;
             }
+
             DateTime publishtime;
-            Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
 
             var title = await AskForItem<string>("What is the activity?");
             var desc = await AskForItem<string>("Give me a description!");
-            await ReplyAsync("When is the activity?");
-            var startTime = await AskForDate();
+            var startTime = await AskForDate2("raid");
             var response = await AskForItem<string>("Do you want to publish this automatically? Y/N");
             if (response.ToLower() != "y")
 
@@ -55,9 +56,7 @@ namespace ERIK.Bot.Modules
             }
             else
             {
-                await ReplyAsync("When do you want to publish?");
-
-                publishtime = await AskForDate();
+                publishtime = await AskForDate2("publish");
             }
 
             SavedMessage savedMessage = new SavedMessage
@@ -72,22 +71,41 @@ namespace ERIK.Bot.Modules
                 GuildId = this.Context.Guild.Id,
                 JoinLimit = 6
             };
-
+            
+            _context.CreateMessage(savedMessage);
+            
             IUserMessage msg = await ReplyAsync(embed: savedMessage.ToEmbed(this.Context.Client));
 
             savedMessage.TrackedIds = new List<TrackedMessage>();
             savedMessage.TrackedIds.Add(new TrackedMessage() { ChannelId = msg.Channel.Id, MessageId = msg.Id });
-
-            _context.CreateMessage(savedMessage);
+            _context.Update(savedMessage);
+            _context.SaveChanges();
+            
             await ConnectMessage(savedMessage, msg);
 
+        }
+
+        public async Task<DateTime> AskForDate2(string s)
+        {
+            DateTime finalDateTime = DateTime.Today;
+            var dayResult = await AskForItem<DateTime>($"Tell me when the {s} is taking place in DD/MM/YY");
+            var timeResult = await AskForItem<DateTime>($"And the time? HH:MM");
+
+            finalDateTime.AddDays(dayResult.Day);
+            finalDateTime.AddMonths(dayResult.Month);
+            finalDateTime.AddHours(timeResult.Hour);
+            finalDateTime.AddMinutes(timeResult.Minute);
+
+
+
+            return finalDateTime;
         }
 
         public async Task<DateTime> AskForDate()
         {
             DateTime finalDateTime = DateTime.Today;
             string dayText = "What day?\n";
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 7; i++)
             {
                 dayText += $"{i} - {DateTime.Now.AddDays(i):D}\n";
             }
