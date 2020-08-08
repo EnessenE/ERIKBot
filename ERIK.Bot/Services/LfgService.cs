@@ -114,6 +114,7 @@ namespace ERIK.Bot.Services
                     }
                     message.Notified = true;
                     _context.Update(message);
+                    _context.SaveChanges();
                 }
                 catch (Exception error)
                 {
@@ -165,7 +166,7 @@ namespace ERIK.Bot.Services
                             prePublishChannel = _client.GetChannel(guild.LfgPublishChannelId) as ITextChannel;
                         }
 
-                        if (guild != null && !(guild.LfgPublishChannelId > 0))
+                        if (guild != null && guild.LfgPublishChannelId > 0)
                         {
                             message.Published = true;
 
@@ -189,7 +190,7 @@ namespace ERIK.Bot.Services
                         {
                             await guildOwner.SendMessageAsync(
                                 $"I couldn't find the selected publish channel. This caused me to fail publishing the LFG with id {message.Id} for {message.Title}.");
-                            _logger.LogInformation("I couldn't find the selected publish channel. This caused me to fail publishing the LFG with id{Id} for {Title}.", message.Id, message.Title);
+                            _logger.LogInformation("I couldn't find the selected publish channel. This caused me to fail publishing the LFG with id {Id} for {Title}.", message.Id, message.Title);
 
                         }
                     }
