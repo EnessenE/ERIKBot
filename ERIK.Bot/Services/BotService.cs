@@ -28,7 +28,7 @@ namespace ERIK.Bot.Services
         private readonly DiscordBotSettings _botOptions;
         private readonly IServiceCollection _services;
         private readonly EntityContext _context;
-        private ReactionService _reactionService;
+        private readonly ReactionService _reactionService;
         private ServiceProvider _serviceProvider;
 
         public BotService(ILogger<BotService> logger, IOptions<DiscordBotSettings> botOptions, EntityContext context, ReactionService reactionService, IServiceCollection services)
