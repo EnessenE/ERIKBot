@@ -130,11 +130,14 @@ namespace ERIK.Bot.Modules
             {
                 await ReplyAsync(text);
                 var item = await NextMessageAsync();
-                var x = item.ToString();
-                result = (T)Convert.ChangeType(x, typeof(T));
-                if (result != null)
+                if (item != null)
                 {
-                    break;
+                    var x = item.ToString();
+                    result = (T)Convert.ChangeType(x, typeof(T));
+                    if (result != null)
+                    {
+                        break;
+                    }
                 }
             }
 
