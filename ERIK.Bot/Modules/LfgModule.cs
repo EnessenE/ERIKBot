@@ -71,16 +71,16 @@ namespace ERIK.Bot.Modules
                 GuildId = this.Context.Guild.Id,
                 JoinLimit = 6
             };
-            
+
             _context.CreateMessage(savedMessage);
-            
+
             IUserMessage msg = await ReplyAsync(embed: savedMessage.ToEmbed(this.Context.Client));
 
             savedMessage.TrackedIds = new List<TrackedMessage>();
             savedMessage.TrackedIds.Add(new TrackedMessage() { ChannelId = msg.Channel.Id, MessageId = msg.Id });
             _context.Update(savedMessage);
             _context.SaveChanges();
-            
+
             await ConnectMessage(savedMessage, msg);
 
         }
@@ -241,6 +241,43 @@ namespace ERIK.Bot.Modules
                 await ReplyAsync("No posts to publish.");
             }
 
+        }
+
+        [RequireUserPermission(GuildPermission.MentionEveryone)]
+        [Command("lfg settings")]
+        [Summary("Settings of the LFG section")]
+        public async Task Settings()
+        {
+            var guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
+
+            var embedBuilder = new EmbedBuilder
+            {
+                Title = "Guild LFG settings",
+                Description = "Settings used by the bot."
+            };
+
+            var prePublishChannel = this.Context.Guild.GetChannel(guild.LfgPrepublishChannelId) as IGuildChannel;
+            if (prePublishChannel != null)
+            {
+                embedBuilder.AddField("Pre publish channel", prePublishChannel);
+            }
+            else
+            {
+                embedBuilder.AddField("Pre publish channel", "None set");
+            }
+
+            var publishChannel = this.Context.Guild.GetChannel(guild.LfgPublishChannelId);
+            if (publishChannel != null)
+            {
+                embedBuilder.AddField("Publish channel", prePublishChannel);
+            }
+            else
+            {
+                embedBuilder.AddField("Publish channel", "None set");
+            }
+
+            embedBuilder.WithColor(Color.Blue);
+            await ReplyAsync(embed: embedBuilder.Build());
         }
 
         public async Task ConnectMessage(SavedMessage message, IUserMessage sentMessage)
