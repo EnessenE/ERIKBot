@@ -34,6 +34,7 @@ namespace ERIK.Bot.Services
             _logger.LogInformation("Starting the status setter!");
             new Thread(() =>
             {
+                Thread.Sleep(6000);
                 while (true)
                 {
                     _logger.LogInformation("Checking for LFG's");
