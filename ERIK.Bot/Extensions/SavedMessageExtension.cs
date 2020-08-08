@@ -31,7 +31,14 @@ namespace ERIK.Bot.Extensions
             embedB.Author = authorBuilder;
 
             embedB.AddField("Activity:", savedMsg.Title, true);
-            embedB.AddField("Start Time:", savedMsg.Time, true);
+            if (savedMsg.IsFinished)
+            {
+                embedB.AddField("Start Time:", savedMsg.Time.ToString("G") + " - Already occured", true);
+            }
+            else
+            {
+                embedB.AddField("Start Time:", savedMsg.Time, true);
+            }
 
             if (!savedMsg.Published)
             {
@@ -82,12 +89,12 @@ namespace ERIK.Bot.Extensions
                     altMsg.Remove(altMsg.Length - 2);
                 }
 
-                embedB.AddField($"Joined ({savedMsg.TotalJoined}/{savedMsg.JoinLimit}):", joinedMsg, true);
+                embedB.AddField($"Joined ({savedMsg.TotalJoined}/{savedMsg.JoinLimit}):", joinedMsg, false);
                 embedB.AddField($"Alternatives ({savedMsg.TotalAlternate}):", altMsg, true);
             }
             else
             {
-                embedB.AddField("Joined:", "no one joined yet", true);
+                embedB.AddField("Joined:", "no one joined yet", false);
                 embedB.AddField("Alternatives:", "there are no alternatives", true);
             }
 
