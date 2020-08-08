@@ -40,13 +40,17 @@ namespace ERIK.Bot.Models.Reactions
             get
             {
                 var total = 0;
-                foreach (var item in Reactions)
+                if (Reactions != null)
                 {
-                    if (item.State == ReactionState.Joined)
+                    foreach (var item in Reactions)
                     {
-                        total += 1;
+                        if (item.State == ReactionState.Joined)
+                        {
+                            total += 1;
+                        }
                     }
                 }
+
                 return total;
             }
         }
@@ -57,13 +61,17 @@ namespace ERIK.Bot.Models.Reactions
             get
             {
                 var total = 0;
-                foreach (var item in Reactions)
+                if (Reactions != null)
                 {
-                    if (item.State == ReactionState.Alternate)
+                    foreach (var item in Reactions)
                     {
-                        total += 1;
+                        if (item.State == ReactionState.Alternate)
+                        {
+                            total += 1;
+                        }
                     }
                 }
+
                 return total;
             }
         }
