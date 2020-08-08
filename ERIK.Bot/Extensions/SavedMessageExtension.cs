@@ -18,7 +18,6 @@ namespace ERIK.Bot.Extensions
             List<string> alt = new List<string>();
             var embedB = new EmbedBuilder
             {
-                Title = savedmsg.Title,
                 Description = savedmsg.Description
             };
 

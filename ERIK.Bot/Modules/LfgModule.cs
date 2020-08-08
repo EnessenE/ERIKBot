@@ -24,14 +24,22 @@ namespace ERIK.Bot.Modules
             _context = context;
         }
 
-
+        [RequireUserPermission(GuildPermission.MentionEveryone)]
         [Command("lfg create")]
         [Summary("Save the last [amount] messages in the selected text channel. Usage: !save [email] [amount (default 100)]")]
         public async Task CreateLfg(string activity, string desc, DateTime time)
         {
+            Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
+
+            if (this.Context.Channel.Id != guild.LfgPrepublishChannelId)
+            {
+                await ReplyAsync("This command can only be used in the pre-publish channel");
+                return;
+            }
             SavedMessage savedMessage = new SavedMessage
             {
                 IsFinished = false,
+                AuthorId = this.Context.Message.Author.Id,
                 Type = ReactionMessageType.LFG,
                 Time = time,
                 Title = activity,
@@ -49,6 +57,7 @@ namespace ERIK.Bot.Modules
 
         }
 
+        [RequireUserPermission(GuildPermission.MentionEveryone)]
         [Command("lfg prepublish")]
         [Summary("Before publishing an LFG you can pre-create it in a channel")]
         public async Task SetChannelPrePublish(IChannel channel)
@@ -59,7 +68,7 @@ namespace ERIK.Bot.Modules
             await ReplyAsync($"Set the new pre-publish channel to <@{channel.Id}>");
         }
 
-
+        [RequireUserPermission(GuildPermission.MentionEveryone)]
         [Command("lfg normalchannel")]
         [Summary("Before publishing an LFG you can pre-create it in a channel")]
         public async Task SetChannelPublish(IChannel channel)
@@ -70,7 +79,7 @@ namespace ERIK.Bot.Modules
             await ReplyAsync($"Set the new publish channel to <@{channel.Id}>");
         }
 
-        [RequireUserPermission(GuildPermission.Administrator)]
+        [RequireUserPermission(GuildPermission.MentionEveryone)]
         [Command("lfg publish")]
         [Summary("Publish all current pre-published LFGs to the pre-selected publish channel")]
         public async Task Publish()
@@ -96,8 +105,8 @@ namespace ERIK.Bot.Modules
 
                         _context.UpdateRange(messages);
                         _context.SaveChanges();
-                        await ReplyAsync("I successfully published all non published LFG posts for this guild.");
                     }
+                    await ReplyAsync("I successfully published all non published LFG posts for this guild.");
                 }
                 else
                 {
