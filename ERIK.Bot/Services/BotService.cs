@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
 using ERIK.Bot.Configurations;
@@ -12,6 +13,7 @@ using ERIK.Bot.Context;
 using ERIK.Bot.Extensions;
 using ERIK.Bot.Models;
 using ERIK.Bot.Modules;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -24,17 +26,18 @@ namespace ERIK.Bot.Services
         private CommandService _commands;
         private readonly ILogger<BotService> _logger;
         private readonly DiscordBotSettings _botOptions;
-        private readonly IServiceProvider _services;
+        private readonly IServiceCollection _services;
         private readonly EntityContext _context;
         private ReactionService _reactionService;
+        private ServiceProvider _serviceProvider;
 
-        public BotService(ILogger<BotService> logger, IOptions<DiscordBotSettings> botOptions, IServiceProvider services, EntityContext context, ReactionService reactionService)
+        public BotService(ILogger<BotService> logger, IOptions<DiscordBotSettings> botOptions, EntityContext context, ReactionService reactionService, IServiceCollection services)
         {
             _logger = logger;
-            _services = services;
             _botOptions = botOptions.Value;
             _context = context;
             _reactionService = reactionService;
+            _services = services;
         }
 
         public async Task Start(IServiceProvider services)
@@ -46,6 +49,10 @@ namespace ERIK.Bot.Services
 
             //logger
             _client.Log += Log;
+
+            _services.AddSingleton(_client);
+            _services.AddSingleton<InteractiveService>();
+            _serviceProvider = _services.BuildServiceProvider();
 
             //connect events
             InstallCommandsAsync();
@@ -78,7 +85,7 @@ namespace ERIK.Bot.Services
             // If you do not use Dependency Injection, pass null.
             // See Dependency Injection guide for more information.
             await _commands.AddModulesAsync(assembly: Assembly.GetEntryAssembly(),
-                                            services: _services);
+                                            services: _serviceProvider);
         }
 
         private Task HandleReaction(Cacheable<IUserMessage, ulong> cachedMessage, ISocketMessageChannel channel, SocketReaction socketReaction)
@@ -116,7 +123,7 @@ namespace ERIK.Bot.Services
                 var result = await _commands.ExecuteAsync(
                     context: context,
                     argPos: argPos,
-                    services: _services);
+                    services: _serviceProvider);
 
                 if (!result.IsSuccess && result.Error != CommandError.UnknownCommand)
                 {

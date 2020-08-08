@@ -41,6 +41,7 @@ namespace ERIK.Bot
 
            // services.AddSingleton<DiscordSocketClient>();
 
+           services.AddSingleton<IServiceCollection>(services);
             services.AddTransient<MailService>();
             //services.AddSingleton<InteractiveService>();
             services.AddTransient<BotService>();
