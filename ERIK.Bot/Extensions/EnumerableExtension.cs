@@ -30,9 +30,9 @@ namespace ERIK.Bot.Extensions
             return System.Linq.Queryable.Where(obj, predicate);
         }
 
-        public static IEnumerable<TResult> Select<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)
-        {
-            return System.Linq.Enumerable.Select(source, selector);
-        }
+        //public static IEnumerable<TResult> Select<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)
+        //{
+        //    return System.Linq.Enumerable.Select(source, selector);
+        //}
     }
 }
