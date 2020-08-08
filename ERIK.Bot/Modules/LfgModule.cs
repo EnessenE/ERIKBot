@@ -34,18 +34,21 @@ namespace ERIK.Bot.Modules
         public async Task CreateLfg()
         {
 
-            DateTime publishtime = new DateTime();
+            if (this.Context.Channel.Id != guild.LfgPrepublishChannelId)
+            {
+                await ReplyAsync("This command can only be used in the pre-publish channel");
+                return;
+            }
+            DateTime publishtime;
             Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
 
-            await ReplyAsync("What is the activity?");
-            SocketMessage title = await NextMessageAsync();
-            await ReplyAsync("Give me a description!");
-            SocketMessage desc = await NextMessageAsync();
-            await ReplyAsync("What time wil it start?");
-            SocketMessage startTime = await NextMessageAsync();
-            await ReplyAsync("Do you want to publish this automatically? Y/N");
-            SocketMessage response = await NextMessageAsync();
-            if (Convert.ToString(response) != "y")
+            var title = await AskForItem<string>("What is the activity?");
+            var desc = await AskForItem<string>("Give me a description!");
+            await ReplyAsync("When is the activity?");
+            var startTime = await AskForDate();
+            var response = await AskForItem<string>("Do you want to publish this automatically? Y/N");
+            if (response.ToLower() != "y")
+
             {
                 await ReplyAsync("Creating lfg!");
                 publishtime = default;
@@ -53,27 +56,22 @@ namespace ERIK.Bot.Modules
             else
             {
                 await ReplyAsync("When do you want to publish?");
-                SocketMessage publishTime = await NextMessageAsync();
-                publishtime = Convert.ToDateTime(publishTime.Content);
+
+                publishtime = await AskForDate();
             }
 
-            SavedMessage savedMessage;
-            savedMessage = new SavedMessage();
-            savedMessage.IsFinished = false;
-            savedMessage.AuthorId = this.Context.Message.Author.Id;
-            savedMessage.Type = ReactionMessageType.LFG;
-            savedMessage.Time = Convert.ToDateTime(startTime.Content);
-            savedMessage.Title = Convert.ToString(title);
-            savedMessage.Description = Convert.ToString(desc);
-            savedMessage.PublishTime = publishtime;
-            savedMessage.GuildId = this.Context.Guild.Id;
-
-            if (this.Context.Channel.Id != guild.LfgPrepublishChannelId)
+            SavedMessage savedMessage = new SavedMessage
             {
-                await ReplyAsync("This command can only be used in the pre-publish channel");
-                return;
-            }
-
+                IsFinished = false,
+                AuthorId = this.Context.Message.Author.Id,
+                Type = ReactionMessageType.LFG,
+                Time = startTime,
+                Title = Convert.ToString(title),
+                Description = Convert.ToString(desc),
+                PublishTime = publishtime,
+                GuildId = this.Context.Guild.Id,
+                JoinLimit = 6
+            };
 
             IUserMessage msg = await ReplyAsync(embed: savedMessage.ToEmbed(this.Context.Client));
 
@@ -85,6 +83,45 @@ namespace ERIK.Bot.Modules
 
         }
 
+        public async Task<DateTime> AskForDate()
+        {
+            DateTime finalDateTime = DateTime.Today;
+            string dayText = "What day?\n";
+            for (int i = 0; i < 5; i++)
+            {
+                dayText += $"{i} - {DateTime.Now.AddDays(i):D}\n";
+            }
+
+            var dayResult = await AskForItem<int>(dayText);
+
+            string timeText = "What time? HH:mm";
+            DateTime time = await AskForItem<DateTime>(timeText);
+
+            finalDateTime.AddDays(dayResult);
+            finalDateTime.AddHours(time.Hour);
+            finalDateTime.AddMinutes(time.Minute);
+
+            return finalDateTime;
+
+        }
+
+        public async Task<T> AskForItem<T>(string text)
+        {
+            T result;
+            while (true)
+            {
+                await ReplyAsync(text);
+                var item = await NextMessageAsync();
+                var x = item.ToString();
+                result = (T)Convert.ChangeType(x, typeof(T));
+                if (result != null)
+                {
+                    break;
+                }
+            }
+
+            return result;
+        }
         //[RequireUserPermission(GuildPermission.MentionEveryone)]
         //[Command("lfg create", RunMode = RunMode.Async)]
         //[Summary("Save the last [amount] messages in the selected text channel. Usage: !save [email] [amount (default 100)]")]
@@ -188,7 +225,7 @@ namespace ERIK.Bot.Modules
 
         }
 
-        private async Task ConnectMessage(SavedMessage message, IUserMessage sentMessage)
+        public async Task ConnectMessage(SavedMessage message, IUserMessage sentMessage)
         {
             var checkMark = new Emoji("✔️");
             var cross = new Emoji("❌");

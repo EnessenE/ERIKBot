@@ -72,6 +72,12 @@ namespace ERIK.Bot.Services
         {
             //Clear previous user state (if any)
             _context.RemoveReaction(trackedMessage, socketReaction.UserId);
+
+            if (trackedMessage.TotalJoined >= trackedMessage.JoinLimit && state == ReactionState.Joined)
+            {
+                state = ReactionState.Alternate;
+            }
+
             _context.AddReaction(trackedMessage, socketReaction.User.Value, state);
 
             foreach (var trackedId in trackedMessage.TrackedIds)

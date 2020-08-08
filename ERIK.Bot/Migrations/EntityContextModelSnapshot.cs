@@ -92,6 +92,12 @@ namespace ERIK.Bot.Migrations
                     b.Property<bool>("IsFinished")
                         .HasColumnType("bit");
 
+                    b.Property<int>("JoinLimit")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Notified")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("PublishTime")
                         .HasColumnType("datetime2");
 
