@@ -82,9 +82,16 @@ namespace ERIK.Bot.Services
 
             foreach (var trackedId in trackedMessage.TrackedIds)
             {
-                var targetChannel = client.GetChannel(trackedId.ChannelId) as ITextChannel;
-                var targetMessage = await targetChannel.GetMessageAsync(trackedId.MessageId) as IUserMessage;
-                await targetMessage.ModifyAsync(m => { m.Embed = trackedMessage.ToEmbed(client); });
+                try
+                {
+                    var targetChannel = client.GetChannel(trackedId.ChannelId) as ITextChannel;
+                    var targetMessage = await targetChannel.GetMessageAsync(trackedId.MessageId) as IUserMessage;
+                    await targetMessage.ModifyAsync(m => { m.Embed = trackedMessage.ToEmbed(client); });
+                }
+                catch (Exception error)
+                {
+                    _logger.LogError("Failed editting a message.");
+                }
             }
 
             try
