@@ -81,7 +81,8 @@ namespace ERIK.Bot.Context
         /// <returns></returns>
         public async Task<List<SavedMessage>> GetAllPublishedAndNonFinished(bool notified)
         {
-            var result = SavedMessages.Where(a => a.Published && !a.IsFinished && a.Notified == notified).Include(a => a.Reactions).Include(a => a.TrackedIds).ToList();
+            var result = SavedMessages.Where(a => a.Published && !a.IsFinished && a.Notified == notified).Include(x => x.Reactions)
+                .ThenInclude(x => x.User).Include(a => a.TrackedIds).ToList();
             return result;
         }
 
