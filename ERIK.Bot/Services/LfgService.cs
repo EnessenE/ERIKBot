@@ -67,8 +67,9 @@ namespace ERIK.Bot.Services
                             try
                             {
                                 var channel = _client.GetChannel(trackedMessage.ChannelId) as ITextChannel;
-                                var sentMessage = await channel.GetMessageAsync(trackedMessage.MessageId);
+                                var sentMessage = await channel.GetMessageAsync(trackedMessage.MessageId) as IUserMessage;
                                 _ = sentMessage.RemoveAllReactionsAsync().ConfigureAwait(false);
+                                await sentMessage.ModifyAsync(m => { message.ToEmbed(_client); });
                                 _logger.LogInformation("Finished one post.");
                             }
                             catch (Exception error)
