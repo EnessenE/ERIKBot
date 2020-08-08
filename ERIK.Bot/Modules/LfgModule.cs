@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
+using Discord.WebSocket;
 using ERIK.Bot.Configurations;
 using ERIK.Bot.Context;
 using ERIK.Bot.Enums;
@@ -29,9 +30,10 @@ namespace ERIK.Bot.Modules
 
         [RequireUserPermission(GuildPermission.MentionEveryone)]
         [Command("lfg create", RunMode = RunMode.Async)]
-        [Summary("Save the last [amount] messages in the selected text channel. Usage: !save [email] [amount (default 100)]")]
+        [Summary("Create a LFG with Activity, Description, Start time and setup a time to publish the lfg")]
         public async Task CreateLfg()
         {
+
             if (this.Context.Channel.Id != guild.LfgPrepublishChannelId)
             {
                 await ReplyAsync("This command can only be used in the pre-publish channel");
@@ -46,6 +48,7 @@ namespace ERIK.Bot.Modules
             var startTime = await AskForDate();
             var response = await AskForItem<string>("Do you want to publish this automatically? Y/N");
             if (response.ToLower() != "y")
+
             {
                 await ReplyAsync("Creating lfg!");
                 publishtime = default;
@@ -53,6 +56,7 @@ namespace ERIK.Bot.Modules
             else
             {
                 await ReplyAsync("When do you want to publish?");
+
                 publishtime = await AskForDate();
             }
 
@@ -68,10 +72,6 @@ namespace ERIK.Bot.Modules
                 GuildId = this.Context.Guild.Id,
                 JoinLimit = 6
             };
-
-          
-    
-
 
             IUserMessage msg = await ReplyAsync(embed: savedMessage.ToEmbed(this.Context.Client));
 
