@@ -89,7 +89,12 @@ namespace ERIK.Bot.Modules
         {
             DateTime finalDateTime = DateTime.Today;
             var dayResult = await AskForItem<DateTime>($"Tell me when the {s} is taking place in DD/MM/YY");
+
+            await ReplyAsync($"Time set at {dayResult}");
+
             var timeResult = await AskForItem<DateTime>($"And the time? HH:MM");
+
+            await ReplyAsync($"Time set at {timeResult}");
 
             finalDateTime.AddDays(dayResult.Day);
             finalDateTime.AddMonths(dayResult.Month);
