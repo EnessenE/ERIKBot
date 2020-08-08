@@ -52,6 +52,7 @@ namespace ERIK.Bot.Services
 
             _services.AddSingleton(_client);
             _services.AddSingleton<InteractiveService>();
+            _services.AddSingleton<LfgModule>();
             _serviceProvider = _services.BuildServiceProvider();
 
             //connect events
@@ -61,6 +62,9 @@ namespace ERIK.Bot.Services
 
             await _client.LoginAsync(TokenType.Bot, _botOptions.Token);
             await _client.StartAsync();
+
+            var lfgService = _serviceProvider.GetRequiredService<LfgService>();
+            lfgService.Start();
             var statusService = _serviceProvider.GetRequiredService<StatusService>();
             statusService.Start();
 
