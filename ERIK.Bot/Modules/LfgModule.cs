@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Addons.Interactive;
 using Discord.Commands;
 using ERIK.Bot.Configurations;
 using ERIK.Bot.Context;
@@ -11,11 +12,12 @@ using ERIK.Bot.Extensions;
 using ERIK.Bot.Models;
 using ERIK.Bot.Models.Reactions;
 using ERIK.Bot.Services;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Options;
 
 namespace ERIK.Bot.Modules
 {
-    public class LfgModule : ModuleBase<SocketCommandContext>
+    public class LfgModule : InteractiveBase
     {
         private readonly EntityContext _context;
 
@@ -24,28 +26,49 @@ namespace ERIK.Bot.Modules
             _context = context;
         }
 
+
         [RequireUserPermission(GuildPermission.MentionEveryone)]
-        [Command("lfg create")]
+        [Command("lfg create", RunMode = RunMode.Async)]
         [Summary("Save the last [amount] messages in the selected text channel. Usage: !save [email] [amount (default 100)]")]
-        public async Task CreateLfg(string activity, string desc, DateTime time)
+        public async Task CreateLfg()
         {
+            
             Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
+
+            await ReplyAsync("What is the activity?");
+            var title = await NextMessageAsync();
+            await ReplyAsync("Give me a description!");
+            var desc = await NextMessageAsync();
+            await ReplyAsync("What time wil it start?");
+            var startTime = await NextMessageAsync();
+            await ReplyAsync("Do you want to publish this automatically? Y/N");
+            var response = await NextMessageAsync();
+            if (Convert.ToString(response) != "y")
+            {
+                await ReplyAsync("Creating lfg!");
+            }
+            else
+            {
+                await ReplyAsync("When do you want to publish?");
+            }
+
+            SavedMessage savedMessage = new SavedMessage
+            {
+                IsFinished = false,
+                AuthorId = this.Context.Message.Author.Id,
+                Type = ReactionMessageType.LFG,
+                Time = Convert.ToDateTime(startTime),
+                Title = Convert.ToString(title),
+                Description = Convert.ToString(desc),
+                GuildId = this.Context.Guild.Id
+            };
 
             if (this.Context.Channel.Id != guild.LfgPrepublishChannelId)
             {
                 await ReplyAsync("This command can only be used in the pre-publish channel");
                 return;
             }
-            SavedMessage savedMessage = new SavedMessage
-            {
-                IsFinished = false,
-                AuthorId = this.Context.Message.Author.Id,
-                Type = ReactionMessageType.LFG,
-                Time = time,
-                Title = activity,
-                Description = desc,
-                GuildId = this.Context.Guild.Id
-            };
+
 
             IUserMessage msg = await ReplyAsync(embed: savedMessage.ToEmbed(this.Context.Client));
 
@@ -56,6 +79,39 @@ namespace ERIK.Bot.Modules
             await ConnectMessage(savedMessage, msg);
 
         }
+
+        //[RequireUserPermission(GuildPermission.MentionEveryone)]
+        //[Command("lfg create", RunMode = RunMode.Async)]
+        //[Summary("Save the last [amount] messages in the selected text channel. Usage: !save [email] [amount (default 100)]")]
+        //public async Task CreateLfg(string activity, string desc, DateTime time)
+        //{
+        //    Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
+
+        //    if (this.Context.Channel.Id != guild.LfgPrepublishChannelId)
+        //    {
+        //        await ReplyAsync("This command can only be used in the pre-publish channel");
+        //        return;
+        //    }
+        //    SavedMessage savedMessage = new SavedMessage
+        //    {
+        //        IsFinished = false,
+        //        AuthorId = this.Context.Message.Author.Id,
+        //        Type = ReactionMessageType.LFG,
+        //        Time = time,
+        //        Title = activity,
+        //        Description = desc,
+        //        GuildId = this.Context.Guild.Id
+        //    };
+
+        //    IUserMessage msg = await ReplyAsync(embed: savedMessage.ToEmbed(this.Context.Client));
+
+        //    savedMessage.TrackedIds = new List<TrackedMessage>();
+        //    savedMessage.TrackedIds.Add(new TrackedMessage() { ChannelId = msg.Channel.Id, MessageId = msg.Id });
+
+        //    _context.CreateMessage(savedMessage);
+        //    await ConnectMessage(savedMessage, msg);
+
+        //}
 
         [RequireUserPermission(GuildPermission.MentionEveryone)]
         [Command("lfg prepublish")]

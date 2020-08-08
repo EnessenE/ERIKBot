@@ -15,7 +15,7 @@ using ERIK.Bot.Models.Reactions;
 
 namespace ERIK.Bot.Modules
 {
-    public class MiscModule : ModuleBase<SocketCommandContext>
+    public class MiscModule : InteractiveBase
     {
         private readonly CommandService _commandService;
         private readonly Responses _responses;
@@ -66,14 +66,16 @@ namespace ERIK.Bot.Modules
             await ReplyAsync(response);
         }
 
-        [Command("response")]
-        [Summary("back and fort")]
-        public async Task Respond()
+        [Command("reply", RunMode = RunMode.Async)]
+        [Summary("the bot talks back")]
+        public async Task response()
         {
             await ReplyAsync("What is 2+2?");
-            //LfgCreateResponceExtention lfgCRE = new LfgCreateResponceExtention();
-
-            //await lfgCRE.Response();
+            var response = await NextMessageAsync();
+            if (response != null)
+                await ReplyAsync($"You replied: {response.Content}");
+            else
+                await ReplyAsync("You did not reply before the timeout");
         }
 
     }
