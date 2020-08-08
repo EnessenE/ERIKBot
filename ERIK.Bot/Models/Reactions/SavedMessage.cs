@@ -23,6 +23,7 @@ namespace ERIK.Bot.Models.Reactions
         public string Title { get; set; }
         public string Description { get; set; }
         public DateTime Time { get; set; }
+        public DateTime PublishTime { get; set; }
         public ulong AuthorId { get; set; }
 
         public ReactionMessageType Type { get; set; }

@@ -11,25 +11,27 @@ namespace ERIK.Bot.Migrations
                 name: "DiscordUsers",
                 columns: table => new
                 {
-                    Id = table.Column<decimal>(nullable: false)
+                    __Id = table.Column<long>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DiscordUsers", x => x.Id);
+                    table.PrimaryKey("PK_DiscordUsers", x => x.__Id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Guilds",
                 columns: table => new
                 {
-                    Id = table.Column<decimal>(nullable: false),
+                    __Id = table.Column<long>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Prefix = table.Column<string>(nullable: true),
                     LfgPrepublishChannelId = table.Column<decimal>(nullable: false),
                     LfgPublishChannelId = table.Column<decimal>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Guilds", x => x.Id);
+                    table.PrimaryKey("PK_Guilds", x => x.__Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -43,6 +45,7 @@ namespace ERIK.Bot.Migrations
                     Title = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
                     Time = table.Column<DateTime>(nullable: false),
+                    PublishTime = table.Column<DateTime>(nullable: false),
                     AuthorId = table.Column<decimal>(nullable: false),
                     Type = table.Column<int>(nullable: false)
                 },
@@ -56,7 +59,7 @@ namespace ERIK.Bot.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    UserId = table.Column<decimal>(nullable: true),
+                    User__Id = table.Column<long>(nullable: true),
                     State = table.Column<int>(nullable: false),
                     SavedMessageId = table.Column<Guid>(nullable: true)
                 },
@@ -70,10 +73,10 @@ namespace ERIK.Bot.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_MessageReaction_DiscordUsers_UserId",
-                        column: x => x.UserId,
+                        name: "FK_MessageReaction_DiscordUsers_User__Id",
+                        column: x => x.User__Id,
                         principalTable: "DiscordUsers",
-                        principalColumn: "Id",
+                        principalColumn: "__Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -103,9 +106,9 @@ namespace ERIK.Bot.Migrations
                 column: "SavedMessageId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MessageReaction_UserId",
+                name: "IX_MessageReaction_User__Id",
                 table: "MessageReaction",
-                column: "UserId");
+                column: "User__Id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TrackedMessage_SavedMessageId",

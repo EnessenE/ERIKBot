@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Net;
 using Discord.WebSocket;
 using ERIK.Bot.Context;
 using ERIK.Bot.Enums;
@@ -80,8 +81,19 @@ namespace ERIK.Bot.Services
                 await targetMessage.ModifyAsync(m => { m.Embed = trackedMessage.ToEmbed(client); });
             }
 
-            //Clear new user reaction
-            await message.RemoveReactionAsync(socketReaction.Emote, socketReaction.User.Value);
+            try
+            {
+                //Clear new user reaction
+                await message.RemoveReactionAsync(socketReaction.Emote, socketReaction.User.Value);
+            }
+            catch (HttpException exception)
+            {
+                var channel = message.Channel as IGuildChannel;
+                var owner = await channel.Guild.GetOwnerAsync();
+                var msgChannel = message.Channel as IMessageChannel;
+                await msgChannel.SendMessageAsync("<@" + owner.Id + "> I require the MANAGE_REACTIONS permission for full functionality!");
+
+            }
         }
     }
 }

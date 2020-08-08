@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ERIK.Bot.Migrations
 {
     [DbContext(typeof(EntityContext))]
-    [Migration("20200807162420_Initial")]
+    [Migration("20200808110750_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,9 +23,10 @@ namespace ERIK.Bot.Migrations
 
             modelBuilder.Entity("ERIK.Bot.Models.Guild", b =>
                 {
-                    b.Property<decimal>("Id")
+                    b.Property<long>("__Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(20,0)");
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<decimal>("LfgPrepublishChannelId")
                         .HasColumnType("decimal(20,0)");
@@ -36,18 +37,19 @@ namespace ERIK.Bot.Migrations
                     b.Property<string>("Prefix")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                    b.HasKey("__Id");
 
                     b.ToTable("Guilds");
                 });
 
             modelBuilder.Entity("ERIK.Bot.Models.Reactions.DiscordUser", b =>
                 {
-                    b.Property<decimal>("Id")
+                    b.Property<long>("__Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(20,0)");
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.HasKey("Id");
+                    b.HasKey("__Id");
 
                     b.ToTable("DiscordUsers");
                 });
@@ -64,14 +66,14 @@ namespace ERIK.Bot.Migrations
                     b.Property<int>("State")
                         .HasColumnType("int");
 
-                    b.Property<decimal?>("UserId")
-                        .HasColumnType("decimal(20,0)");
+                    b.Property<long?>("User__Id")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
                     b.HasIndex("SavedMessageId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("User__Id");
 
                     b.ToTable("MessageReaction");
                 });
@@ -93,6 +95,9 @@ namespace ERIK.Bot.Migrations
 
                     b.Property<bool>("IsFinished")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime>("PublishTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("Published")
                         .HasColumnType("bit");
@@ -141,7 +146,7 @@ namespace ERIK.Bot.Migrations
 
                     b.HasOne("ERIK.Bot.Models.Reactions.DiscordUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("User__Id");
                 });
 
             modelBuilder.Entity("ERIK.Bot.Models.Reactions.TrackedMessage", b =>
