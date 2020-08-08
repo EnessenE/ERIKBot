@@ -11,27 +11,25 @@ namespace ERIK.Bot.Migrations
                 name: "DiscordUsers",
                 columns: table => new
                 {
-                    __Id = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1")
+                    Id = table.Column<decimal>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DiscordUsers", x => x.__Id);
+                    table.PrimaryKey("PK_DiscordUsers", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Guilds",
                 columns: table => new
                 {
-                    __Id = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<decimal>(nullable: false),
                     Prefix = table.Column<string>(nullable: true),
                     LfgPrepublishChannelId = table.Column<decimal>(nullable: false),
                     LfgPublishChannelId = table.Column<decimal>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Guilds", x => x.__Id);
+                    table.PrimaryKey("PK_Guilds", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -59,7 +57,7 @@ namespace ERIK.Bot.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    User__Id = table.Column<long>(nullable: true),
+                    UserId = table.Column<decimal>(nullable: true),
                     State = table.Column<int>(nullable: false),
                     SavedMessageId = table.Column<Guid>(nullable: true)
                 },
@@ -73,10 +71,10 @@ namespace ERIK.Bot.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_MessageReaction_DiscordUsers_User__Id",
-                        column: x => x.User__Id,
+                        name: "FK_MessageReaction_DiscordUsers_UserId",
+                        column: x => x.UserId,
                         principalTable: "DiscordUsers",
-                        principalColumn: "__Id",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -106,9 +104,9 @@ namespace ERIK.Bot.Migrations
                 column: "SavedMessageId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MessageReaction_User__Id",
+                name: "IX_MessageReaction_UserId",
                 table: "MessageReaction",
-                column: "User__Id");
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TrackedMessage_SavedMessageId",
