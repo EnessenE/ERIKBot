@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Discord.Addons.Interactive;
 using Discord.WebSocket;
 using ERIK.Bot.Configurations;
 using ERIK.Bot.Context;
@@ -41,7 +42,7 @@ namespace ERIK.Bot
            // services.AddSingleton<DiscordSocketClient>();
 
             services.AddTransient<MailService>();
-
+            //services.AddSingleton<InteractiveService>();
             services.AddTransient<BotService>();
             services.AddTransient<ReactionService>();
 

@@ -1,17 +1,17 @@
 ﻿using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
+using Discord.Addons.Interactive;
 using System.Collections.Generic;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Discord.WebSocket;
+using Microsoft.Extensions.Options;
 using ERIK.Bot.Configurations;
 using ERIK.Bot.Context;
 using ERIK.Bot.Extensions;
 using ERIK.Bot.Models;
-using Microsoft.Extensions.Options;
-using ERIK.Bot.Extensions;
 using ERIK.Bot.Models.Reactions;
-using System;
 
 namespace ERIK.Bot.Modules
 {
@@ -65,5 +65,16 @@ namespace ERIK.Bot.Modules
                 
             await ReplyAsync(response);
         }
+
+        [Command("response")]
+        [Summary("back and fort")]
+        public async Task Respond()
+        {
+            await ReplyAsync("What is 2+2?");
+            //LfgCreateResponceExtention lfgCRE = new LfgCreateResponceExtention();
+
+            //await lfgCRE.Response();
+        }
+
     }
 }
