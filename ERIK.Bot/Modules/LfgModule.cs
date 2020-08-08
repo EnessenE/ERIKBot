@@ -69,8 +69,8 @@ namespace ERIK.Bot.Modules
         }
 
         [RequireUserPermission(GuildPermission.MentionEveryone)]
-        [Command("lfg normalchannel")]
-        [Summary("Before publishing an LFG you can pre-create it in a channel")]
+        [Command("lfg normal")]
+        [Summary("Sets the publish channel of the bot")]
         public async Task SetChannelPublish(IChannel channel)
         {
             Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
@@ -94,17 +94,24 @@ namespace ERIK.Bot.Modules
                     foreach (var message in messages)
                     {
                         message.Published = true;
-                        IUserMessage sentMessage = await channel.SendMessageAsync(embed: message.ToEmbed(this.Context.Client));
-                        message.TrackedIds.Add(new TrackedMessage()
+                        if (channel != null)
                         {
-                            ChannelId = sentMessage.Channel.Id,
-                            MessageId = sentMessage.Id
-                        });
+                            IUserMessage sentMessage =
+                                await channel.SendMessageAsync(embed: message.ToEmbed(this.Context.Client));
+                            message.TrackedIds.Add(new TrackedMessage()
+                            {
+                                ChannelId = sentMessage.Channel.Id,
+                                MessageId = sentMessage.Id
+                            });
 
-                        await ConnectMessage(message, sentMessage);
-
-                        _context.UpdateRange(messages);
-                        _context.SaveChanges();
+                            await ConnectMessage(message, sentMessage);
+                            _context.UpdateRange(messages);
+                            _context.SaveChanges();
+                        }
+                        else
+                        {
+                            await ReplyAsync("I couldn't find the target channel. Try again");
+                        }
                     }
                     await ReplyAsync("I successfully published all non published LFG posts for this guild.");
                 }

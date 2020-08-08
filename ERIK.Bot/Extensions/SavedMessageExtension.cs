@@ -12,26 +12,32 @@ namespace ERIK.Bot.Extensions
 {
     public static class SavedMessageExtension
     {
-        public static Embed ToEmbed(this SavedMessage savedmsg, DiscordSocketClient client)
+        public static Embed ToEmbed(this SavedMessage savedMsg, DiscordSocketClient client)
         {
             List<string> joined = new List<string>();
             List<string> alt = new List<string>();
             var embedB = new EmbedBuilder
             {
-                Description = savedmsg.Description
+                Description = savedMsg.Description
             };
 
-            embedB.WithFooter(footer => footer.Text = "Kga lfg");
+            embedB.WithFooter(footer => footer.Text = savedMsg.Id.ToString());
             embedB.WithColor(Color.Green);
 
-            embedB.AddField("Activity:", savedmsg.Title, true);
-            embedB.AddField("Start Time:", savedmsg.Time, true);
+            //author
+            var author = client.GetUser(savedMsg.AuthorId);
+            var authorBuilder = new EmbedAuthorBuilder {Name = author.Username, IconUrl = author.GetAvatarUrl()};
+
+            embedB.Author = authorBuilder;
+
+            embedB.AddField("Activity:", savedMsg.Title, true);
+            embedB.AddField("Start Time:", savedMsg.Time, true);
             embedB.AddField("ID", "No implementation", true);
 
-            embedB.WithDescription(savedmsg.Description);
-            if (savedmsg.Reactions != null && savedmsg.Reactions.Count != 0)
+            embedB.WithDescription(savedMsg.Description);
+            if (savedMsg.Reactions != null && savedMsg.Reactions.Count != 0)
             {
-                foreach (var item in savedmsg.Reactions)
+                foreach (var item in savedMsg.Reactions)
                 {
                     var user = client.GetUser(item.User.Id);
                     switch (item.State)
