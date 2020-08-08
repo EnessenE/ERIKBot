@@ -30,7 +30,7 @@ namespace ERIK.Bot.Modules
 
         [RequireUserPermission(GuildPermission.MentionEveryone)]
         [Command("lfg create", RunMode = RunMode.Async)]
-        [Summary("Create a LFG with Activity, Description, Start time and setup a time to publish the lfg")]
+        [Summary("Create a LFG with Activity, Description, Start time and setup a time to (automatically) publish the lfg")]
         public async Task CreateLfg()
         {
 
@@ -43,20 +43,18 @@ namespace ERIK.Bot.Modules
             }
 
             DateTime publishtime;
-
             var title = await AskForItem<string>("What is the activity?");
             var desc = await AskForItem<string>("Give me a description!");
-            var startTime = await AskForDate2("raid");
+            var startTime = await AskForDate("raid");
             var response = await AskForItem<string>("Do you want to publish this automatically? Y/N");
             if (response.ToLower() != "y")
-
             {
                 await ReplyAsync("Creating lfg!");
                 publishtime = default;
             }
             else
             {
-                publishtime = await AskForDate2("publish");
+                publishtime = await AskForDate("publish");
             }
 
             SavedMessage savedMessage = new SavedMessage
@@ -85,48 +83,20 @@ namespace ERIK.Bot.Modules
 
         }
 
-        public async Task<DateTime> AskForDate2(string s)
+        //the string parameter is to indicate whether the question is related to the raid or the publishing of the lfg
+        public async Task<DateTime> AskForDate(string s)
         {
             DateTime finalDateTime = DateTime.Today;
             var dayResult = await AskForItem<DateTime>($"Tell me when the {s} is taking place in DD/MM/YY");
-
-            await ReplyAsync($"Time set at {dayResult}");
-
             var timeResult = await AskForItem<DateTime>($"And the time? HH:MM");
 
-            await ReplyAsync($"Time set at {timeResult}");
+            dayResult = dayResult.AddHours(timeResult.Hour);
+            dayResult = dayResult.AddMinutes(timeResult.Minute);
 
-            finalDateTime.AddDays(dayResult.Day);
-            finalDateTime.AddMonths(dayResult.Month);
-            finalDateTime.AddHours(timeResult.Hour);
-            finalDateTime.AddMinutes(timeResult.Minute);
-
-
-
-            return finalDateTime;
+            return dayResult;
         }
 
-        public async Task<DateTime> AskForDate()
-        {
-            DateTime finalDateTime = DateTime.Today;
-            string dayText = "What day?\n";
-            for (int i = 0; i < 7; i++)
-            {
-                dayText += $"{i} - {DateTime.Now.AddDays(i):D}\n";
-            }
 
-            var dayResult = await AskForItem<int>(dayText);
-
-            string timeText = "What time? HH:mm";
-            DateTime time = await AskForItem<DateTime>(timeText);
-
-            finalDateTime.AddDays(dayResult);
-            finalDateTime.AddHours(time.Hour);
-            finalDateTime.AddMinutes(time.Minute);
-
-            return finalDateTime;
-
-        }
 
         public async Task<T> AskForItem<T>(string text)
         {
@@ -148,38 +118,7 @@ namespace ERIK.Bot.Modules
 
             return result;
         }
-        //[RequireUserPermission(GuildPermission.MentionEveryone)]
-        //[Command("lfg create", RunMode = RunMode.Async)]
-        //[Summary("Save the last [amount] messages in the selected text channel. Usage: !save [email] [amount (default 100)]")]
-        //public async Task CreateLfg(string activity, string desc, DateTime time)
-        //{
-        //    Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
 
-        //    if (this.Context.Channel.Id != guild.LfgPrepublishChannelId)
-        //    {
-        //        await ReplyAsync("This command can only be used in the pre-publish channel");
-        //        return;
-        //    }
-        //    SavedMessage savedMessage = new SavedMessage
-        //    {
-        //        IsFinished = false,
-        //        AuthorId = this.Context.Message.Author.Id,
-        //        Type = ReactionMessageType.LFG,
-        //        Time = time,
-        //        Title = activity,
-        //        Description = desc,
-        //        GuildId = this.Context.Guild.Id
-        //    };
-
-        //    IUserMessage msg = await ReplyAsync(embed: savedMessage.ToEmbed(this.Context.Client));
-
-        //    savedMessage.TrackedIds = new List<TrackedMessage>();
-        //    savedMessage.TrackedIds.Add(new TrackedMessage() { ChannelId = msg.Channel.Id, MessageId = msg.Id });
-
-        //    _context.CreateMessage(savedMessage);
-        //    await ConnectMessage(savedMessage, msg);
-
-        //}
 
         [RequireUserPermission(GuildPermission.MentionEveryone)]
         [Command("lfg prepublish")]
@@ -299,3 +238,60 @@ namespace ERIK.Bot.Modules
 
     }
 }
+
+
+// Reference (old)Code
+//[RequireUserPermission(GuildPermission.MentionEveryone)]
+//[Command("lfg create", RunMode = RunMode.Async)]
+//[Summary("Save the last [amount] messages in the selected text channel. Usage: !save [email] [amount (default 100)]")]
+//public async Task CreateLfg(string activity, string desc, DateTime time)
+//{
+//    Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
+
+//    if (this.Context.Channel.Id != guild.LfgPrepublishChannelId)
+//    {
+//        await ReplyAsync("This command can only be used in the pre-publish channel");
+//        return;
+//    }
+//    SavedMessage savedMessage = new SavedMessage
+//    {
+//        IsFinished = false,
+//        AuthorId = this.Context.Message.Author.Id,
+//        Type = ReactionMessageType.LFG,
+//        Time = time,
+//        Title = activity,
+//        Description = desc,
+//        GuildId = this.Context.Guild.Id
+//    };
+
+//    IUserMessage msg = await ReplyAsync(embed: savedMessage.ToEmbed(this.Context.Client));
+
+//    savedMessage.TrackedIds = new List<TrackedMessage>();
+//    savedMessage.TrackedIds.Add(new TrackedMessage() { ChannelId = msg.Channel.Id, MessageId = msg.Id });
+
+//    _context.CreateMessage(savedMessage);
+//    await ConnectMessage(savedMessage, msg);
+
+//}
+
+//public async Task<DateTime> AskForDate()
+//{
+//    DateTime finalDateTime = DateTime.Today;
+//    string dayText = "What day?\n";
+//    for (int i = 0; i < 7; i++)
+//    {
+//        dayText += $"{i} - {DateTime.Now.AddDays(i):D}\n";
+//    }
+
+//    var dayResult = await AskForItem<int>(dayText);
+
+//    string timeText = "What time? HH:mm";
+//    DateTime time = await AskForItem<DateTime>(timeText);
+
+//    finalDateTime.AddDays(dayResult);
+//    finalDateTime.AddHours(time.Hour);
+//    finalDateTime.AddMinutes(time.Minute);
+
+//    return finalDateTime;
+
+//}
