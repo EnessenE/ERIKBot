@@ -39,6 +39,7 @@ namespace ERIK.Bot.Modules
             SavedMessage savedMessage = new SavedMessage
             {
                 IsFinished = false,
+                AuthorId = this.Context.Message.Author.Id,
                 Type = ReactionMessageType.LFG,
                 Time = time,
                 Title = activity,
