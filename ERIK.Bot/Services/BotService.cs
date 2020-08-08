@@ -61,7 +61,8 @@ namespace ERIK.Bot.Services
 
             await _client.LoginAsync(TokenType.Bot, _botOptions.Token);
             await _client.StartAsync();
-            StartRandomStatusThread();
+            var statusService = _serviceProvider.GetRequiredService<StatusService>();
+            statusService.Start();
 
             //Client has started
             //_logger.LogInformation($"I am {_client.CurrentUser.Username}.");
@@ -140,47 +141,6 @@ namespace ERIK.Bot.Services
             // as it may clog up the request queue should a user spam a
             // command.
 
-        }
-        
-        public void StartRandomStatusThread()
-        {
-
-            _logger.LogInformation("Starting the status setter!");
-            new Thread(() =>
-            {
-                Thread.Sleep(5000);
-                while (true)
-                {
-                    try
-                    {
-                        _logger.LogInformation("Attempting to set the status");
-
-                        string randomtext = LoadJson().PickRandom();
-                        _client.SetGameAsync(randomtext);
-                        _logger.LogInformation("Set the status to {msg}!", randomtext);
-
-                    }
-                    catch (Exception error)
-                    {
-                        _logger.LogWarning("Failed to set status");
-                    }
-                    Thread.Sleep(900000);
-
-                }
-            }).Start();
-        }
-
-        public List<string> LoadJson()
-        {
-            List<string> list = new List<string>();
-            using (StreamReader r = new StreamReader("status.json"))
-            {
-                string json = r.ReadToEnd();
-                var item = JsonConvert.DeserializeObject<RandomStatuses>(json);
-                list = item.statuses;
-            }
-
-            return list;
         }
 
         private Task Log(LogMessage msg)
