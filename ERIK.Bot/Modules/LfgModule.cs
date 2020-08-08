@@ -32,7 +32,8 @@ namespace ERIK.Bot.Modules
         [Summary("Save the last [amount] messages in the selected text channel. Usage: !save [email] [amount (default 100)]")]
         public async Task CreateLfg()
         {
-            
+
+            DateTime publishtime;
             Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
 
             await ReplyAsync("What is the activity?");
@@ -46,10 +47,13 @@ namespace ERIK.Bot.Modules
             if (Convert.ToString(response) != "y")
             {
                 await ReplyAsync("Creating lfg!");
+                publishtime = default;
             }
             else
             {
                 await ReplyAsync("When do you want to publish?");
+                var publishTime = await NextMessageAsync();
+                publishtime = Convert.ToDateTime(publishTime);
             }
 
             SavedMessage savedMessage = new SavedMessage
@@ -60,6 +64,7 @@ namespace ERIK.Bot.Modules
                 Time = Convert.ToDateTime(startTime),
                 Title = Convert.ToString(title),
                 Description = Convert.ToString(desc),
+                PublishTime = publishtime,
                 GuildId = this.Context.Guild.Id
             };
 
