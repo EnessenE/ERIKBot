@@ -54,6 +54,13 @@ namespace ERIK.Bot.Modules
             await ReplyAsync(_responses.Pong.PickRandom());
         }
 
+        [Command("martijn")]
+        [Summary("Gives details about martijn")]
+        public async Task Martijn()
+        {
+            await ReplyAsync(_responses.Martijn.PickRandom());
+        }
+
         [Command("prefix")]
         [Summary("Set the prefix")]
         public async Task Prefix(string newPrefix)
