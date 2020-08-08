@@ -16,10 +16,7 @@ namespace ERIK.Bot.Extensions
         {
             List<string> joined = new List<string>();
             List<string> alt = new List<string>();
-            var embedB = new EmbedBuilder
-            {
-                Description = savedMsg.Description
-            };
+            var embedB = new EmbedBuilder();
 
             embedB.WithFooter(footer => footer.Text = savedMsg.Id.ToString());
             embedB.WithColor(Color.Green);
@@ -31,6 +28,7 @@ namespace ERIK.Bot.Extensions
             embedB.Author = authorBuilder;
 
             embedB.AddField("Activity:", savedMsg.Title, true);
+            embedB.AddField("Desciption:", savedMsg.Description, true);
             if (savedMsg.IsFinished)
             {
                 embedB.AddField("Start Time:", savedMsg.Time.ToString("G") + " - Already occured", true);
@@ -45,7 +43,7 @@ namespace ERIK.Bot.Extensions
                 embedB.AddField("Publish time", savedMsg.PublishTime);
             }
 
-            embedB.WithDescription(savedMsg.Description);
+            //embedB.WithDescription(savedMsg.Description);
             if (savedMsg.Reactions != null && savedMsg.Reactions.Count != 0)
             {
                 foreach (var item in savedMsg.Reactions)
