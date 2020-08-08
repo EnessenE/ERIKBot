@@ -54,24 +54,33 @@ namespace ERIK.Bot.Services
 
             foreach (var message in listOfPublished)
             {
-                if (message.PublishTime != null)
+
+                if (message.Time != null)
                 {
                     var utcNow = DateTime.Now.ToUniversalTime();
                     var utcFinalTime = message.Time.ToUniversalTime();
-                    if (utcFinalTime >= utcNow)
+                    if (utcNow >= utcFinalTime)
                     {
                         message.IsFinished = true;
                         foreach (var trackedMessage in message.TrackedIds)
                         {
-                            var channel = _client.GetChannel(trackedMessage.ChannelId) as ITextChannel;
-                            var sentMessage = await channel.GetMessageAsync(trackedMessage.MessageId);
-                            _ = sentMessage.RemoveAllReactionsAsync().ConfigureAwait(false);
+                            try
+                            {
+                                var channel = _client.GetChannel(trackedMessage.ChannelId) as ITextChannel;
+                                var sentMessage = await channel.GetMessageAsync(trackedMessage.MessageId);
+                                _ = sentMessage.RemoveAllReactionsAsync().ConfigureAwait(false);
+                                _logger.LogInformation("Finished one post.");
+                            }
+                            catch (Exception error)
+                            {
+                                _logger.LogError("Failed 'fixing' one message.");
+                            }
                         }
-
-                        _context.Update(message);
                     }
+                    _context.Update(message);
                 }
             }
+            _context.SaveChanges();
         }
 
         private async Task CheckForNotification()
@@ -108,9 +117,9 @@ namespace ERIK.Bot.Services
                         var user = _client.GetUser(reaction.User.Id);
                         var guild = _client.GetGuild(message.GuildId);
                         _ = user.SendMessageAsync(
-                                $"Alert \n Prepare to synchronize in Orbit for a LFG you have signed up for. You will be playing the activity called *{message.Title}*. Synchronize in the {guild.Name} guild. \n Launching at {message.Time:HH:mm:ss}.")
+                                $"***Alert*** \n Prepare to synchronize in Orbit for a LFG you have signed up for. You will be playing the activity called *{message.Title}*. Synchronize in the *{guild.Name}* guild. \n Activity starting at {message.Time:HH:mm:ss}.")
                             .ConfigureAwait(false);
-                        _logger.LogInformation("Notifying {user}.",user.Username);
+                        _logger.LogInformation("Notifying {user}.", user.Username);
                     }
                     message.Notified = true;
                     _context.Update(message);
