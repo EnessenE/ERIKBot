@@ -7,13 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Migrations\20200808110105_AddPublishTime.cs" />
-    <Compile Remove="Migrations\20200808110105_AddPublishTime.Designer.cs" />
-    <Compile Remove="Migrations\20200808110758_Initial2.cs" />
-    <Compile Remove="Migrations\20200808110758_Initial2.Designer.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Remove="status.json" />
   </ItemGroup>
 

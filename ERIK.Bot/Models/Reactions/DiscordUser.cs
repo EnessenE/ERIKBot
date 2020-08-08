@@ -12,29 +12,6 @@ namespace ERIK.Bot.Models.Reactions
     public class DiscordUser
     {
         [Key]
-        public long __Id { get; set; }
-
-
-        // Access/modify this variable instead.
-        // Tell EF not to map this field to a Db table
-        [NotMapped]
-        public ulong Id
-        {
-            get
-            {
-                unchecked
-                {
-                    return (ulong)__Id;
-                }
-            }
-
-            set
-            {
-                unchecked
-                {
-                    __Id = (long)value;
-                }
-            }
-        }
+        public ulong Id { get; set; }
     }
 }
