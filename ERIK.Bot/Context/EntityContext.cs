@@ -10,6 +10,7 @@ using ERIK.Bot.Extensions;
 using ERIK.Bot.Models;
 using ERIK.Bot.Models.Reactions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -186,6 +187,5 @@ namespace ERIK.Bot.Context
         {
             return SavedMessages.ToList();
         }
-
     }
 }

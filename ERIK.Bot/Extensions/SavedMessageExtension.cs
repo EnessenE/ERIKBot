@@ -17,7 +17,7 @@ namespace ERIK.Bot.Extensions
             List<string> joined = new List<string>();
             List<string> alt = new List<string>();
             var embedB = new EmbedBuilder();
-
+            embedB.Url = "https://time.is/UTC";
             embedB.WithFooter(footer => footer.Text = savedMsg.Id.ToString());
             embedB.WithColor(Color.Green);
 
@@ -28,19 +28,19 @@ namespace ERIK.Bot.Extensions
             embedB.Author = authorBuilder;
 
             embedB.AddField("Activity:", savedMsg.Title, true);
-            embedB.AddField("Desciption:", savedMsg.Description, true);
+            embedB.AddField("Description:", savedMsg.Description, true);
             if (savedMsg.IsFinished)
             {
-                embedB.AddField("Start Time:", savedMsg.Time.ToString("G") + " - Already occured", true);
+                embedB.AddField("Start Time:", savedMsg.Time.ToFieldTime() + " - Already occured", true);
             }
             else
             {
-                embedB.AddField("Start Time:", savedMsg.Time, true);
+                embedB.AddField("Start Time:", savedMsg.Time.ToFieldTime(), true);
             }
 
             if (!savedMsg.Published)
             {
-                embedB.AddField("Publish time", savedMsg.PublishTime);
+                embedB.AddField("Publish time", savedMsg.PublishTime.ToFieldTime());
             }
 
             //embedB.WithDescription(savedMsg.Description);
