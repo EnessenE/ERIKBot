@@ -72,7 +72,7 @@ namespace ERIK.Bot.Extensions
                     {
                         joinedMsg += item + ", ";
                     }
-                    joinedMsg.Remove(joinedMsg.Length - 2);
+                    joinedMsg = joinedMsg.Remove(joinedMsg.Length - 2);
                 }
 
 
@@ -84,7 +84,7 @@ namespace ERIK.Bot.Extensions
                     {
                         altMsg += item + ", ";
                     }
-                    altMsg.Remove(altMsg.Length - 2);
+                    altMsg = altMsg.Remove(altMsg.Length - 2);
                 }
 
                 embedB.AddField($"Joined ({savedMsg.TotalJoined}/{savedMsg.JoinLimit}):", joinedMsg, false);
