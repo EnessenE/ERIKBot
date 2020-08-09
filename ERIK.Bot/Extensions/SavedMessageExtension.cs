@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Linq;
 using System.Threading.Tasks;
 using ERIK.Bot.Models.Reactions;
@@ -7,6 +8,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using ERIK.Bot.Enums;
+using NJsonSchema.Validation.FormatValidators;
 
 namespace ERIK.Bot.Extensions
 {
@@ -21,6 +23,7 @@ namespace ERIK.Bot.Extensions
             embedB.WithFooter(footer => footer.Text = savedMsg.Id.ToString());
             embedB.WithColor(Color.Green);
 
+            
             //author
             var author = client.GetUser(savedMsg.AuthorId);
             var authorBuilder = new EmbedAuthorBuilder { Name = author.Username, IconUrl = author.GetAvatarUrl() };
@@ -28,14 +31,14 @@ namespace ERIK.Bot.Extensions
             embedB.Author = authorBuilder;
 
             embedB.AddField("Activity:", savedMsg.Title, true);
-            embedB.AddField("Desciption:", savedMsg.Description, true);
+            embedB.AddField("Description:", savedMsg.Description, true);
             if (savedMsg.IsFinished)
             {
                 embedB.AddField("Start Time:", savedMsg.Time.ToString("G") + " - Already occured", true);
             }
             else
             {
-                embedB.AddField("Start Time:", savedMsg.Time, true);
+                embedB.AddField("Start Time:", $"{timeformat(savedMsg)} {savedMsg.Time.Day}/{savedMsg.Time.Month}", true);
             }
 
             if (!savedMsg.Published)
@@ -100,6 +103,15 @@ namespace ERIK.Bot.Extensions
             var embed = embedB.Build();
 
             return embed;
+        }
+
+        private static string timeformat(SavedMessage savedMessage)
+        {
+            if (savedMessage.Time.Minute != 0)
+            {
+                return $"{savedMessage.Time.Hour}/{savedMessage.Time.Minute}";
+            }
+            return $"{savedMessage.Time.Hour}/{savedMessage.Time.Minute}0";
         }
     }
 }
