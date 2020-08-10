@@ -11,14 +11,15 @@ namespace ERIK.Bot.Extensions
         {
             time = time.ToUniversalTime();
             var result = string.Empty;
-            if (time.Minute != 0)
-            {
-                result = $"{time.Hour}/{time.Minute} UTC";
-            }
-            else
-            {
-                result = $"{time.Hour}/{time.Minute}0 UTC";
-            }
+            result = time.ToString("g") + " UTC";
+            //if (time.Minute != 0)
+            //{
+            //    result = $"{time.Hour}/{time.Minute} UTC";
+            //}
+            //else
+            //{
+            //    result = $"{time.Hour}/{time.Minute}0 UTC";
+            //}
 
             return result;
         }
