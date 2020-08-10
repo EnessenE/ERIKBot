@@ -177,7 +177,7 @@ namespace ERIK.Bot.Services
                             guild = _context.GetOrCreateGuild(message.GuildId);
                             IGuild discordGuild = _client.GetGuild(message.GuildId);
                             guildOwner = await discordGuild.GetOwnerAsync();
-                            prePublishChannel = _client.GetChannel(guild.LfgPublishChannelId) as ITextChannel;
+                            prePublishChannel = _client.GetChannel(guild.LfgPrepublishChannelId) as ITextChannel;
                         }
 
                         if (guild != null && guild.LfgPublishChannelId > 0)
