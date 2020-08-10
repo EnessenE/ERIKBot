@@ -51,10 +51,11 @@ namespace ERIK.Bot.Modules
             var title = await AskForItem<string>(origMessage, "What is the activity?");
             var desc = await AskForItem<string>(origMessage, "Give me a description!");
             var startTime = await AskForDate("raid");
-            var response = await AskForItem<string>("Do you want to publish this automatically? Y/N");
+            var response = await AskForItem<string>(origMessage,"Do you want to publish this automatically? Y/N");
             if (response.ToLower() != "y")
             {
                 await ReplyAsync("Creating lfg!");
+                await origMessage.DeleteAsync();
                 publishtime = default;
             }
             else
@@ -91,12 +92,16 @@ namespace ERIK.Bot.Modules
         //the string parameter is to indicate whether the question is related to the raid or the publishing of the lfg
         public async Task<DateTime> AskForDate(string s)
         {
+
+            var origMessage = await ReplyAsync("Asking for time.");
             DateTime finalDateTime = DateTime.Today;
-            var dayResult = await AskForItem<DateTime>($"Tell me when the {s} is taking place in DD/MM/YY");
-            var timeResult = await AskForItem<DateTime>($"And the time? HH:MM");
+            var dayResult = await AskForItem<DateTime>(origMessage,$"Tell me when the {s} is taking place in DD/MM/YY");
+            var timeResult = await AskForItem<DateTime>(origMessage,$"And the time? HH:MM");
 
             dayResult = dayResult.AddHours(timeResult.Hour);
             dayResult = dayResult.AddMinutes(timeResult.Minute);
+
+            await origMessage.DeleteAsync();
 
             return dayResult;
         }
