@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Addons.Interactive;
@@ -14,6 +15,7 @@ using ERIK.Bot.Models;
 using ERIK.Bot.Models.Reactions;
 using ERIK.Bot.Services;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace ERIK.Bot.Modules
@@ -21,10 +23,12 @@ namespace ERIK.Bot.Modules
     public class LfgModule : InteractiveBase
     {
         private readonly EntityContext _context;
+        private readonly ILogger<LfgModule> _logger;
 
-        public LfgModule(EntityContext context)
+        public LfgModule(EntityContext context, ILogger<LfgModule> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
 
@@ -43,8 +47,9 @@ namespace ERIK.Bot.Modules
             }
 
             DateTime publishtime;
-            var title = await AskForItem<string>("What is the activity?");
-            var desc = await AskForItem<string>("Give me a description!");
+            var origMessage = await ReplyAsync("Preparing LFG creation.");
+            var title = await AskForItem<string>(origMessage, "What is the activity?");
+            var desc = await AskForItem<string>(origMessage, "Give me a description!");
             var startTime = await AskForDate("raid");
             var response = await AskForItem<string>("Do you want to publish this automatically? Y/N");
             if (response.ToLower() != "y")
@@ -98,20 +103,37 @@ namespace ERIK.Bot.Modules
 
 
 
-        public async Task<T> AskForItem<T>(string text)
+        public async Task<T> AskForItem<T>(IUserMessage originalMessage, string text)
         {
             T result;
+            bool firstFail = false;
             while (true)
             {
-                await ReplyAsync(text);
+                await originalMessage.ModifyAsync(m => { m.Content = text; });
                 var item = await NextMessageAsync();
                 if (item != null)
                 {
-                    var x = item.ToString();
-                    result = (T)Convert.ChangeType(x, typeof(T));
-                    if (result != null)
+                    try
                     {
-                        break;
+                        var x = item.ToString();
+                        result = (T) Convert.ChangeType(x, typeof(T));
+                        if (result != null)
+                        {
+                            await item.DeleteAsync();
+                            break;
+                        }
+                    }
+                    catch (Exception error)
+                    {
+                        _logger.LogError("Failed", error);
+                        if (!firstFail)
+                        {
+                            firstFail = true;
+                            await originalMessage.ModifyAsync(m =>
+                            {
+                                m.Content = text + "\n Failed the conversion for your input. Try again please.";
+                            });
+                        }
                     }
                 }
             }
@@ -119,6 +141,44 @@ namespace ERIK.Bot.Modules
             return result;
         }
 
+        public async Task<T> AskForItem<T>(string text)
+        {
+            T result;
+            IUserMessage sentMessage;
+            bool firstFail = false;
+            while (true)
+            {
+                sentMessage = await ReplyAsync(text);
+                var item = await NextMessageAsync();
+                if (item != null)
+                {
+                    try
+                    {
+                        var x = item.ToString();
+                        result = (T)Convert.ChangeType(x, typeof(T));
+                        if (result != null)
+                        {
+                            await item.DeleteAsync();
+                            break;
+                        }
+                    }
+                    catch (Exception error)
+                    {
+                        _logger.LogError("Failed", error);
+                        if (!firstFail)
+                        {
+                            firstFail = true;
+                            await sentMessage.ModifyAsync(m =>
+                            {
+                                m.Content = text + "\n Failed the conversion for your input. Try again please.";
+                            });
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
 
         [RequireUserPermission(GuildPermission.MentionEveryone)]
         [Command("lfg prepublish")]

@@ -115,13 +115,17 @@ namespace ERIK.Bot.Services
                 {
                     foreach (var reaction in message.Reactions)
                     {
-                        var user = _client.GetUser(reaction.User.Id);
-                        var guild = _client.GetGuild(message.GuildId);
-                        _ = user.SendMessageAsync(
-                                $"***Alert*** \n Prepare to synchronize in Orbit for a LFG you have signed up for. You will be playing the activity called *{message.Title}*. Synchronize in the *{guild.Name}* guild. \n Activity starting at {message.Time:HH:mm:ss}.")
-                            .ConfigureAwait(false);
-                        _logger.LogInformation("Notifying {user}.", user.Username);
+                        if (reaction.HasJoined)
+                        {
+                            var user = _client.GetUser(reaction.User.Id);
+                            var guild = _client.GetGuild(message.GuildId);
+                            _ = user.SendMessageAsync(
+                                    $"***Alert*** \n Prepare to synchronize in Orbit for a LFG you have signed up for. You will be playing the activity called *{message.Title}*. Synchronize in the *{guild.Name}* guild. \n Activity starting at {message.Time:HH:mm:ss}.")
+                                .ConfigureAwait(false);
+                            _logger.LogInformation("Notifying {user}.", user.Username);
+                        }
                     }
+
                     message.Notified = true;
                     _context.Update(message);
                     _context.SaveChanges();
@@ -173,7 +177,7 @@ namespace ERIK.Bot.Services
                             guild = _context.GetOrCreateGuild(message.GuildId);
                             IGuild discordGuild = _client.GetGuild(message.GuildId);
                             guildOwner = await discordGuild.GetOwnerAsync();
-                            prePublishChannel = _client.GetChannel(guild.LfgPublishChannelId) as ITextChannel;
+                            prePublishChannel = _client.GetChannel(guild.LfgPrepublishChannelId) as ITextChannel;
                         }
 
                         if (guild != null && guild.LfgPublishChannelId > 0)

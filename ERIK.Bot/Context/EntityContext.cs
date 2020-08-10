@@ -10,6 +10,7 @@ using ERIK.Bot.Extensions;
 using ERIK.Bot.Models;
 using ERIK.Bot.Models.Reactions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -65,13 +66,15 @@ namespace ERIK.Bot.Context
 
         public async Task<List<SavedMessage>> GetAllNonPublished(ulong guildId)
         {
-            var result = SavedMessages.Where(a => a.Published == false && a.GuildId == guildId).Include(a => a.Reactions).Include(a => a.TrackedIds).ToList();
+            var result = SavedMessages.Where(a => a.Published == false && a.GuildId == guildId).Include(a => a.TrackedIds).Include(x => x.Reactions)
+                .ThenInclude(x => x.User).Include(a => a.TrackedIds).ToList();
             return result;
         }
 
         public async Task<List<SavedMessage>> GetAllNonPublished()
         {
-            var result = SavedMessages.Where(a => a.Published == false).Include(a => a.Reactions).Include(a => a.TrackedIds).ToList();
+            var result = SavedMessages.Where(a => a.Published == false).Include(a => a.TrackedIds).Include(x => x.Reactions)
+                .ThenInclude(x => x.User).Include(a => a.TrackedIds).ToList();
             return result;
         }
 
@@ -186,6 +189,5 @@ namespace ERIK.Bot.Context
         {
             return SavedMessages.ToList();
         }
-
     }
 }

@@ -19,7 +19,7 @@ namespace ERIK.Bot.Extensions
             List<string> joined = new List<string>();
             List<string> alt = new List<string>();
             var embedB = new EmbedBuilder();
-
+            embedB.Url = "https://time.is/UTC";
             embedB.WithFooter(footer => footer.Text = savedMsg.Id.ToString());
             embedB.WithColor(Color.Green);
 
@@ -34,16 +34,16 @@ namespace ERIK.Bot.Extensions
             embedB.AddField("Description:", savedMsg.Description, true);
             if (savedMsg.IsFinished)
             {
-                embedB.AddField("Start Time:", savedMsg.Time.ToString("G") + " - Already occured", true);
+                embedB.AddField("Start Time:", savedMsg.Time.ToFieldTime() + " - Already occured", true);
             }
             else
             {
-                embedB.AddField("Start Time:", $"{timeformat(savedMsg)} {savedMsg.Time.Day}/{savedMsg.Time.Month}", true);
+                embedB.AddField("Start Time:", savedMsg.Time.ToFieldTime(), true);
             }
 
             if (!savedMsg.Published)
             {
-                embedB.AddField("Publish time", savedMsg.PublishTime);
+                embedB.AddField("Publish time", savedMsg.PublishTime.ToFieldTime());
             }
 
             //embedB.WithDescription(savedMsg.Description);
@@ -75,7 +75,7 @@ namespace ERIK.Bot.Extensions
                     {
                         joinedMsg += item + ", ";
                     }
-                    joinedMsg.Remove(joinedMsg.Length - 2);
+                    joinedMsg = joinedMsg.Remove(joinedMsg.Length - 2);
                 }
 
 
@@ -87,7 +87,7 @@ namespace ERIK.Bot.Extensions
                     {
                         altMsg += item + ", ";
                     }
-                    altMsg.Remove(altMsg.Length - 2);
+                    altMsg = altMsg.Remove(altMsg.Length - 2);
                 }
 
                 embedB.AddField($"Joined ({savedMsg.TotalJoined}/{savedMsg.JoinLimit}):", joinedMsg, false);
@@ -103,15 +103,6 @@ namespace ERIK.Bot.Extensions
             var embed = embedB.Build();
 
             return embed;
-        }
-
-        private static string timeformat(SavedMessage savedMessage)
-        {
-            if (savedMessage.Time.Minute != 0)
-            {
-                return $"{savedMessage.Time.Hour}:{savedMessage.Time.Minute}";
-            }
-            return $"{savedMessage.Time.Hour}:{savedMessage.Time.Minute}0";
         }
     }
 }

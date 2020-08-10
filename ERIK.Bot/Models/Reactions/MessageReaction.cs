@@ -12,5 +12,18 @@ namespace ERIK.Bot.Models.Reactions
         public Guid Id { get; set; }
         public DiscordUser User { get; set; }
         public ReactionState State { get; set; }
+
+        [NotMapped]
+        public bool HasJoined {
+            get
+            {
+                if (State == ReactionState.Alternate || State == ReactionState.Joined)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+        }
     }
 }
