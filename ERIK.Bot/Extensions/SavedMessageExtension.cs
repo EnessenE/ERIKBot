@@ -109,9 +109,9 @@ namespace ERIK.Bot.Extensions
         {
             if (savedMessage.Time.Minute != 0)
             {
-                return $"{savedMessage.Time.Hour}/{savedMessage.Time.Minute}";
+                return $"{savedMessage.Time.Hour}:{savedMessage.Time.Minute}";
             }
-            return $"{savedMessage.Time.Hour}/{savedMessage.Time.Minute}0";
+            return $"{savedMessage.Time.Hour}:{savedMessage.Time.Minute}0";
         }
     }
 }
