@@ -9,8 +9,17 @@ namespace ERIK.Bot.Extensions
     {
         public static string ToFieldTime(this DateTime time)
         {
-            var newTime = time.ToUniversalTime();
-            var result = $"{newTime:G} UTC";
+            time = time.ToUniversalTime();
+            var result = string.Empty;
+            if (time.Minute != 0)
+            {
+                result = $"{time.Hour}/{time.Minute} UTC";
+            }
+            else
+            {
+                result = $"{time.Hour}/{time.Minute}0 UTC";
+            }
+
             return result;
         }
     }
