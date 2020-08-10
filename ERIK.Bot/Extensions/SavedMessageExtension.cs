@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Linq;
 using System.Threading.Tasks;
 using ERIK.Bot.Models.Reactions;
@@ -7,6 +8,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using ERIK.Bot.Enums;
+using NJsonSchema.Validation.FormatValidators;
 
 namespace ERIK.Bot.Extensions
 {
@@ -21,6 +23,7 @@ namespace ERIK.Bot.Extensions
             embedB.WithFooter(footer => footer.Text = savedMsg.Id.ToString());
             embedB.WithColor(Color.Green);
 
+            
             //author
             var author = client.GetUser(savedMsg.AuthorId);
             var authorBuilder = new EmbedAuthorBuilder { Name = author.Username, IconUrl = author.GetAvatarUrl() };
