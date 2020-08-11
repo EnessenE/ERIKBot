@@ -46,7 +46,8 @@ namespace ERIK.Bot.Context
 
         public SavedMessage GetMessage(int id)
         {
-            var result = SavedMessages.Find(id);
+            var result = SavedMessages.Where(x => x.Id == id).Include(a => a.TrackedIds).Include(x => x.Reactions)
+                .ThenInclude(x => x.User).Include(a => a.TrackedIds).First();
             return result;
         }
         
