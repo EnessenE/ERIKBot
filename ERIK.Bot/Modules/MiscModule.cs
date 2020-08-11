@@ -74,7 +74,7 @@ namespace ERIK.Bot.Modules
         }
 
         [Command("serverinfo")]
-        [Summary("Set the prefix")]
+        [Summary("Shows some guild information that was retreived from discord.")]
         public async Task Serverinfo()
         {
             var guild = this.Context.Guild;
