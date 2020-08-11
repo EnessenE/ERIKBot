@@ -189,5 +189,10 @@ namespace ERIK.Bot.Context
         {
             return SavedMessages.ToList();
         }
+
+        public SavedMessage GetSavedMessageById(int id)
+        {
+            return GetMessage(id);
+        }
     }
 }

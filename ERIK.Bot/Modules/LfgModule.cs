@@ -1,22 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Discord;
+﻿using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
-using Discord.WebSocket;
-using ERIK.Bot.Configurations;
 using ERIK.Bot.Context;
 using ERIK.Bot.Enums;
 using ERIK.Bot.Extensions;
 using ERIK.Bot.Models;
 using ERIK.Bot.Models.Reactions;
-using ERIK.Bot.Services;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ERIK.Bot.Modules
 {
@@ -50,8 +43,9 @@ namespace ERIK.Bot.Modules
             var origMessage = await ReplyAsync("Preparing LFG creation.");
             var title = await AskForItem<string>(origMessage, "What is the activity?");
             var desc = await AskForItem<string>(origMessage, "Give me a description!");
+            await origMessage.DeleteAsync();
             var startTime = await AskForDate("raid");
-            var response = await AskForItem<string>(origMessage,"Do you want to publish this automatically? Y/N");
+            var response = await AskForItem<string>(origMessage, $"Do you want to publish this automatically? Y/N");
             if (response.ToLower() != "y")
             {
                 await ReplyAsync("Creating lfg!");
@@ -183,6 +177,23 @@ namespace ERIK.Bot.Modules
             }
 
             return result;
+        }
+
+        [RequireUserPermission(GuildPermission.MentionEveryone)]
+        [Command("lfg id")]
+        [Summary("Retrieve an lfg by id number")]
+        public async Task GetLfgById(int lfgid)
+        {
+            SavedMessage savedMessage;
+            if (lfgid != 0)
+            {
+                savedMessage = _context.GetSavedMessageById(lfgid);
+                if (savedMessage != null)
+                {
+                    savedMessage.ToEmbed(this.Context.Client);
+                }
+            }
+            await ReplyAsync("No valid lfg id found");
         }
 
         [RequireUserPermission(GuildPermission.MentionEveryone)]
