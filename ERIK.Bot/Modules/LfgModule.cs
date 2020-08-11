@@ -9,6 +9,7 @@ using ERIK.Bot.Models.Reactions;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Threading.Tasks;
 
 namespace ERIK.Bot.Modules
@@ -43,7 +44,6 @@ namespace ERIK.Bot.Modules
             var origMessage = await ReplyAsync("Preparing LFG creation.");
             var title = await AskForItem<string>(origMessage, "What is the activity?");
             var desc = await AskForItem<string>(origMessage, "Give me a description!");
-            await origMessage.DeleteAsync();
             var startTime = await AskForDate("raid");
             var response = await AskForItem<string>(origMessage, $"Do you want to publish this automatically? Y/N");
             if (response.ToLower() != "y")
@@ -91,12 +91,12 @@ namespace ERIK.Bot.Modules
             DateTime finalDateTime = DateTime.Today;
             var dayResult = await AskForItem<DateTime>(origMessage,$"Tell me when the {s} is taking place in DD/MM/YY");
             var timeResult = await AskForItem<DateTime>(origMessage,$"And the time? HH:MM");
+            
+            await origMessage.DeleteAsync();
 
             dayResult = dayResult.AddHours(timeResult.Hour);
             dayResult = dayResult.AddMinutes(timeResult.Minute);
-
-            await origMessage.DeleteAsync();
-
+            
             return dayResult;
         }
 
@@ -190,10 +190,18 @@ namespace ERIK.Bot.Modules
                 savedMessage = _context.GetSavedMessageById(lfgid);
                 if (savedMessage != null)
                 {
-                    savedMessage.ToEmbed(this.Context.Client);
+                    await ReplyAsync(embed: savedMessage.ToEmbed(this.Context.Client));
+                }
+                else
+                {
+                    await ReplyAsync("No valid lfg id found");
                 }
             }
-            await ReplyAsync("No valid lfg id found");
+            else
+            {
+                await ReplyAsync("No valid lfg id found");
+            }
+            
         }
 
         [RequireUserPermission(GuildPermission.MentionEveryone)]
