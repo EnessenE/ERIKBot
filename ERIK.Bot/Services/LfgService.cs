@@ -29,7 +29,7 @@ namespace ERIK.Bot.Services
             _lfgModule = lfgModule;
         }
 
-        public async Task Start()
+        public Task Start()
         {
             _logger.LogInformation("Starting the status setter!");
             new Thread(() =>
@@ -44,13 +44,14 @@ namespace ERIK.Bot.Services
                     Thread.Sleep(60000);
                 }
             }).Start();
+            return Task.CompletedTask;
         }
 
         private async Task CheckForFinished()
         {
             _logger.LogInformation("Processing Finished LFGs");
 
-            var listOfPublished = await _context.GetAllPublishedAndNonFinished(true);
+            var listOfPublished = await _context.GetAllNonFinished(true);
 
             foreach (var message in listOfPublished)
             {
@@ -69,12 +70,16 @@ namespace ERIK.Bot.Services
                                 var channel = _client.GetChannel(trackedMessage.ChannelId) as ITextChannel;
                                 var sentMessage = await channel.GetMessageAsync(trackedMessage.MessageId) as IUserMessage;
                                 _ = sentMessage.RemoveAllReactionsAsync().ConfigureAwait(false);
-                                await sentMessage.ModifyAsync(m => { message.ToEmbed(_client); });
+                                await sentMessage.ModifyAsync(m =>
+                                {
+                                    m.Embed = message.ToEmbed(_client);
+                                    m.Content = message.AllJoined.ToUserList();
+                                });
                                 _logger.LogInformation("Finished one post.");
                             }
                             catch (Exception error)
                             {
-                                _logger.LogError("Failed 'fixing' one message.");
+                                _logger.LogError(error, "Failed 'fixing' one message.");
                             }
                         }
                     }
@@ -96,17 +101,17 @@ namespace ERIK.Bot.Services
                 {
                     var utcNow = DateTime.Now.ToUniversalTime();
                     var utcFinalTime = message.Time.ToUniversalTime();
-                    if (utcFinalTime <= utcNow.AddMinutes(-15))
+                    if (utcFinalTime.AddMinutes(-15) <= utcNow)
                     {
                         listToNotify.Add(message);
                     }
                 }
             }
 
-            NotifyUsers(listToNotify);
+            await NotifyUsers(listToNotify);
         }
 
-        private async Task NotifyUsers(List<SavedMessage> messages)
+        private Task NotifyUsers(List<SavedMessage> messages)
         {
             _logger.LogInformation("Notifying users.");
             foreach (var message in messages)
@@ -117,12 +122,13 @@ namespace ERIK.Bot.Services
                     {
                         if (reaction.HasJoined)
                         {
-                            var user = _client.GetUser(reaction.User.Id);
+                            var user = _client.GetUser(reaction.User.Id); 
+                            _logger.LogInformation("Notifying {user}.", user.Username);
+
                             var guild = _client.GetGuild(message.GuildId);
                             _ = user.SendMessageAsync(
-                                    $"***Alert*** \n Prepare to synchronize in Orbit for a LFG you have signed up for. You will be playing the activity called *{message.Title}*. Synchronize in the *{guild.Name}* guild. \n Activity starting at {message.Time:HH:mm:ss}.")
+                                    $"***Alert*** \n Prepare to synchronize in Orbit for a LFG you have signed up for. You will be playing the activity called *{message.Title}*. Synchronize in the *{guild.Name}* guild. \n Activity starting at {message.Time:HH:mm:ss}. The following users have joined: " + message.AllJoined.ToUserList())
                                 .ConfigureAwait(false);
-                            _logger.LogInformation("Notifying {user}.", user.Username);
                         }
                     }
 
@@ -132,9 +138,11 @@ namespace ERIK.Bot.Services
                 }
                 catch (Exception error)
                 {
-                    _logger.LogError("Failed sending the notification for LFG {guid}", message.Id);
+                    _logger.LogError(error, "Failed sending the notification for LFG {guid}", message.Id);
                 }
             }
+
+            return Task.CompletedTask;
         }
 
         private async Task CheckForPublishPosts()
@@ -210,7 +218,7 @@ namespace ERIK.Bot.Services
                     }
                     catch (Exception error)
                     {
-                        _logger.LogError("Failed sending the publish for LFG {guid}", message.Id);
+                        _logger.LogError(error, "Failed sending the publish for LFG {guid}", message.Id);
                     }
                 }
             }

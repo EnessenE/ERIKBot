@@ -89,6 +89,13 @@ namespace ERIK.Bot.Context
             return result;
         }
 
+        public async Task<List<SavedMessage>> GetAllNonFinished(bool notified)
+        {
+            var result = SavedMessages.Where(a => !a.IsFinished && a.Notified == notified).Include(x => x.Reactions)
+                .ThenInclude(x => x.User).Include(a => a.TrackedIds).ToList();
+            return result;
+        }
+
         public Guild GetGuild(ulong id)
         {
             var result = Guilds.Find(id);
