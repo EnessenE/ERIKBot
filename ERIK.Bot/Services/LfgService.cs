@@ -29,22 +29,14 @@ namespace ERIK.Bot.Services
             _lfgModule = lfgModule;
         }
 
-        public Task Start()
+        public Task Loop()
         {
-            _logger.LogInformation("Starting the status setter!");
-            new Thread(() =>
-            {
-                Thread.Sleep(6000);
-                while (true)
-                {
-                    _logger.LogInformation("Checking for LFG's");
-                    CheckForPublishPosts().ConfigureAwait(false);
-                    CheckForNotification().ConfigureAwait(false);
-                    CheckForFinished().ConfigureAwait(false);
-                    Thread.Sleep(60000);
-                }
-            }).Start();
+            _logger.LogInformation("Starting loop check");
+            CheckForPublishPosts().ConfigureAwait(false);
+            CheckForNotification().ConfigureAwait(false);
+            CheckForFinished().ConfigureAwait(false);
             return Task.CompletedTask;
+
         }
 
         private async Task CheckForFinished()
@@ -122,7 +114,7 @@ namespace ERIK.Bot.Services
                     {
                         if (reaction.HasJoined)
                         {
-                            var user = _client.GetUser(reaction.User.Id); 
+                            var user = _client.GetUser(reaction.User.Id);
                             _logger.LogInformation("Notifying {user}.", user.Username);
 
                             var guild = _client.GetGuild(message.GuildId);
