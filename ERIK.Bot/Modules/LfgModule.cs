@@ -317,10 +317,21 @@ namespace ERIK.Bot.Modules
             var cross = new Emoji("❌");
             var question = new Emoji("❓");
             var reactions = new IEmote[] { checkMark, cross, question };
-            message.TrackedIds = new List<TrackedMessage>();
-            message.TrackedIds.Add(new TrackedMessage() { ChannelId = sentMessage.Channel.Id, MessageId = sentMessage.Id });
+
+            if (message.TrackedIds == null)
+            {
+                message.TrackedIds = new List<TrackedMessage>();
+            }
+
+            message.TrackedIds.Add(new TrackedMessage()
+            {
+                ChannelId = sentMessage.Channel.Id, 
+                MessageId = sentMessage.Id
+            });
+
             _context.Update(message);
             _context.SaveChanges();
+
             await sentMessage.AddReactionsAsync(reactions); //One call saves data and doesn't hit the API rate limiting
         }
 
