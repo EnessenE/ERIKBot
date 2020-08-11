@@ -10,7 +10,7 @@ namespace ERIK.Bot.Models.Reactions
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         public List<MessageReaction> Reactions { get; set; }
         public List<TrackedMessage> TrackedIds { get; set; }

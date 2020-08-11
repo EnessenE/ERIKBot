@@ -44,7 +44,7 @@ namespace ERIK.Bot.Context
             base.OnModelCreating(modelBuilder);
         }
 
-        public SavedMessage GetMessage(Guid id)
+        public SavedMessage GetMessage(int id)
         {
             var result = SavedMessages.Find(id);
             return result;
@@ -189,6 +189,9 @@ namespace ERIK.Bot.Context
                 {
                     retrievedMessage.Reactions.Remove(reaction);
                 }
+
+                Update(message);
+                SaveChanges();
             }
         }
 
