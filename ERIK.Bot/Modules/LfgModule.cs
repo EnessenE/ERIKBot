@@ -79,8 +79,6 @@ namespace ERIK.Bot.Modules
 
             IUserMessage msg = await ReplyAsync(embed: savedMessage.ToEmbed(this.Context.Client));
 
-            savedMessage.TrackedIds = new List<TrackedMessage>();
-            savedMessage.TrackedIds.Add(new TrackedMessage() { ChannelId = msg.Channel.Id, MessageId = msg.Id });
             _context.Update(savedMessage);
             _context.SaveChanges();
             await origMessage.DeleteAsync();
@@ -224,17 +222,9 @@ namespace ERIK.Bot.Modules
                         message.Published = true;
                         if (channel != null)
                         {
-                            IUserMessage sentMessage =
-                                await channel.SendMessageAsync(embed: message.ToEmbed(this.Context.Client));
-                            message.TrackedIds.Add(new TrackedMessage()
-                            {
-                                ChannelId = sentMessage.Channel.Id,
-                                MessageId = sentMessage.Id
-                            });
+                            IUserMessage sentMessage = await channel.SendMessageAsync(embed: message.ToEmbed(this.Context.Client));
 
                             await ConnectMessage(message, sentMessage);
-                            _context.UpdateRange(messages);
-                            _context.SaveChanges();
                         }
                         else
                         {
@@ -292,12 +282,23 @@ namespace ERIK.Bot.Modules
             await ReplyAsync(embed: embedBuilder.Build());
         }
 
+
+        /// <summary>
+        /// Automaticly add emojis and start tracking the sent message for changes
+        /// </summary>
+        /// <param name="message">The saved (LFG) message</param>
+        /// <param name="sentMessage">The sent discord message</param>
+        /// <returns></returns>
         public async Task ConnectMessage(SavedMessage message, IUserMessage sentMessage)
         {
             var checkMark = new Emoji("✔️");
             var cross = new Emoji("❌");
             var question = new Emoji("❓");
             var reactions = new IEmote[] { checkMark, cross, question };
+            message.TrackedIds = new List<TrackedMessage>();
+            message.TrackedIds.Add(new TrackedMessage() { ChannelId = sentMessage.Channel.Id, MessageId = sentMessage.Id });
+            _context.Update(message);
+            _context.SaveChanges();
             await sentMessage.AddReactionsAsync(reactions); //One call saves data and doesn't hit the API rate limiting
         }
 

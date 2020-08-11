@@ -186,11 +186,6 @@ namespace ERIK.Bot.Services
                             var embeddedMessage = message.ToEmbed(_client);
                             var channel = _client.GetChannel(guild.LfgPublishChannelId) as ITextChannel;
                             IUserMessage sentMessage = await channel.SendMessageAsync(embed: embeddedMessage);
-                            message.TrackedIds.Add(new TrackedMessage()
-                            {
-                                ChannelId = sentMessage.Channel.Id,
-                                MessageId = sentMessage.Id
-                            });
 
                             await _lfgModule.ConnectMessage(message, sentMessage);
 
