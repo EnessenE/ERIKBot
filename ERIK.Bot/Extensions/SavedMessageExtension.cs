@@ -34,16 +34,16 @@ namespace ERIK.Bot.Extensions
             embedB.AddField("Description:", savedMsg.Description, true);
             if (savedMsg.IsFinished)
             {
-                embedB.AddField("Start Time:", savedMsg.Time.ToFieldTime() + " - Already occured", true);
+                embedB.AddField("Start Time:", savedMsg.Time.ToFieldTime() + " - Already occured", false);
             }
             else
             {
-                embedB.AddField("Start Time:", savedMsg.Time.ToFieldTime(), true);
+                embedB.AddField("Start Time:", savedMsg.Time.ToFieldTime(), false);
             }
 
             if (!savedMsg.Published)
             {
-                embedB.AddField("Publish time", savedMsg.PublishTime.ToFieldTime());
+                embedB.AddField("Publish time", savedMsg.PublishTime.ToFieldTime(), true);
             }
 
             //embedB.WithDescription(savedMsg.Description);
@@ -90,13 +90,13 @@ namespace ERIK.Bot.Extensions
                     altMsg = altMsg.Remove(altMsg.Length - 2);
                 }
 
-                embedB.AddField($"Joined ({savedMsg.TotalJoined}/{savedMsg.JoinLimit}):", joinedMsg, false);
-                embedB.AddField($"Alternatives ({savedMsg.TotalAlternate}):", altMsg, true);
+                embedB.AddField($"Joined ({savedMsg.TotalJoined}/{savedMsg.JoinLimit}):", joinedMsg, true);
+                embedB.AddField($"Alternatives ({savedMsg.TotalAlternate}):", altMsg, false);
             }
             else
             {
-                embedB.AddField("Joined:", "No one joined yet", false);
-                embedB.AddField("Alternatives:", "There are no alternatives", true);
+                embedB.AddField("Joined:", "No one joined yet", true);
+                embedB.AddField("Alternatives:", "There are no alternatives", false);
             }
 
             embedB.WithCurrentTimestamp();
