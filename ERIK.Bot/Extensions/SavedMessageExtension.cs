@@ -95,8 +95,8 @@ namespace ERIK.Bot.Extensions
             }
             else
             {
-                embedB.AddField("Joined:", "no one joined yet", false);
-                embedB.AddField("Alternatives:", "there are no alternatives", true);
+                embedB.AddField("Joined:", "No one joined yet", false);
+                embedB.AddField("Alternatives:", "There are no alternatives", true);
             }
 
             embedB.WithCurrentTimestamp();

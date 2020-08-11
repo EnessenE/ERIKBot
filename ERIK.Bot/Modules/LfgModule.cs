@@ -88,9 +88,9 @@ namespace ERIK.Bot.Modules
             var origMessage = await ReplyAsync("Asking for time.");
             DateTime finalDateTime = DateTime.Today;
 
-            var dayResult = await AskForItem<DateTime>(origMessage,$"Tell me when the {s} is taking place in DD/MM/YY");
-            var timeResult = await AskForItem<DateTime>(origMessage,$"And the time? HH:MM");
-            
+            var dayResult = await AskForItem<DateTime>(origMessage, $"Tell me when the {s} is taking place in DD/MM/YY (CEST)"); 
+            var timeResult = await AskForItem<DateTime>(origMessage, $"And the time? HH:MM (CEST)");
+
             await origMessage.DeleteAsync();
 
 
