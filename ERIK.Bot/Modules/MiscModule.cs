@@ -20,7 +20,7 @@ namespace ERIK.Bot.Modules
         private readonly CommandService _commandService;
         private readonly Responses _responses;
         private EntityContext _context;
-        
+
 
         public MiscModule(CommandService commandService, IOptions<Responses> responses, EntityContext context)
         {
@@ -69,10 +69,35 @@ namespace ERIK.Bot.Modules
             string oldPrefix = "ERR";
             Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
             response = "Saved the new prefix successfully.";
-                
+
             await ReplyAsync(response);
         }
 
+        [Command("serverinfo")]
+        [Summary("Set the prefix")]
+        public async Task Serverinfo()
+        {
+            var guild = this.Context.Guild;
+            var embed = new EmbedBuilder();
+            embed.WithThumbnailUrl(guild.IconUrl);
+            embed.WithTitle($"Server info {guild.Name}");
+            embed.WithDescription(guild.Description);
+            var stats = string.Empty;
+            stats += $"**Id:** {guild.Id}\n";
+            stats += $"**Total members:** {guild.MemberCount}\n";
+            stats += $"**Owner:** {guild.Owner.Nickname}\n";
+            stats += $"**Region:** {guild.VoiceRegionId}\n";
+            stats += $"**Created at:** {guild.CreatedAt:R}\n";
+            stats += $"**Verification level:** {guild.VerificationLevel}\n";
+            stats += $"**AFK Timeout:** {guild.AFKTimeout} minute(s)\n";
+            stats += $"**Icon:** {guild.IconUrl}\n";
+
+            embed.AddField("Generic stats", stats);
+
+            await ReplyAsync(embed: embed.Build());
+        }
+
+        //test code for bot response
         [Command("reply", RunMode = RunMode.Async)]
         [Summary("the bot talks back")]
         public async Task response()
@@ -85,5 +110,14 @@ namespace ERIK.Bot.Modules
                 await ReplyAsync("You did not reply before the timeout");
         }
 
+
+        [Command("alter", RunMode = RunMode.Async)]
+        [Summary("the bot talks back")]
+        public async Task altermessage()
+        {
+            var Message = await Context.Channel.SendMessageAsync("test message");
+            
+            await Message.ModifyAsync(msg => msg.Content = "test [edited]");
+        }
     }
 }

@@ -43,7 +43,7 @@ namespace ERIK.Bot.Services
                     }
                     catch (Exception error)
                     {
-                        _logger.LogWarning("Failed to set status");
+                        _logger.LogError(error, "Failed to set status");
                     }
                     Thread.Sleep(900000);
 

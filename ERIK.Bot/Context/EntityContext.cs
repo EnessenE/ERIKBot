@@ -10,6 +10,7 @@ using ERIK.Bot.Extensions;
 using ERIK.Bot.Models;
 using ERIK.Bot.Models.Reactions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -43,9 +44,10 @@ namespace ERIK.Bot.Context
             base.OnModelCreating(modelBuilder);
         }
 
-        public SavedMessage GetMessage(Guid id)
+        public SavedMessage GetMessage(int id)
         {
-            var result = SavedMessages.Find(id);
+            var result = SavedMessages.Where(x => x.Id == id).Include(a => a.TrackedIds).Include(x => x.Reactions)
+                .ThenInclude(x => x.User).Include(a => a.TrackedIds).First();
             return result;
         }
         
@@ -65,13 +67,15 @@ namespace ERIK.Bot.Context
 
         public async Task<List<SavedMessage>> GetAllNonPublished(ulong guildId)
         {
-            var result = SavedMessages.Where(a => a.Published == false && a.GuildId == guildId).Include(a => a.Reactions).Include(a => a.TrackedIds).ToList();
+            var result = SavedMessages.Where(a => a.Published == false && a.GuildId == guildId).Include(a => a.TrackedIds).Include(x => x.Reactions)
+                .ThenInclude(x => x.User).Include(a => a.TrackedIds).ToList();
             return result;
         }
 
         public async Task<List<SavedMessage>> GetAllNonPublished()
         {
-            var result = SavedMessages.Where(a => a.Published == false).Include(a => a.Reactions).Include(a => a.TrackedIds).ToList();
+            var result = SavedMessages.Where(a => a.Published == false).Include(a => a.TrackedIds).Include(x => x.Reactions)
+                .ThenInclude(x => x.User).Include(a => a.TrackedIds).ToList();
             return result;
         }
 
@@ -81,7 +85,15 @@ namespace ERIK.Bot.Context
         /// <returns></returns>
         public async Task<List<SavedMessage>> GetAllPublishedAndNonFinished(bool notified)
         {
-            var result = SavedMessages.Where(a => a.Published && !a.IsFinished && a.Notified == notified).Include(a => a.Reactions).Include(a => a.TrackedIds).ToList();
+            var result = SavedMessages.Where(a => a.Published && !a.IsFinished && a.Notified == notified).Include(x => x.Reactions)
+                .ThenInclude(x => x.User).Include(a => a.TrackedIds).ToList();
+            return result;
+        }
+
+        public async Task<List<SavedMessage>> GetAllNonFinished(bool notified)
+        {
+            var result = SavedMessages.Where(a => !a.IsFinished && a.Notified == notified).Include(x => x.Reactions)
+                .ThenInclude(x => x.User).Include(a => a.TrackedIds).ToList();
             return result;
         }
 
@@ -178,6 +190,9 @@ namespace ERIK.Bot.Context
                 {
                     retrievedMessage.Reactions.Remove(reaction);
                 }
+
+                Update(message);
+                SaveChanges();
             }
         }
 
@@ -186,5 +201,9 @@ namespace ERIK.Bot.Context
             return SavedMessages.ToList();
         }
 
+        public SavedMessage GetSavedMessageById(int id)
+        {
+            return GetMessage(id);
+        }
     }
 }

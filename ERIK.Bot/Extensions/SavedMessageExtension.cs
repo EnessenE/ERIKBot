@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Linq;
 using System.Threading.Tasks;
 using ERIK.Bot.Models.Reactions;
@@ -7,6 +8,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using ERIK.Bot.Enums;
+using NJsonSchema.Validation.FormatValidators;
 
 namespace ERIK.Bot.Extensions
 {
@@ -16,14 +18,12 @@ namespace ERIK.Bot.Extensions
         {
             List<string> joined = new List<string>();
             List<string> alt = new List<string>();
-            var embedB = new EmbedBuilder
-            {
-                Description = savedMsg.Description
-            };
-
+            var embedB = new EmbedBuilder();
+            embedB.Url = "https://time.is/UTC";
             embedB.WithFooter(footer => footer.Text = savedMsg.Id.ToString());
             embedB.WithColor(Color.Green);
 
+            
             //author
             var author = client.GetUser(savedMsg.AuthorId);
             var authorBuilder = new EmbedAuthorBuilder { Name = author.Username, IconUrl = author.GetAvatarUrl() };
@@ -31,14 +31,22 @@ namespace ERIK.Bot.Extensions
             embedB.Author = authorBuilder;
 
             embedB.AddField("Activity:", savedMsg.Title, true);
-            embedB.AddField("Start Time:", savedMsg.Time, true);
+            embedB.AddField("Description:", savedMsg.Description, true);
+            if (savedMsg.IsFinished)
+            {
+                embedB.AddField("Start Time:", savedMsg.Time.ToFieldTime() + " - Already occured", true);
+            }
+            else
+            {
+                embedB.AddField("Start Time:", savedMsg.Time.ToFieldTime(), true);
+            }
 
             if (!savedMsg.Published)
             {
-                embedB.AddField("Publish time", savedMsg.PublishTime);
+                embedB.AddField("Publish time", savedMsg.PublishTime.ToFieldTime());
             }
 
-            embedB.WithDescription(savedMsg.Description);
+            //embedB.WithDescription(savedMsg.Description);
             if (savedMsg.Reactions != null && savedMsg.Reactions.Count != 0)
             {
                 foreach (var item in savedMsg.Reactions)
@@ -67,7 +75,7 @@ namespace ERIK.Bot.Extensions
                     {
                         joinedMsg += item + ", ";
                     }
-                    joinedMsg.Remove(joinedMsg.Length - 2);
+                    joinedMsg = joinedMsg.Remove(joinedMsg.Length - 2);
                 }
 
 
@@ -79,16 +87,16 @@ namespace ERIK.Bot.Extensions
                     {
                         altMsg += item + ", ";
                     }
-                    altMsg.Remove(altMsg.Length - 2);
+                    altMsg = altMsg.Remove(altMsg.Length - 2);
                 }
 
-                embedB.AddField($"Joined ({savedMsg.TotalJoined}/{savedMsg.JoinLimit}):", joinedMsg, true);
+                embedB.AddField($"Joined ({savedMsg.TotalJoined}/{savedMsg.JoinLimit}):", joinedMsg, false);
                 embedB.AddField($"Alternatives ({savedMsg.TotalAlternate}):", altMsg, true);
             }
             else
             {
-                embedB.AddField("Joined:", "no one joined yet", true);
-                embedB.AddField("Alternatives:", "there are no alternatives", true);
+                embedB.AddField("Joined:", "No one joined yet", false);
+                embedB.AddField("Alternatives:", "There are no alternatives", true);
             }
 
             embedB.WithCurrentTimestamp();

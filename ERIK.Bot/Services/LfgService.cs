@@ -29,49 +29,56 @@ namespace ERIK.Bot.Services
             _lfgModule = lfgModule;
         }
 
-        public async Task Start()
+        public Task Loop()
         {
-            _logger.LogInformation("Starting the status setter!");
-            new Thread(() =>
-            {
-                Thread.Sleep(6000);
-                while (true)
-                {
-                    _logger.LogInformation("Checking for LFG's");
-                    CheckForPublishPosts().ConfigureAwait(false);
-                    CheckForNotification().ConfigureAwait(false);
-                    CheckForFinished().ConfigureAwait(false);
-                    Thread.Sleep(60000);
-                }
-            }).Start();
+            _logger.LogInformation("Starting loop check");
+            CheckForPublishPosts().ConfigureAwait(false);
+            CheckForNotification().ConfigureAwait(false);
+            CheckForFinished().ConfigureAwait(false);
+            return Task.CompletedTask;
+
         }
 
         private async Task CheckForFinished()
         {
             _logger.LogInformation("Processing Finished LFGs");
 
-            var listOfPublished = await _context.GetAllPublishedAndNonFinished(true);
+            var listOfPublished = await _context.GetAllNonFinished(true);
 
             foreach (var message in listOfPublished)
             {
-                if (message.PublishTime != null)
+
+                if (message.Time != null)
                 {
                     var utcNow = DateTime.Now.ToUniversalTime();
                     var utcFinalTime = message.Time.ToUniversalTime();
-                    if (utcFinalTime >= utcNow)
+                    if (utcNow >= utcFinalTime)
                     {
                         message.IsFinished = true;
                         foreach (var trackedMessage in message.TrackedIds)
                         {
-                            var channel = _client.GetChannel(trackedMessage.ChannelId) as ITextChannel;
-                            var sentMessage = await channel.GetMessageAsync(trackedMessage.MessageId);
-                            _ = sentMessage.RemoveAllReactionsAsync().ConfigureAwait(false);
+                            try
+                            {
+                                var channel = _client.GetChannel(trackedMessage.ChannelId) as ITextChannel;
+                                var sentMessage = await channel.GetMessageAsync(trackedMessage.MessageId) as IUserMessage;
+                                _ = sentMessage.RemoveAllReactionsAsync().ConfigureAwait(false);
+                                await sentMessage.ModifyAsync(m =>
+                                {
+                                    m.Embed = message.ToEmbed(_client);
+                                    m.Content = message.AllJoined.ToUserList();
+                                });
+                                _logger.LogInformation("Finished one post.");
+                            }
+                            catch (Exception error)
+                            {
+                                _logger.LogError(error, "Failed 'fixing' one message.");
+                            }
                         }
-
-                        _context.Update(message);
                     }
+                    _context.Update(message);
                 }
             }
+            _context.SaveChanges();
         }
 
         private async Task CheckForNotification()
@@ -86,17 +93,17 @@ namespace ERIK.Bot.Services
                 {
                     var utcNow = DateTime.Now.ToUniversalTime();
                     var utcFinalTime = message.Time.ToUniversalTime();
-                    if (utcFinalTime <= utcNow.AddMinutes(-15))
+                    if (utcFinalTime.AddMinutes(-15) <= utcNow)
                     {
                         listToNotify.Add(message);
                     }
                 }
             }
 
-            NotifyUsers(listToNotify);
+            await NotifyUsers(listToNotify);
         }
 
-        private async Task NotifyUsers(List<SavedMessage> messages)
+        private Task NotifyUsers(List<SavedMessage> messages)
         {
             _logger.LogInformation("Notifying users.");
             foreach (var message in messages)
@@ -105,21 +112,29 @@ namespace ERIK.Bot.Services
                 {
                     foreach (var reaction in message.Reactions)
                     {
-                        var user = _client.GetUser(reaction.User.Id);
-                        var guild = _client.GetGuild(message.GuildId);
-                        _ = user.SendMessageAsync(
-                                $"Alert \n Prepare to synchronize in Orbit for a LFG you have signed up for. You will be playing the activity called *{message.Title}*. Synchronize in the {guild.Name} guild. \n Launching at {message.Time:HH:mm:ss}.")
-                            .ConfigureAwait(false);
-                        _logger.LogInformation("Notifying {user}.",user.Username);
+                        if (reaction.HasJoined)
+                        {
+                            var user = _client.GetUser(reaction.User.Id);
+                            _logger.LogInformation("Notifying {user}.", user.Username);
+
+                            var guild = _client.GetGuild(message.GuildId);
+                            _ = user.SendMessageAsync(
+                                    $"***Alert*** \n Prepare to synchronize in Orbit for a LFG you have signed up for. You will be playing the activity called *{message.Title}*. Synchronize in the *{guild.Name}* guild. \n Activity starting at {message.Time:HH:mm:ss}. The following users have joined: " + message.AllJoined.ToUserList())
+                                .ConfigureAwait(false);
+                        }
                     }
+
                     message.Notified = true;
                     _context.Update(message);
+                    _context.SaveChanges();
                 }
                 catch (Exception error)
                 {
-                    _logger.LogError("Failed sending the notification for LFG {guid}", message.Id);
+                    _logger.LogError(error, "Failed sending the notification for LFG {guid}", message.Id);
                 }
             }
+
+            return Task.CompletedTask;
         }
 
         private async Task CheckForPublishPosts()
@@ -162,22 +177,32 @@ namespace ERIK.Bot.Services
                             guild = _context.GetOrCreateGuild(message.GuildId);
                             IGuild discordGuild = _client.GetGuild(message.GuildId);
                             guildOwner = await discordGuild.GetOwnerAsync();
-                            prePublishChannel = _client.GetChannel(guild.LfgPublishChannelId) as ITextChannel;
+                            prePublishChannel = _client.GetChannel(guild.LfgPrepublishChannelId) as ITextChannel;
                         }
 
-                        if (guild != null && !(guild.LfgPublishChannelId > 0))
+                        if (guild != null && guild.LfgPublishChannelId > 0)
                         {
                             message.Published = true;
-
+                            var embeddedMessage = message.ToEmbed(_client);
                             var channel = _client.GetChannel(guild.LfgPublishChannelId) as ITextChannel;
-                            IUserMessage sentMessage = await channel.SendMessageAsync(embed: message.ToEmbed(_client));
-                            message.TrackedIds.Add(new TrackedMessage()
-                            {
-                                ChannelId = sentMessage.Channel.Id,
-                                MessageId = sentMessage.Id
-                            });
+                            IUserMessage sentMessage = await channel.SendMessageAsync(embed: embeddedMessage);
 
                             await _lfgModule.ConnectMessage(message, sentMessage);
+
+                            foreach (var trackedMessage in message.TrackedIds)
+                            {
+                                try
+                                {
+                                    var trackedChannel = _client.GetChannel(trackedMessage.ChannelId) as ITextChannel;
+                                    var trackedSentMessage = await trackedChannel.GetMessageAsync(trackedMessage.MessageId) as IUserMessage;
+                                    await trackedSentMessage.ModifyAsync(m => { m.Embed = embeddedMessage; });
+                                }
+                                catch (Exception error)
+                                {
+                                    _logger.LogError(error, "Failed 'fixing' one message.");
+                                }
+                            }
+
                             _context.UpdateRange(messages);
                             _context.SaveChanges();
                             await prePublishChannel.SendMessageAsync(
@@ -189,13 +214,13 @@ namespace ERIK.Bot.Services
                         {
                             await guildOwner.SendMessageAsync(
                                 $"I couldn't find the selected publish channel. This caused me to fail publishing the LFG with id {message.Id} for {message.Title}.");
-                            _logger.LogInformation("I couldn't find the selected publish channel. This caused me to fail publishing the LFG with id{Id} for {Title}.", message.Id, message.Title);
+                            _logger.LogInformation("I couldn't find the selected publish channel. This caused me to fail publishing the LFG with id {Id} for {Title}.", message.Id, message.Title);
 
                         }
                     }
                     catch (Exception error)
                     {
-                        _logger.LogError("Failed sending the publish for LFG {guid}", message.Id);
+                        _logger.LogError(error, "Failed sending the publish for LFG {guid}", message.Id);
                     }
                 }
             }
