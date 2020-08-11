@@ -96,7 +96,7 @@ namespace ERIK.Bot.Modules
 
             dayResult = dayResult.AddHours(timeResult.Hour);
             dayResult = dayResult.AddMinutes(timeResult.Minute);
-            
+
             return dayResult;
         }
 
@@ -190,7 +190,8 @@ namespace ERIK.Bot.Modules
                 savedMessage = _context.GetSavedMessageById(lfgid);
                 if (savedMessage != null)
                 {
-                    await ReplyAsync(embed: savedMessage.ToEmbed(this.Context.Client));
+                    var sentMessage = await ReplyAsync(embed: savedMessage.ToEmbed(this.Context.Client));
+                    await ConnectMessage(savedMessage, sentMessage);
                 }
                 else
                 {
