@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ERIK.Bot.Migrations
 {
     [DbContext(typeof(EntityContext))]
-    [Migration("20200808135859_Initial")]
+    [Migration("20200811123743_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -58,8 +58,8 @@ namespace ERIK.Bot.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("SavedMessageId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int?>("SavedMessageId")
+                        .HasColumnType("int");
 
                     b.Property<int>("State")
                         .HasColumnType("int");
@@ -78,9 +78,10 @@ namespace ERIK.Bot.Migrations
 
             modelBuilder.Entity("ERIK.Bot.Models.Reactions.SavedMessage", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<decimal>("AuthorId")
                         .HasColumnType("decimal(20,0)");
@@ -132,8 +133,8 @@ namespace ERIK.Bot.Migrations
                     b.Property<decimal>("MessageId")
                         .HasColumnType("decimal(20,0)");
 
-                    b.Property<Guid?>("SavedMessageId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int?>("SavedMessageId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

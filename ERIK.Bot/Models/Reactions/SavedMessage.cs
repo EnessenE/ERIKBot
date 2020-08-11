@@ -10,7 +10,7 @@ namespace ERIK.Bot.Models.Reactions
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         public List<MessageReaction> Reactions { get; set; }
         public List<TrackedMessage> TrackedIds { get; set; }
@@ -68,6 +68,27 @@ namespace ERIK.Bot.Models.Reactions
                         if (item.State == ReactionState.Alternate)
                         {
                             total += 1;
+                        }
+                    }
+                }
+
+                return total;
+            }
+        }
+
+        [NotMapped]
+        public List<ulong> AllJoined
+        {
+            get
+            {
+                var total = new List<ulong>();
+                if (Reactions != null)
+                {
+                    foreach (var item in Reactions)
+                    {
+                        if (item.State == ReactionState.Joined)
+                        {
+                            total.Add(item.User.Id);
                         }
                     }
                 }

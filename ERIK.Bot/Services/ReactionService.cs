@@ -70,42 +70,46 @@ namespace ERIK.Bot.Services
 
         public async Task ProcessLfg(DiscordSocketClient client, IUserMessage message, SavedMessage trackedMessage, SocketReaction socketReaction, ReactionState state)
         {
-            //Clear previous user state (if any)
-            _context.RemoveReaction(trackedMessage, socketReaction.UserId);
-
-            if (trackedMessage.TotalJoined >= trackedMessage.JoinLimit && state == ReactionState.Joined)
+            if (!trackedMessage.IsFinished)
             {
-                state = ReactionState.Alternate;
-            }
+                //Clear previous user state (if any)
+                _context.RemoveReaction(trackedMessage, socketReaction.UserId);
 
-            _context.AddReaction(trackedMessage, socketReaction.User.Value, state);
+                if (trackedMessage.TotalJoined >= trackedMessage.JoinLimit && state == ReactionState.Joined)
+                {
+                    state = ReactionState.Alternate;
+                }
 
-            foreach (var trackedId in trackedMessage.TrackedIds)
-            {
+                _context.AddReaction(trackedMessage, socketReaction.User.Value, state);
+
+                foreach (var trackedId in trackedMessage.TrackedIds)
+                {
+                    try
+                    {
+                        var targetChannel = client.GetChannel(trackedId.ChannelId) as ITextChannel;
+                        var targetMessage = await targetChannel.GetMessageAsync(trackedId.MessageId) as IUserMessage;
+                        await targetMessage.ModifyAsync(m => { m.Embed = trackedMessage.ToEmbed(client); });
+                    }
+                    catch (Exception error)
+                    {
+                        _logger.LogError(error, "Failed editting a message.");
+                    }
+                }
+
                 try
                 {
-                    var targetChannel = client.GetChannel(trackedId.ChannelId) as ITextChannel;
-                    var targetMessage = await targetChannel.GetMessageAsync(trackedId.MessageId) as IUserMessage;
-                    await targetMessage.ModifyAsync(m => { m.Embed = trackedMessage.ToEmbed(client); });
+                    //Clear new user reaction
+                    await message.RemoveReactionAsync(socketReaction.Emote, socketReaction.User.Value);
                 }
-                catch (Exception error)
+                catch (HttpException)
                 {
-                    _logger.LogError("Failed editting a message.");
+                    var channel = message.Channel as IGuildChannel;
+                    var owner = await channel.Guild.GetOwnerAsync();
+                    var msgChannel = message.Channel as IMessageChannel;
+                    await msgChannel.SendMessageAsync("<@" + owner.Id +
+                                                      "> I require the MANAGE_REACTIONS permission for full functionality!");
+
                 }
-            }
-
-            try
-            {
-                //Clear new user reaction
-                await message.RemoveReactionAsync(socketReaction.Emote, socketReaction.User.Value);
-            }
-            catch (HttpException exception)
-            {
-                var channel = message.Channel as IGuildChannel;
-                var owner = await channel.Guild.GetOwnerAsync();
-                var msgChannel = message.Channel as IMessageChannel;
-                await msgChannel.SendMessageAsync("<@" + owner.Id + "> I require the MANAGE_REACTIONS permission for full functionality!");
-
             }
         }
     }

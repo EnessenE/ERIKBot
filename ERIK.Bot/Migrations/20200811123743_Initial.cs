@@ -36,7 +36,8 @@ namespace ERIK.Bot.Migrations
                 name: "SavedMessages",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     GuildId = table.Column<decimal>(nullable: false),
                     IsFinished = table.Column<bool>(nullable: false),
                     Notified = table.Column<bool>(nullable: false),
@@ -61,7 +62,7 @@ namespace ERIK.Bot.Migrations
                     Id = table.Column<Guid>(nullable: false),
                     UserId = table.Column<decimal>(nullable: true),
                     State = table.Column<int>(nullable: false),
-                    SavedMessageId = table.Column<Guid>(nullable: true)
+                    SavedMessageId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -87,7 +88,7 @@ namespace ERIK.Bot.Migrations
                     Id = table.Column<Guid>(nullable: false),
                     MessageId = table.Column<decimal>(nullable: false),
                     ChannelId = table.Column<decimal>(nullable: false),
-                    SavedMessageId = table.Column<Guid>(nullable: true)
+                    SavedMessageId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {

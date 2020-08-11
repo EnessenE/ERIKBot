@@ -44,7 +44,7 @@ namespace ERIK.Bot.Context
             base.OnModelCreating(modelBuilder);
         }
 
-        public SavedMessage GetMessage(Guid id)
+        public SavedMessage GetMessage(int id)
         {
             var result = SavedMessages.Find(id);
             return result;
@@ -85,6 +85,13 @@ namespace ERIK.Bot.Context
         public async Task<List<SavedMessage>> GetAllPublishedAndNonFinished(bool notified)
         {
             var result = SavedMessages.Where(a => a.Published && !a.IsFinished && a.Notified == notified).Include(x => x.Reactions)
+                .ThenInclude(x => x.User).Include(a => a.TrackedIds).ToList();
+            return result;
+        }
+
+        public async Task<List<SavedMessage>> GetAllNonFinished(bool notified)
+        {
+            var result = SavedMessages.Where(a => !a.IsFinished && a.Notified == notified).Include(x => x.Reactions)
                 .ThenInclude(x => x.User).Include(a => a.TrackedIds).ToList();
             return result;
         }
@@ -182,6 +189,9 @@ namespace ERIK.Bot.Context
                 {
                     retrievedMessage.Reactions.Remove(reaction);
                 }
+
+                Update(message);
+                SaveChanges();
             }
         }
 
