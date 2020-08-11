@@ -55,7 +55,6 @@ namespace ERIK.Bot.Modules
             if (response.ToLower() != "y")
             {
                 await ReplyAsync("Creating lfg!");
-                await origMessage.DeleteAsync();
                 publishtime = default;
             }
             else
@@ -84,6 +83,7 @@ namespace ERIK.Bot.Modules
             savedMessage.TrackedIds.Add(new TrackedMessage() { ChannelId = msg.Channel.Id, MessageId = msg.Id });
             _context.Update(savedMessage);
             _context.SaveChanges();
+            await origMessage.DeleteAsync();
 
             await ConnectMessage(savedMessage, msg);
 
