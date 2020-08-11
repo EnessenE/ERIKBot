@@ -73,6 +73,29 @@ namespace ERIK.Bot.Modules
             await ReplyAsync(response);
         }
 
+        [Command("serverinfo")]
+        [Summary("Set the prefix")]
+        public async Task Serverinfo()
+        {
+            var guild = this.Context.Guild;
+            var embed = new EmbedBuilder();
+            embed.WithThumbnailUrl(guild.IconUrl);
+            embed.WithTitle($"Server info {guild.Name}");
+            embed.WithDescription(guild.Description);
+            var stats = string.Empty;
+            stats += $"**Id:** {guild.Id}\n";
+            stats += $"**Total members:** {guild.MemberCount}\n";
+            stats += $"**Owner:** {guild.Owner.Nickname}\n";
+            stats += $"**Region:** {guild.VoiceRegionId}\n";
+            stats += $"**Created at:** {guild.CreatedAt:R}\n";
+            stats += $"**Verification level:** {guild.VerificationLevel}\n";
+            stats += $"**AFK Timeout:** {guild.AFKTimeout} minute(s)\n";
+            stats += $"**Icon:** {guild.IconUrl}\n";
+
+            embed.AddField("Generic stats", stats);
+
+            await ReplyAsync(embed: embed.Build());
+        }
 
         //test code for bot response
         [Command("reply", RunMode = RunMode.Async)]
