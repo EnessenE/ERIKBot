@@ -183,9 +183,9 @@ namespace ERIK.Bot.Services
                         if (guild != null && guild.LfgPublishChannelId > 0)
                         {
                             message.Published = true;
-
+                            var embeddedMessage = message.ToEmbed(_client);
                             var channel = _client.GetChannel(guild.LfgPublishChannelId) as ITextChannel;
-                            IUserMessage sentMessage = await channel.SendMessageAsync(embed: message.ToEmbed(_client));
+                            IUserMessage sentMessage = await channel.SendMessageAsync(embed: embeddedMessage);
                             message.TrackedIds.Add(new TrackedMessage()
                             {
                                 ChannelId = sentMessage.Channel.Id,
@@ -193,6 +193,21 @@ namespace ERIK.Bot.Services
                             });
 
                             await _lfgModule.ConnectMessage(message, sentMessage);
+
+                            foreach (var trackedMessage in message.TrackedIds)
+                            {
+                                try
+                                {
+                                    var trackedChannel = _client.GetChannel(trackedMessage.ChannelId) as ITextChannel;
+                                    var trackedSentMessage = await trackedChannel.GetMessageAsync(trackedMessage.MessageId) as IUserMessage;
+                                    await trackedSentMessage.ModifyAsync(m => { m.Embed = embeddedMessage; });
+                                }
+                                catch (Exception error)
+                                {
+                                    _logger.LogError(error, "Failed 'fixing' one message.");
+                                }
+                            }
+
                             _context.UpdateRange(messages);
                             _context.SaveChanges();
                             await prePublishChannel.SendMessageAsync(
