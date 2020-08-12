@@ -96,5 +96,26 @@ namespace ERIK.Bot.Models.Reactions
                 return total;
             }
         }
+
+        [NotMapped]
+        public List<ulong> AllJoinedAndAlternate
+        {
+            get
+            {
+                var total = new List<ulong>();
+                if (Reactions != null)
+                {
+                    foreach (var item in Reactions)
+                    {
+                        if (item.State == ReactionState.Joined || item.State == ReactionState.Alternate)
+                        {
+                            total.Add(item.User.Id);
+                        }
+                    }
+                }
+
+                return total;
+            }
+        }
     }
 }
