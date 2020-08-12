@@ -175,10 +175,7 @@ namespace ERIK.Bot.Modules
                         if (!firstFail)
                         {
                             firstFail = true;
-                            await sentMessage.ModifyAsync(m =>
-                            {
-                                m.Content = text + "\n Failed the conversion for your input. Try again please.";
-                            });
+                            text += "\n Failed the conversion for your input. Try again please.";
                         }
                     }
                 }
