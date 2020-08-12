@@ -34,7 +34,7 @@ namespace ERIK.Bot.Modules
 
             Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
 
-            if (guild.LfgPrepublishChannelId > 0)
+            if (guild.LfgPrepublishChannelId < 1)
             {
                 await ReplyAsync("This command requires the pre-publish channel to be set.");
                 return;
