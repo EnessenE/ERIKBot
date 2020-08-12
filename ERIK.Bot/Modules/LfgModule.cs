@@ -42,7 +42,7 @@ namespace ERIK.Bot.Modules
 
             var prePublish = this.Context.Guild.GetChannel(guild.LfgPrepublishChannelId) as ITextChannel;
 
-            if (prePublish != null)
+            if (prePublish == null)
             {
                 await ReplyAsync("Couldn't find the targetted pre-publish channel");
                 return;
