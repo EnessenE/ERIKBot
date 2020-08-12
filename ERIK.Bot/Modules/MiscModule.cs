@@ -41,7 +41,9 @@ namespace ERIK.Bot.Modules
             foreach (CommandInfo command in commands)
             {
                 // Get the command Summary attribute information
-                string embedFieldText = command.Summary ?? "No description available\n";
+                string embedFieldText = String.Empty;
+
+                embedFieldText += command.Summary ?? "No description available\n";
 
                 embedBuilder.AddField($"{prefix}{command.Name}", embedFieldText);
             }
@@ -125,7 +127,7 @@ namespace ERIK.Bot.Modules
         public async Task altermessage()
         {
             var Message = await Context.Channel.SendMessageAsync("test message");
-            
+
             await Message.ModifyAsync(msg => msg.Content = "test [edited]");
         }
     }
