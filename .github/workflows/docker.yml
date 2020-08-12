@@ -27,18 +27,9 @@ jobs:
       run: echo Hello, ${{ secrets.DOCKER_USERNAME }}
 
     - name: Build and push Docker images
-      uses: docker/build-action@v1
+      uses: docker/build-push-action@v1.1.0
       with:
-        repository: myorg/myrepo
-        tags: v1
-    - name: login
-      uses: docker/login-action@v1
-      with:
-        dockerfile: ERIK.Bot/Dockerfile 
-        registry: enes1/erik
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-    - name: push
-      uses: docker/push-action@v1
-      with:
-        registry: hub.docker.com
+        dockerfile: ERIK.Bot/Dockerfile 
+        repository: enes1/erik
