@@ -33,6 +33,8 @@ namespace ERIK.Bot.Modules
         [Summary("A summary of all available commands")]
         public async Task Help()
         {
+            var prefix = _context.GetOrCreateGuild(this.Context.Guild.Id).Prefix;
+
             List<CommandInfo> commands = _commandService.Commands.ToList();
             EmbedBuilder embedBuilder = new EmbedBuilder();
 
@@ -41,7 +43,7 @@ namespace ERIK.Bot.Modules
                 // Get the command Summary attribute information
                 string embedFieldText = command.Summary ?? "No description available\n";
 
-                embedBuilder.AddField(command.Name, embedFieldText);
+                embedBuilder.AddField($"{prefix}{command.Name}", embedFieldText);
             }
 
             await ReplyAsync("Here's a list of commands and their description: ", false, embedBuilder.Build());
@@ -68,7 +70,14 @@ namespace ERIK.Bot.Modules
             string response = string.Empty;
             string oldPrefix = "ERR";
             Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
-            response = "Saved the new prefix successfully.";
+
+            oldPrefix = guild.Prefix;
+            guild.Prefix = newPrefix;
+
+            _context.Update(guild);
+            _context.SaveChanges();
+
+            response = $"Changed this guilds prefix from {oldPrefix} to {guild.Prefix}";
 
             await ReplyAsync(response);
         }

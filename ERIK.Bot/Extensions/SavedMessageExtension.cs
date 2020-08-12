@@ -20,7 +20,7 @@ namespace ERIK.Bot.Extensions
             List<string> alt = new List<string>();
             var embedB = new EmbedBuilder();
             embedB.Url = "https://time.is/UTC";
-            embedB.WithFooter(footer => footer.Text = savedMsg.Id.ToString());
+            embedB.WithFooter(footer => footer.Text = "Id: " + savedMsg.Id.ToString());
             embedB.WithColor(Color.Green);
 
             
@@ -34,16 +34,16 @@ namespace ERIK.Bot.Extensions
             embedB.AddField("Description:", savedMsg.Description, true);
             if (savedMsg.IsFinished)
             {
-                embedB.AddField("Start Time:", savedMsg.Time.ToFieldTime() + " - Already occured", false);
+                embedB.AddField("Start Time:", savedMsg.Time, false);
             }
             else
             {
-                embedB.AddField("Start Time:", savedMsg.Time.ToFieldTime(), false);
+                embedB.AddField("Start Time:", savedMsg.Time, false);
             }
 
             if (!savedMsg.Published)
             {
-                embedB.AddField("Publish time", savedMsg.PublishTime.ToFieldTime(), true);
+                embedB.AddField("Publish time", savedMsg.PublishTime, true);
             }
 
             //embedB.WithDescription(savedMsg.Description);
@@ -90,13 +90,13 @@ namespace ERIK.Bot.Extensions
                     altMsg = altMsg.Remove(altMsg.Length - 2);
                 }
 
-                embedB.AddField($"Joined ({savedMsg.TotalJoined}/{savedMsg.JoinLimit}):", joinedMsg, true);
-                embedB.AddField($"Alternatives ({savedMsg.TotalAlternate}):", altMsg, false);
+                embedB.AddField($"Joined ({savedMsg.TotalJoined}/{savedMsg.JoinLimit}):", joinedMsg, false);
+                embedB.AddField($"Alternatives ({savedMsg.TotalAlternate}):", altMsg, true);
             }
             else
             {
-                embedB.AddField("Joined:", "No one joined yet", true);
-                embedB.AddField("Alternatives:", "There are no alternatives", false);
+                embedB.AddField("Joined:", "No one joined yet", false);
+                embedB.AddField("Alternatives:", "There are no alternatives", true);
             }
 
             embedB.WithCurrentTimestamp();

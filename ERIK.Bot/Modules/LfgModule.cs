@@ -34,9 +34,17 @@ namespace ERIK.Bot.Modules
 
             Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
 
-            if (this.Context.Channel.Id != guild.LfgPrepublishChannelId)
+            if (guild.LfgPrepublishChannelId < 1)
             {
-                await ReplyAsync("This command can only be used in the pre-publish channel");
+                await ReplyAsync("This command requires the pre-publish channel to be set.");
+                return;
+            }
+
+            var prePublish = this.Context.Guild.GetChannel(guild.LfgPrepublishChannelId) as ITextChannel;
+
+            if (prePublish == null)
+            {
+                await ReplyAsync("Couldn't find the targetted pre-publish channel");
                 return;
             }
 
@@ -71,7 +79,7 @@ namespace ERIK.Bot.Modules
 
             _context.CreateMessage(savedMessage);
 
-            IUserMessage msg = await ReplyAsync(embed: savedMessage.ToEmbed(this.Context.Client));
+            IUserMessage msg = await prePublish.SendMessageAsync(embed: savedMessage.ToEmbed(this.Context.Client));
 
             _context.Update(savedMessage);
             _context.SaveChanges();
@@ -88,7 +96,7 @@ namespace ERIK.Bot.Modules
             var origMessage = await ReplyAsync("Asking for time.");
             DateTime finalDateTime = DateTime.Today;
 
-            var dayResult = await AskForItem<DateTime>(origMessage, $"Tell me when the {s} is taking place in DD/MM/YY (CEST)"); 
+            var dayResult = await AskForItem<DateTime>(origMessage, $"Tell me when the {s} is taking place in DD/MM/YY (CEST)");
             var timeResult = await AskForItem<DateTime>(origMessage, $"And the time? HH:MM (CEST)");
 
             await origMessage.DeleteAsync();
@@ -115,7 +123,7 @@ namespace ERIK.Bot.Modules
                     try
                     {
                         var x = item.ToString();
-                        result = (T) Convert.ChangeType(x, typeof(T));
+                        result = (T)Convert.ChangeType(x, typeof(T));
                         if (result != null)
                         {
                             await item.DeleteAsync();
@@ -167,10 +175,7 @@ namespace ERIK.Bot.Modules
                         if (!firstFail)
                         {
                             firstFail = true;
-                            await sentMessage.ModifyAsync(m =>
-                            {
-                                m.Content = text + "\n Failed the conversion for your input. Try again please.";
-                            });
+                            text += "\n Failed the conversion for your input. Try again please.";
                         }
                     }
                 }
@@ -179,7 +184,6 @@ namespace ERIK.Bot.Modules
             return result;
         }
 
-        [RequireUserPermission(GuildPermission.MentionEveryone)]
         [Command("lfg id")]
         [Summary("Retrieve an lfg by id number")]
         public async Task GetLfgById(int lfgid)
@@ -190,8 +194,15 @@ namespace ERIK.Bot.Modules
                 savedMessage = _context.GetSavedMessageById(lfgid);
                 if (savedMessage != null)
                 {
-                    var sentMessage = await ReplyAsync(embed: savedMessage.ToEmbed(this.Context.Client));
-                    await ConnectMessage(savedMessage, sentMessage);
+                    if (savedMessage.Published)
+                    {
+                        var sentMessage = await ReplyAsync(embed: savedMessage.ToEmbed(this.Context.Client));
+                        await ConnectMessage(savedMessage, sentMessage);
+                    }
+                    else
+                    {
+                        await ReplyAsync("Sorry, this LFG hasn't been published yet.");
+                    }
                 }
                 else
                 {
@@ -202,7 +213,7 @@ namespace ERIK.Bot.Modules
             {
                 await ReplyAsync("No valid lfg id found");
             }
-            
+
         }
 
         [RequireUserPermission(GuildPermission.MentionEveryone)]
@@ -214,6 +225,43 @@ namespace ERIK.Bot.Modules
             guild.LfgPrepublishChannelId = channel.Id;
             _context.SaveChanges();
             await ReplyAsync($"Set the new pre-publish channel to <@{channel.Id}>");
+        }
+
+        [RequireUserPermission(GuildPermission.Administrator)]
+        [Command("lfg delete")]
+        [Summary("Delete an LFG. Usage: !lfg delete [id]")]
+        public async Task DeleteLFG(int id)
+        {
+            SavedMessage message = _context.GetMessage(id);
+            if (message != null)
+            {
+                if (message.GuildId == this.Context.Guild.Id)
+                {
+                    foreach (var trackedMessage in message.TrackedIds)
+                    {
+                        var channel = this.Context.Guild.GetChannel(trackedMessage.ChannelId) as ITextChannel;
+                        var foundMessage = await channel.GetMessageAsync(trackedMessage.MessageId) as IUserMessage;
+                        await foundMessage.ModifyAsync(m =>
+                        {
+                            m.Embed = null;
+                            m.Content = $"This LFG({id}) was deleted by {this.Context.Message.Author.Username}";
+                        });
+                        _ = foundMessage.RemoveAllReactionsAsync().ConfigureAwait(false);
+
+                    }
+
+                    _context.Remove(message);
+                    _context.SaveChanges();
+                }
+                else
+                {
+                    await ReplyAsync("This LFG wasn't created in this guild and can't be deleted because of it.");
+                }
+            }
+            else
+            {
+                await ReplyAsync("Couldn't find the targetted LFG.");
+            }
         }
 
         [RequireUserPermission(GuildPermission.MentionEveryone)]
@@ -325,7 +373,7 @@ namespace ERIK.Bot.Modules
 
             message.TrackedIds.Add(new TrackedMessage()
             {
-                ChannelId = sentMessage.Channel.Id, 
+                ChannelId = sentMessage.Channel.Id,
                 MessageId = sentMessage.Id
             });
 
