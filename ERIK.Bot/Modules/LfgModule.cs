@@ -233,25 +233,49 @@ namespace ERIK.Bot.Modules
         public async Task DeleteLFG(int id)
         {
             SavedMessage message = _context.GetMessage(id);
+            var author = this.Context.Message.Author;
             if (message != null)
             {
                 if (message.GuildId == this.Context.Guild.Id)
                 {
                     foreach (var trackedMessage in message.TrackedIds)
                     {
-                        var channel = this.Context.Guild.GetChannel(trackedMessage.ChannelId) as ITextChannel;
-                        var foundMessage = await channel.GetMessageAsync(trackedMessage.MessageId) as IUserMessage;
-                        await foundMessage.ModifyAsync(m =>
+                        try
                         {
-                            m.Embed = null;
-                            m.Content = $"This LFG({id}) was deleted by {this.Context.Message.Author.Username}";
-                        });
-                        _ = foundMessage.RemoveAllReactionsAsync().ConfigureAwait(false);
+                            var channel = this.Context.Guild.GetChannel(trackedMessage.ChannelId) as ITextChannel;
+                            var foundMessage = await channel.GetMessageAsync(trackedMessage.MessageId) as IUserMessage;
+                            await foundMessage.ModifyAsync(m =>
+                            {
+                                m.Embed = null;
+                                m.Content = $"This LFG({id}) was deleted by {author}";
+                            });
+                            _ = foundMessage.RemoveAllReactionsAsync().ConfigureAwait(false);
+                        }
+                        catch (Exception error)
+                        {
+                            _logger.LogError(error, "Failed deleting a message.");
+                        }
+                    }
 
+                    foreach (var userSignedUp in message.AllJoinedAndAlternate)
+                    {
+                        try
+                        {
+                            var user = this.Context.Client.GetUser(userSignedUp);
+                            _ = user.SendMessageAsync(
+                                    $"The LFG {message.Title} with Id {message.Id} that you signed up for has been deleted. For more info contact the deleter of the LFG {author}")
+                                .ConfigureAwait(false);
+                        }
+                        catch (Exception error)
+                        {
+                            _logger.LogError(error, "Failed send a message to {id}.", userSignedUp);
+                        }
                     }
 
                     _context.Remove(message);
                     _context.SaveChanges();
+                    await ReplyAsync("Successfully deleted this LFG. All participants have been notified.");
+
                 }
                 else
                 {
