@@ -52,7 +52,7 @@ namespace ERIK.Bot.Services
 
             _services.AddSingleton(_client);
             _services.AddSingleton<InteractiveService>();
-            _services.AddSingleton<LfgModule>();
+            _services.AddTransient<LfgModule>();
             _services.AddTransient<LfgService>();
             _services.AddTransient<StatusService>();
             _serviceProvider = _services.BuildServiceProvider();
