@@ -33,3 +33,4 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
         dockerfile: ERIK.Bot/Dockerfile 
         repository: enes1/erik
+        tag_with_ref: true
