@@ -179,7 +179,6 @@ namespace ERIK.Bot.Modules
             return result;
         }
 
-        [RequireUserPermission(GuildPermission.MentionEveryone)]
         [Command("lfg id")]
         [Summary("Retrieve an lfg by id number")]
         public async Task GetLfgById(int lfgid)
@@ -190,8 +189,15 @@ namespace ERIK.Bot.Modules
                 savedMessage = _context.GetSavedMessageById(lfgid);
                 if (savedMessage != null)
                 {
-                    var sentMessage = await ReplyAsync(embed: savedMessage.ToEmbed(this.Context.Client));
-                    await ConnectMessage(savedMessage, sentMessage);
+                    if (savedMessage.Published)
+                    {
+                        var sentMessage = await ReplyAsync(embed: savedMessage.ToEmbed(this.Context.Client));
+                        await ConnectMessage(savedMessage, sentMessage);
+                    }
+                    else
+                    {
+                        await ReplyAsync("Sorry, this LFG hasn't been published yet.");
+                    }
                 }
                 else
                 {
