@@ -1,29 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord.WebSocket;
-using ERIKBot.Extensions;
-using ERIKBot.Models;
+using ERIK.Bot.Extensions;
+using ERIK.Bot.Models;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
-namespace ERIKBot.Modules
+namespace ERIK.Bot.Services
 {
-    public class ClientStatusModule //: ModuleBase<SocketCommandContext>
+    public class StatusService
     {
-        private readonly DiscordSocketClient _client;
+        private ILogger<StatusService> _logger;
+        private DiscordSocketClient _client;
 
-        public ClientStatusModule(DiscordSocketClient client)
+        public StatusService(ILogger<StatusService> logger, DiscordSocketClient client)
         {
+            _logger = logger;
             _client = client;
         }
 
-        public async Task Start()
+        public void Start()
         {
 
-            Console.WriteLine("Starting the status setter!");
+            _logger.LogInformation("Starting the status setter!");
             new Thread(() =>
             {
                 Thread.Sleep(5000);
@@ -31,16 +34,16 @@ namespace ERIKBot.Modules
                 {
                     try
                     {
-                        Console.WriteLine("Attempting to set the status");
+                        _logger.LogInformation("Attempting to set the status");
 
                         string randomtext = LoadJson().PickRandom();
                         _client.SetGameAsync(randomtext);
-                        Console.WriteLine("Set the status!");
+                        _logger.LogInformation("Set the status to {msg}!", randomtext);
 
                     }
                     catch (Exception error)
                     {
-                        Console.WriteLine("Failed to set status");
+                        _logger.LogError(error, "Failed to set status");
                     }
                     Thread.Sleep(900000);
 
@@ -51,7 +54,7 @@ namespace ERIKBot.Modules
         public List<string> LoadJson()
         {
             List<string> list = new List<string>();
-            using (StreamReader r = new StreamReader("status.json"))
+            using (StreamReader r = new StreamReader("status.json")) //Move to appsettings
             {
                 string json = r.ReadToEnd();
                 var item = JsonConvert.DeserializeObject<RandomStatuses>(json);

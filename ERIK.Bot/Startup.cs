@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Discord.Addons.Interactive;
 using Discord.WebSocket;
 using ERIK.Bot.Configurations;
+using ERIK.Bot.Context;
 using ERIK.Bot.Modules;
 using ERIK.Bot.Services;
 using Microsoft.AspNetCore.Builder;
@@ -33,12 +35,22 @@ namespace ERIK.Bot
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<DiscordBotSettings>(Configuration.GetSection("DiscordBot"));
+            services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
+            services.Configure<SQLSettings>(Configuration.GetSection("SQLSettings"));
+            services.Configure<Responses>(Configuration.GetSection("Responses"));
 
-            services.AddTransient<BotService>();
+            // services.AddSingleton<DiscordSocketClient>();
+
+            services.AddSingleton<IServiceCollection>(services);
             services.AddTransient<MailService>();
-            services.AddTransient<ClientStatusModule>();
+            //services.AddSingleton<InteractiveService>();
+            services.AddTransient<BotService>();
+            services.AddTransient<ReactionService>();
 
-            services.AddSingleton<DiscordSocketClient>();
+            services.AddTransient<EntityContext>();
+
+            //Add the DBContext
+            services.AddDbContext<EntityContext>();
 
             //Add logging
             services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
@@ -66,7 +78,6 @@ namespace ERIK.Bot
                     .AllowAnyMethod()
                     .AllowAnyHeader();
             }));
-
             services.AddControllers();
         }
 
@@ -77,10 +88,8 @@ namespace ERIK.Bot
 
             var provider = services.BuildServiceProvider();     // Build the service provider
 
-            await provider.GetRequiredService<BotService>().Start();       // Start the startup service
-            provider.GetRequiredService<ClientStatusModule>().Start();       // Start the startup service
+            await provider.GetRequiredService<BotService>().Start(provider);       // Start the startup service
 
-            provider.GetRequiredService<MailService>().Start();       // Start the startup service
             await Task.Delay(-1);                               // Keep the program alive
         }
 
