@@ -227,7 +227,7 @@ namespace ERIK.Bot.Modules
             await ReplyAsync($"Set the new pre-publish channel to <@{channel.Id}>");
         }
 
-        [RequireUserPermission(GuildPermission.Administrator)]
+        [RequireUserPermission(GuildPermission.MentionEveryone)]
         [Command("lfg delete")]
         [Summary("Delete an LFG. Usage: !lfg delete [id]")]
         public async Task DeleteLFG(int id)
