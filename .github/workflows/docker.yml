@@ -29,10 +29,7 @@ jobs:
     - name: Build and push Docker images
       uses: docker/build-push-action@v1.1.0
       with:
-        dockerfile: ERIK.Bot/Dockerfile 
-        # Username used to log in to a Docker registry. If not set then no login will occur
-        username:   ${{ secrets.DOCKER_USERNAME }}
-        # Password or personal access token used to log in to a Docker registry. If not set then no login will occur
+        username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-        # Server address of Docker registry. If not set then will default to Docker Hub
-        repository: ${{ secrets.DOCKER_REPOSITORY }}# optional
+        dockerfile: ERIK.Bot/Dockerfile 
+        repository: enes1/erik
