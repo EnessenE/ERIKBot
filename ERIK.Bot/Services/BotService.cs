@@ -118,6 +118,9 @@ namespace ERIK.Bot.Services
         {
             // Don't process the command if it was a system message
             var message = messageParam as SocketUserMessage;
+            var channel = message.Channel as SocketGuildChannel;
+            var guild = channel.Guild;
+
             if (message == null) return;
 
             _logger.LogInformation("[{time}]{author}: {content}", message.Timestamp.ToString("HH:mm:ss"), message.Author.Username, message.Content);
@@ -126,7 +129,10 @@ namespace ERIK.Bot.Services
             int argPos = 0;
 
             // Determine if the message is a command based on the prefix and make sure no bots trigger commands
-            if (!(message.HasCharPrefix('!', ref argPos) ||
+
+            var prefix = _context.GetOrCreateGuild(guild.Id).Prefix;
+
+            if (!(message.HasStringPrefix(prefix, ref argPos) ||
                 message.HasMentionPrefix(_client.CurrentUser, ref argPos)) ||
                 message.Author.IsBot)
                 return;
