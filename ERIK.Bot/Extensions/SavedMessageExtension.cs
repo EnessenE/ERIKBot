@@ -20,7 +20,7 @@ namespace ERIK.Bot.Extensions
             List<string> alt = new List<string>();
             var embedB = new EmbedBuilder();
             embedB.Url = "https://time.is/UTC";
-            embedB.WithFooter(footer => footer.Text = savedMsg.Id.ToString());
+            embedB.WithFooter(footer => footer.Text = "Id: " + savedMsg.Id.ToString());
             embedB.WithColor(Color.Green);
 
             
