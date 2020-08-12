@@ -36,7 +36,7 @@ namespace ERIK.Bot.Modules
 
             if (guild.LfgPrepublishChannelId > 0)
             {
-                await ReplyAsync("This command required the pre-publish channel to be set.");
+                await ReplyAsync("This command requires the pre-publish channel to be set.");
                 return;
             }
 
