@@ -246,6 +246,8 @@ namespace ERIK.Bot.Modules
                             m.Embed = null;
                             m.Content = $"This LFG({id}) was deleted by {this.Context.Message.Author.Username}";
                         });
+                        _ = foundMessage.RemoveAllReactionsAsync().ConfigureAwait(false);
+
                     }
 
                     _context.Remove(message);
