@@ -24,12 +24,12 @@ namespace ERIK.Bot.Modules
             _logger = logger;
         }
 
-        private async Task<string> RandomCat()
+        private async Task<dynamic> RandomCat()
         {
             string result = "https://cataas.com/cat";
             using (var httpClient = new HttpClient())
             {
-                using (var request = new HttpRequestMessage(new HttpMethod("GET"), "https://api.thecatapi.com/v1/images/search?format=json"))
+                using (var request = new HttpRequestMessage(new HttpMethod("GET"), "https://api.thecatapi.com/v1/images/search?format=json&limit=3"))
                 {
                     request.Headers.TryAddWithoutValidation("x-api-key", _catOptions.Token);
 
@@ -38,7 +38,7 @@ namespace ERIK.Bot.Modules
                     {
                         var jsonString = await response.Content.ReadAsStringAsync();
                         var apiResult = JsonConvert.DeserializeObject<dynamic>(jsonString);
-                        result = apiResult[0].url;
+                        result = apiResult;
                     }
 
                 }
@@ -50,10 +50,15 @@ namespace ERIK.Bot.Modules
         public async Task MessageChannelCheck(SocketCommandContext context, SocketUserMessage message, SocketGuild guild)
         {
             if (context.Channel.Id == 284815121618829312) //#enesfw
-            {
-                string url = await RandomCat();
-                _logger.LogInformation("Url to send: {url}", url);
-                await context.Channel.SendMessageAsync($"Look how cute!" + url);
+            {               
+                dynamic result = await RandomCat();
+
+                for (int i = 0; i < 3; i++)
+                {
+                    string url = result[i].url;
+                    _logger.LogInformation("Url to send: {url}", url);
+                    await context.Channel.SendMessageAsync($"Look how cute! " + url);
+                }
             }
         }
     }
