@@ -1,8 +1,8 @@
-name: Build Project
+name: Build Project and push to docker
 
 on:
   push:
-    branches: [ develop, master ]
+    branches: [ master ]
 
 jobs:
   build:
