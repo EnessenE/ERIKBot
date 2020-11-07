@@ -10,8 +10,6 @@ namespace ERIK.Bot.Models
 
      
         public string Prefix { get; set; }
-        public ulong LfgPrepublishChannelId { get; set; }
-        public ulong LfgPublishChannelId { get; set; }
 
     }
 }

@@ -52,8 +52,6 @@ namespace ERIK.Bot.Services
 
             _services.AddSingleton(_client);
             _services.AddSingleton<InteractiveService>();
-            _services.AddTransient<LfgModule>();
-            _services.AddTransient<LfgService>();
             _services.AddTransient<StatusService>();
             _serviceProvider = _services.BuildServiceProvider();
 
@@ -65,7 +63,6 @@ namespace ERIK.Bot.Services
             await _client.LoginAsync(TokenType.Bot, _botOptions.Token);
             await _client.StartAsync();
 
-            StartLFGLoop();
             var statusService = _serviceProvider.GetRequiredService<StatusService>();
             statusService.Start();
 
@@ -74,21 +71,6 @@ namespace ERIK.Bot.Services
 
 
             // Block this task until the program is closed.
-        }
-
-        public void StartLFGLoop()
-        {
-            _logger.LogInformation("Starting the status setter!");
-            new Thread(() =>
-            {
-                Thread.Sleep(6000);
-                while (true)
-                {
-                    var lfgService = _serviceProvider.GetRequiredService<LfgService>();
-                    lfgService.Loop();
-                    Thread.Sleep(60000);
-                }
-            }).Start();
         }
 
         public async Task InstallCommandsAsync()
