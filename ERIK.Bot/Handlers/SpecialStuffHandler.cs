@@ -51,7 +51,7 @@ namespace ERIK.Bot.Modules
         public async Task MessageChannelCheck(SocketCommandContext context, SocketUserMessage message, SocketGuild guild)
         {
             //string result = "https://cataas.com/cat";
-            if (context.Channel.Id == 474590032267837473) //#enesfw
+            if (context.Channel.Id == 284815121618829312) //#enesfw
             {               
                 var result = await RandomCats(3);
 
