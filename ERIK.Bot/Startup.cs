@@ -46,6 +46,7 @@ namespace ERIK.Bot
             //services.AddSingleton<InteractiveService>();
             services.AddTransient<BotService>();
             services.AddTransient<ReactionService>();
+            services.AddTransient<SpecialStuffHandler>();
 
             services.AddTransient<EntityContext>();
 
