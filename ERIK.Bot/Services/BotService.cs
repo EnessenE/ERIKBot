@@ -30,14 +30,16 @@ namespace ERIK.Bot.Services
         private readonly EntityContext _context;
         private readonly ReactionService _reactionService;
         private ServiceProvider _serviceProvider;
+        private SpecialStuffHandler _specialStuffHandler;
 
-        public BotService(ILogger<BotService> logger, IOptions<DiscordBotSettings> botOptions, EntityContext context, ReactionService reactionService, IServiceCollection services)
+        public BotService(ILogger<BotService> logger, IOptions<DiscordBotSettings> botOptions, EntityContext context, ReactionService reactionService, IServiceCollection services, SpecialStuffHandler specialStuffHandler)
         {
             _logger = logger;
             _botOptions = botOptions.Value;
             _context = context;
             _reactionService = reactionService;
             _services = services;
+            _specialStuffHandler = specialStuffHandler;
         }
 
         public async Task Start(IServiceProvider services)
@@ -52,8 +54,6 @@ namespace ERIK.Bot.Services
 
             _services.AddSingleton(_client);
             _services.AddSingleton<InteractiveService>();
-            _services.AddTransient<LfgModule>();
-            _services.AddTransient<LfgService>();
             _services.AddTransient<StatusService>();
             _serviceProvider = _services.BuildServiceProvider();
 
@@ -65,7 +65,6 @@ namespace ERIK.Bot.Services
             await _client.LoginAsync(TokenType.Bot, _botOptions.Token);
             await _client.StartAsync();
 
-            StartLFGLoop();
             var statusService = _serviceProvider.GetRequiredService<StatusService>();
             statusService.Start();
 
@@ -74,21 +73,6 @@ namespace ERIK.Bot.Services
 
 
             // Block this task until the program is closed.
-        }
-
-        public void StartLFGLoop()
-        {
-            _logger.LogInformation("Starting the status setter!");
-            new Thread(() =>
-            {
-                Thread.Sleep(6000);
-                while (true)
-                {
-                    var lfgService = _serviceProvider.GetRequiredService<LfgService>();
-                    lfgService.Loop();
-                    Thread.Sleep(60000);
-                }
-            }).Start();
         }
 
         public async Task InstallCommandsAsync()
@@ -121,9 +105,20 @@ namespace ERIK.Bot.Services
             var channel = message.Channel as SocketGuildChannel;
             var guild = channel.Guild;
 
-            if (message == null) return;
+            if (message == null || message.Author.IsBot) return;
+
+            var context = new SocketCommandContext(_client, message);
 
             _logger.LogInformation("[{time}]{author}: {content}", message.Timestamp.ToString("HH:mm:ss"), message.Author.Username, message.Content);
+
+            try
+            {
+                _specialStuffHandler.MessageChannelCheck(context, message, guild);
+            }
+            catch (Exception error)
+            {
+                _logger.LogError("Failed executing special stuff", error);
+            }
 
             // Create a number to track where the prefix ends and the command begins
             int argPos = 0;
@@ -133,12 +128,10 @@ namespace ERIK.Bot.Services
             var prefix = tempContext.GetOrCreateGuild(guild.Id).Prefix;
 
             if (!(message.HasStringPrefix(prefix, ref argPos) ||
-                message.HasMentionPrefix(_client.CurrentUser, ref argPos)) ||
-                message.Author.IsBot)
+                message.HasMentionPrefix(_client.CurrentUser, ref argPos)))
                 return;
 
             // Create a WebSocket-based command context based on the message
-            var context = new SocketCommandContext(_client, message);
 
             // Execute the command with the command context we just
             // created, along with the service provider for precondition checks.
@@ -161,6 +154,7 @@ namespace ERIK.Bot.Services
             {
                 await context.Channel.SendMessageAsync("Failed executing your command. \n" + error.Message);
             }
+
 
             // Optionally, we may inform the user if the command fails
             // to be executed; however, this may not always be desired,
