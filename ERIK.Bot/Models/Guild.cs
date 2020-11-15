@@ -8,8 +8,9 @@ namespace ERIK.Bot.Models
         [Key]
         public ulong Id { get; set; }
 
-     
         public string Prefix { get; set; }
 
+        //features
+        public bool IconSupport { get; set; }
     }
 }

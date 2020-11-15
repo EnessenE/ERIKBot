@@ -68,13 +68,27 @@ namespace ERIK.Bot.Context
                 guild = new Guild()
                 {
                     Id = id,
-                    Prefix = "!" //retrieve from appsettings
+                    Prefix = "!" //TODO: retrieve from appsettings
                 };
                 Add(guild);
                 SaveChanges();
             }
 
             return guild;
+        }
+
+        /// <summary>
+        /// Returns all guilds known to the bot
+        /// </summary>
+        /// <returns></returns>
+        public List<Guild> GetGuilds()
+        {
+            return Guilds.ToList();
+        }
+
+        public List<Icon> GetIcons(Guild guild)
+        {
+            return null;
         }
     }
 }
