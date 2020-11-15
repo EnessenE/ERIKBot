@@ -48,29 +48,34 @@ namespace ERIK.Bot.Modules
             return null;
         }
 
+        private async void PostCats(SocketCommandContext context, SocketUserMessage message)
+        {
+            var result = await RandomCats(3);
+
+            if (result != null)
+            {
+                foreach (var cat in result)
+                {
+                    string url = cat.url;
+                    _logger.LogInformation("Url to send: {url}", url);
+                    await context.Channel.SendMessageAsync($"Look how cute! " + url);
+                }
+            }
+            else
+            {
+                string url = "https://cataas.com/cat"; _logger.LogInformation("Url to send: {url}", url);
+                await context.Channel.SendMessageAsync($"Look how adorable! " + url);
+                _logger.LogInformation("FALLBACK! Url to send: {url}", url);
+                await context.Channel.SendMessageAsync($"Look how cute! " + url);
+            }
+        }
+
         public async Task MessageChannelCheck(SocketCommandContext context, SocketUserMessage message, SocketGuild guild)
         {
             //string result = "https://cataas.com/cat";
             if (context.Channel.Id == 284815121618829312) //#enesfw
-            {               
-                var result = await RandomCats(3);
-
-                if (result != null)
-                {
-                    foreach (var cat in result)
-                    {
-                        string url = cat.url;
-                        _logger.LogInformation("Url to send: {url}", url);
-                        await context.Channel.SendMessageAsync($"Look how cute! " + url);
-                    }
-                }
-                else
-                {
-                    string url = "https://cataas.com/cat"; _logger.LogInformation("Url to send: {url}", url);
-                    await context.Channel.SendMessageAsync($"Look how adorable! " + url);
-                    _logger.LogInformation("FALLBACK! Url to send: {url}", url);
-                    await context.Channel.SendMessageAsync($"Look how cute! " + url);
-                }
+            {
+                //PostCats(context, message);
             }
         }
     }
