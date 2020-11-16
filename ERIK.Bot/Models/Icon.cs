@@ -16,8 +16,8 @@ namespace ERIK.Bot.Models
         public string Image { get; set; }
         public string Name { get; set; }
         
-        public DateTime startDate { get; set; }
-        public DateTime endDate { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
 
         public bool Default { get; set; }
         public bool Active { get; set; }

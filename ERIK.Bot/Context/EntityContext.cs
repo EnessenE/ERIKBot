@@ -24,7 +24,6 @@ namespace ERIK.Bot.Context
         private readonly ILogger<EntityContext> _logger;
 
         public DbSet<Guild> Guilds { get; set; }
-        public DbSet<DiscordUser> DiscordUsers { get; set; }
 
         public EntityContext(IOptions<SQLSettings> sqlSettings, ILogger<EntityContext> logger)
         {
@@ -88,7 +87,7 @@ namespace ERIK.Bot.Context
 
         public List<Icon> GetIcons(Guild guild)
         {
-            return null;
+            return guild.Icons;
         }
     }
 }

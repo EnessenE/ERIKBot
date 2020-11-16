@@ -9,6 +9,8 @@ namespace ERIK.Bot.Configurations
     {
         public List<string> Pong { get; set; }
         public List<string> Martijn { get; set; }
+        public List<string> IconDefault { get; set; }
+        public List<string> IconDefaultWrong { get; set; }
 
     }
 }

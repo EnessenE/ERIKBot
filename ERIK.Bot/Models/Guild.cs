@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ERIK.Bot.Models
@@ -12,5 +13,7 @@ namespace ERIK.Bot.Models
 
         //features
         public bool IconSupport { get; set; }
+
+        public List<Icon> Icons { get; set; }
     }
 }

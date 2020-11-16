@@ -1,7 +1,8 @@
 ﻿namespace ERIK.Bot.Configurations
 {
-    class DiscordBotSettings
+    public class DiscordBotSettings
     {
         public string Token { get; set; }
+        public string IconDirectory { get; set; }
     }
 }
