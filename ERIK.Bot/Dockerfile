@@ -5,7 +5,7 @@ WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster AS build
+FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS build
 WORKDIR /src
 COPY ["ERIK.Bot/ERIK.Bot.csproj", "ERIK.Bot/"]
 RUN dotnet restore "ERIK.Bot/ERIK.Bot.csproj"
