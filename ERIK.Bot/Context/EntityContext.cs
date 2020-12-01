@@ -34,6 +34,7 @@ namespace ERIK.Bot.Context
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            optionsBuilder.UseLazyLoadingProxies();
             optionsBuilder.UseSqlServer(_sqlSettings.Value.ConnectionString);
         }
 

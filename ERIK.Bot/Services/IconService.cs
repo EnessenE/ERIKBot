@@ -9,6 +9,7 @@ using Discord;
 using Discord.WebSocket;
 using ERIK.Bot.Configurations;
 using ERIK.Bot.Context;
+using ERIK.Bot.Extensions;
 using ERIK.Bot.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -69,66 +70,79 @@ namespace ERIK.Bot.Services
             Icon defaultIcon = null;
             var icons = _context.GetIcons(guild);
 
-            _logger.LogDebug("{guildid} has {icons} icons", guild.Id, icons.Count);
-
-            foreach (var icon in icons)
+            if (icons != null)
             {
-                _logger.LogDebug("Processing Icon [{icon}]", icon.Name);
+                _logger.LogDebug("{guild} has {icons} icons", guild.Id, icons.Count);
 
-                if (!icon.Default)
+                foreach (var icon in icons)
                 {
-                    if (icon.Enabled)
-                    {
-                        if (icon.StartDate >= DateTime.Now && icon.EndDate <= DateTime.Now)
-                        {
+                    _logger.LogDebug("{guild} Processing Icon [{icon}]", guild, icon.Name);
 
-                        }
-                    }
-                    else if (icon.Active)
+                    if (!icon.Default)
                     {
-                        //Icon is currently active, and needs to be disabled
-                        if (icon.EndDate >= DateTime.Now)
+                        if (icon.Enabled)
                         {
-                            goToDefault = true;
-                            if (!icon.Recurring)
+                            if (icon.StartDate >= DateTime.Now && icon.EndDate <= DateTime.Now)
                             {
-                                icon.Active = false;
-                                icon.Enabled = false;
+                                SocketGuild socketGuild = _client.GetGuild(guild.Id);
+
+                                //Icon needs to be actived.
+                                var filePath = icon.DownloadAndOrGet(_botSettings, guild);
+
+                                await socketGuild.ModifyAsync(x => { x.Icon = new Image(filePath); });
+                                _logger.LogDebug("{guild} Activating icon [{icon}]", guild, icon.Name);
+
+                            }
+                        }
+                        else if (icon.Active)
+                        {
+                            //Icon is currently active, and needs to be disabled
+                            if (icon.EndDate >= DateTime.Now)
+                            {
+                                goToDefault = true;
+                                if (!icon.Recurring)
+                                {
+                                    icon.Active = false;
+                                    icon.Enabled = false;
+                                }
                             }
                         }
                     }
-                }
-                else
-                {
-                    defaultIcon = icon;
-                }
-                _logger.LogDebug("Completed Icon [{icon}]", icon.Name);
-            }
-
-            if (goToDefault)
-            {
-                SocketGuild socketGuild = _client.GetGuild(guild.Id);
-                if (socketGuild == null)
-                {
-                    _logger.LogError("Failed retrieving guild {guild}", guild.Id);
-                }
-                else
-                {
-                    if (defaultIcon != null)
+                    else
                     {
-                        var filePath = $"{_botSettings.IconDirectory}/{guild.Id}-{defaultIcon.Id}";
-                        if (!File.Exists(filePath))
-                        {
-                            WebClient webClient = new WebClient();
-                            webClient.DownloadFile(defaultIcon.Image, filePath);
-                        }
-                        await socketGuild.ModifyAsync(x => { x.Icon = new Image(filePath); });
+                        defaultIcon = icon;
+                        _logger.LogDebug("{guild} Is default [{icon}]", guild, icon.Name);
+
+                    }
+
+                    _logger.LogDebug("{guild} Completed Icon [{icon}]", guild, icon.Name);
+                }
+
+                if (goToDefault)
+                {
+                    SocketGuild socketGuild = _client.GetGuild(guild.Id);
+                    if (socketGuild == null)
+                    {
+                        _logger.LogError("Failed retrieving guild {guild}", guild.Id);
                     }
                     else
                     {
-                        _logger.LogError("Guild {id} hasn't set an default icon", guild.Id);
+                        if (defaultIcon != null)
+                        {
+                            var filePath = defaultIcon.DownloadAndOrGet(_botSettings, guild);
+
+                            await socketGuild.ModifyAsync(x => { x.Icon = new Image(filePath); });
+                        }
+                        else
+                        {
+                            _logger.LogError("Guild {id} hasn't set an default icon", guild.Id);
+                        }
                     }
                 }
+            }
+            else
+            {
+                _logger.LogDebug("No icons found for guild {guild}", guild.Id);
             }
         }
     }

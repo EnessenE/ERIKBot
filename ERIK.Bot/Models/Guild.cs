@@ -14,6 +14,11 @@ namespace ERIK.Bot.Models
         //features
         public bool IconSupport { get; set; }
 
-        public List<Icon> Icons { get; set; }
+        public virtual List<Icon> Icons { get; set; }
+
+        public override string ToString()
+        {
+            return Id.ToString();
+        }
     }
 }

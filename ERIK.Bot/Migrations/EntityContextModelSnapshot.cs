@@ -15,9 +15,9 @@ namespace ERIK.Bot.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.9")
+                .UseIdentityColumns()
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                .HasAnnotation("ProductVersion", "3.1.9");
 
             modelBuilder.Entity("ERIK.Bot.Models.Guild", b =>
                 {
@@ -81,6 +81,11 @@ namespace ERIK.Bot.Migrations
                     b.HasOne("ERIK.Bot.Models.Guild", null)
                         .WithMany("Icons")
                         .HasForeignKey("GuildId");
+                });
+
+            modelBuilder.Entity("ERIK.Bot.Models.Guild", b =>
+                {
+                    b.Navigation("Icons");
                 });
 #pragma warning restore 612, 618
         }
