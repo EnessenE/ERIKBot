@@ -24,7 +24,6 @@ namespace ERIK.Bot.Context
         private readonly ILogger<EntityContext> _logger;
 
         public DbSet<Guild> Guilds { get; set; }
-        public DbSet<DiscordUser> DiscordUsers { get; set; }
 
         public EntityContext(IOptions<SQLSettings> sqlSettings, ILogger<EntityContext> logger)
         {
@@ -35,6 +34,7 @@ namespace ERIK.Bot.Context
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            optionsBuilder.UseLazyLoadingProxies();
             optionsBuilder.UseSqlServer(_sqlSettings.Value.ConnectionString);
         }
 
@@ -68,13 +68,27 @@ namespace ERIK.Bot.Context
                 guild = new Guild()
                 {
                     Id = id,
-                    Prefix = "!" //retrieve from appsettings
+                    Prefix = "!" //TODO: retrieve from appsettings
                 };
                 Add(guild);
                 SaveChanges();
             }
 
             return guild;
+        }
+
+        /// <summary>
+        /// Returns all guilds known to the bot
+        /// </summary>
+        /// <returns></returns>
+        public List<Guild> GetGuilds()
+        {
+            return Guilds.ToList();
+        }
+
+        public List<Icon> GetIcons(Guild guild)
+        {
+            return guild.Icons;
         }
     }
 }

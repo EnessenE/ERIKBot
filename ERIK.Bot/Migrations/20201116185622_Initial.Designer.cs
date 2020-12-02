@@ -4,20 +4,22 @@ using ERIK.Bot.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ERIK.Bot.Migrations
 {
     [DbContext(typeof(EntityContext))]
-    partial class EntityContextModelSnapshot : ModelSnapshot
+    [Migration("20201116185622_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .UseIdentityColumns()
+                .HasAnnotation("ProductVersion", "3.1.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("ProductVersion", "3.1.9");
+                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("ERIK.Bot.Models.Guild", b =>
                 {
@@ -81,11 +83,6 @@ namespace ERIK.Bot.Migrations
                     b.HasOne("ERIK.Bot.Models.Guild", null)
                         .WithMany("Icons")
                         .HasForeignKey("GuildId");
-                });
-
-            modelBuilder.Entity("ERIK.Bot.Models.Guild", b =>
-                {
-                    b.Navigation("Icons");
                 });
 #pragma warning restore 612, 618
         }
