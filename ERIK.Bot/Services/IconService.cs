@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Castle.Core.Internal;
 using Discord;
 using Discord.WebSocket;
 using ERIK.Bot.Configurations;
@@ -89,8 +90,14 @@ namespace ERIK.Bot.Services
                                 //Icon needs to be actived.
                                 var filePath = icon.DownloadAndOrGet(_botSettings, guild);
 
-                                await socketGuild.ModifyAsync(x => { x.Icon = new Image(filePath); });
-                                _logger.LogDebug("{guild} Activating icon [{icon}]", guild, icon.Name);
+                                if (!filePath.IsNullOrEmpty())
+                                {
+                                    await socketGuild.ModifyAsync(x => { x.Icon = new Image(filePath); });
+                                }
+                                else
+                                {
+                                    _logger.LogDebug("{guild} icon failed at download", guild);
+                                }
 
                             }
                         }

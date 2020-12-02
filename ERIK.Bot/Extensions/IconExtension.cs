@@ -17,8 +17,16 @@ namespace ERIK.Bot.Extensions
             var filePath = $"{botSettings.IconDirectory}/{guild.Id}-{icon.Id}";
             if (!File.Exists(filePath))
             {
-                WebClient webClient = new WebClient();
-                webClient.DownloadFile(icon.Image, filePath);
+                try
+                {
+                    Uri uri = new Uri(icon.Image);
+                    var webClient = new WebClient();
+                    webClient.DownloadFile(uri, filePath);
+                }
+                catch (Exception error)
+                {
+                    filePath = String.Empty;
+                }
             }
 
             return filePath;

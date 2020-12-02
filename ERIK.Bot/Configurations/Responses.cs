@@ -31,5 +31,10 @@ namespace ERIK.Bot.Configurations
         /// </summary>
         public List<string> NotEnabled { get; set; }
 
+        /// <summary>
+        /// Couldn't download the picture
+        /// </summary>
+        public List<string> FailedDownload { get; set; }
+
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Castle.Core.Internal;
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
@@ -114,7 +115,7 @@ namespace ERIK.Bot.Modules
             {
                 foreach (var icon in guild.Icons) //short hack, fix later by a proper call
                 {
-                    _logger.LogDebug("Processing Icon [{icon}]", icon.Name);
+                    _logger.LogDebug("{guild} Processing Icon [{icon}]",guild, icon.Name);
 
                     if (icon.Default)
                     {
@@ -125,11 +126,70 @@ namespace ERIK.Bot.Modules
                             //Icon needs to be actived.
                             var filePath = icon.DownloadAndOrGet(_botSettings, guild);
 
-                            await socketGuild.ModifyAsync(x => { x.Icon = new Image(filePath); });
-                            ReplyAsync(_responses.IconRestoredToDefault.PickRandom());
+                            if (!filePath.IsNullOrEmpty())
+                            {
+                                await socketGuild.ModifyAsync(x => { x.Icon = new Image(filePath); });
+                                ReplyAsync(_responses.IconRestoredToDefault.PickRandom());
+                            }
+                            else
+                            {
+                                _logger.LogDebug("{guild} icon failed at download", guild);
+                                ReplyAsync(_responses.FailedDownload.PickRandom());
+                            }
                         }
                     }
                 }
+            }
+            else
+            {
+                //Not enabled.
+                ReplyAsync(_responses.NotEnabled.PickRandom() + " - Icon Support");
+            }
+        }
+
+
+        [Command("icon list")]
+        [Summary("Lists all current icons.")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task List()
+        {
+            Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
+
+            if (guild.IconSupport)
+            {
+                EmbedBuilder embedBuilder = new EmbedBuilder();
+
+                embedBuilder.WithTitle("All icons set for this guild");
+                embedBuilder.WithDescription("All times in UTC");
+                Icon defaultIcon = null;
+                foreach (var icon in guild.Icons)
+                {
+                    string date = $"{icon.StartDate.ToLongTimeString()} - {icon.EndDate.ToLongTimeString()}";
+                    if (date != default)
+                    {
+                        date = "Not recurring.";
+                    }
+
+                    string setting = $"EN: {icon.Enabled} AC: {icon.Active}";
+
+                    string text = $"{date}\n{setting}\n{icon.Image}";
+                    embedBuilder.AddField(icon.Name, text);
+
+                    if (icon.Default)
+                    {
+                        defaultIcon = icon;
+                    }
+                }
+
+                if (defaultIcon != null)
+                {
+                    embedBuilder.WithThumbnailUrl(defaultIcon.Image);
+                }
+
+                embedBuilder.WithFooter("All currently registed icons for " + this.Context.Guild.Name);
+                embedBuilder.WithCurrentTimestamp();
+
+                ReplyAsync(null, false, embedBuilder.Build());
             }
             else
             {

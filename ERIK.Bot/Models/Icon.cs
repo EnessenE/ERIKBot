@@ -20,8 +20,20 @@ namespace ERIK.Bot.Models
         public DateTime EndDate { get; set; }
 
         public bool Default { get; set; }
+
+        /// <summary>
+        /// Icon is active and in use
+        /// </summary>
         public bool Active { get; set; }
+
+        /// <summary>
+        /// Icon is enabled for usage or not
+        /// </summary>
         public bool Enabled { get; set; }
+
+        /// <summary>
+        /// Recurring icon, dates have to be set
+        /// </summary>
         public bool Recurring { get; set; }
 
 
