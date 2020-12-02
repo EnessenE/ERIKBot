@@ -14,8 +14,8 @@ namespace ERIK.Bot.Services
 {
     public class StatusService
     {
-        private ILogger<StatusService> _logger;
-        private DiscordSocketClient _client;
+        private readonly ILogger<StatusService> _logger;
+        private readonly DiscordSocketClient _client;
 
         public StatusService(ILogger<StatusService> logger, DiscordSocketClient client)
         {

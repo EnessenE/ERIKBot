@@ -27,16 +27,14 @@ namespace ERIK.Bot.Services
         private readonly ILogger<BotService> _logger;
         private readonly DiscordBotSettings _botOptions;
         private readonly IServiceCollection _services;
-        private readonly EntityContext _context;
         private readonly ReactionService _reactionService;
         private ServiceProvider _serviceProvider;
-        private SpecialStuffHandler _specialStuffHandler;
+        private readonly SpecialStuffHandler _specialStuffHandler;
 
-        public BotService(ILogger<BotService> logger, IOptions<DiscordBotSettings> botOptions, EntityContext context, ReactionService reactionService, IServiceCollection services, SpecialStuffHandler specialStuffHandler)
+        public BotService(ILogger<BotService> logger, IOptions<DiscordBotSettings> botOptions, ReactionService reactionService, IServiceCollection services, SpecialStuffHandler specialStuffHandler)
         {
             _logger = logger;
             _botOptions = botOptions.Value;
-            _context = context;
             _reactionService = reactionService;
             _services = services;
             _specialStuffHandler = specialStuffHandler;
@@ -52,9 +50,13 @@ namespace ERIK.Bot.Services
             //logger
             _client.Log += Log;
 
+
+            //THIS IS HORRIBLE, but shamefully needed because bad library implementation of dep injection
+            //Gotta run core 3.1
             _services.AddSingleton(_client);
             _services.AddSingleton<InteractiveService>();
             _services.AddTransient<StatusService>();
+            _services.AddTransient<IconService>();
             _serviceProvider = _services.BuildServiceProvider();
 
             //connect events
@@ -68,6 +70,8 @@ namespace ERIK.Bot.Services
             var statusService = _serviceProvider.GetRequiredService<StatusService>();
             statusService.Start();
 
+            var iconService = _serviceProvider.GetRequiredService<IconService>();
+            iconService.Start();
             //Client has started
             //_logger.LogInformation($"I am {_client.CurrentUser.Username}.");
 
