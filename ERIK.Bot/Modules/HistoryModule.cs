@@ -24,8 +24,8 @@ namespace ERIK.Bot.Modules
             _options = options.Value;
         }
 
-
-        [Command("save")]
+        
+        //[Command("save")]
         [Summary("Save the last [amount] messages in the selected text channel. Usage: !save [email] [amount (default 100)]")]
         public async Task SaveHistory(string email, int totalMessagesToCollect = 100)
         {

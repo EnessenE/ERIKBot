@@ -108,27 +108,27 @@ namespace ERIK.Bot.Modules
             await ReplyAsync(embed: embed.Build());
         }
 
-        //test code for bot response
-        [Command("reply", RunMode = RunMode.Async)]
-        [Summary("the bot talks back")]
-        public async Task response()
-        {
-            await ReplyAsync("What is 2+2?");
-            var response = await NextMessageAsync();
-            if (response != null)
-                await ReplyAsync($"You replied: {response.Content}");
-            else
-                await ReplyAsync("You did not reply before the timeout");
-        }
+        ////test code for bot response
+        //[Command("reply", RunMode = RunMode.Async)]
+        //[Summary("the bot talks back")]
+        //public async Task response()
+        //{
+        //    await ReplyAsync("What is 2+2?");
+        //    var response = await NextMessageAsync();
+        //    if (response != null)
+        //        await ReplyAsync($"You replied: {response.Content}");
+        //    else
+        //        await ReplyAsync("You did not reply before the timeout");
+        //}
 
 
-        [Command("alter", RunMode = RunMode.Async)]
-        [Summary("the bot talks back")]
-        public async Task altermessage()
-        {
-            var Message = await Context.Channel.SendMessageAsync("test message");
+        //[Command("alter", RunMode = RunMode.Async)]
+        //[Summary("the bot talks back")]
+        //public async Task altermessage()
+        //{
+        //    var Message = await Context.Channel.SendMessageAsync("test message");
 
-            await Message.ModifyAsync(msg => msg.Content = "test [edited]");
-        }
+        //    await Message.ModifyAsync(msg => msg.Content = "test [edited]");
+        //}
     }
 }
