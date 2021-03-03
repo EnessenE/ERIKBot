@@ -107,11 +107,21 @@ namespace ERIK.Bot.Services
             // Don't process the command if it was a system message
             var message = messageParam as SocketUserMessage;
             var channel = message.Channel as SocketGuildChannel;
-            var guild = channel.Guild;
-
+            //check first if author isn't a bot
             if (message == null || message.Author.IsBot) return;
 
             var context = new SocketCommandContext(_client, message);
+
+            if (channel == null)
+            {
+                //ugly
+                await context.Channel.SendMessageAsync("Sorry, I don't respond here");
+                return;
+            }
+
+            var guild = channel.Guild;
+
+
 
             _logger.LogInformation("[{time}]{author}: {content}", message.Timestamp.ToString("HH:mm:ss"), message.Author.Username, message.Content);
 

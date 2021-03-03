@@ -11,10 +11,11 @@ namespace ERIK.Bot.Modules
     public class AdminModule : ModuleBase<SocketCommandContext>
     {
         [Command("roles")]
-        [RequireUserPermission(GuildPermission.ManageRoles)]
         public async Task GetAllRoles()
         {
-            string message = "All roles: \n";
+            var author = this.Context.Message.Author;
+
+            string message = $"All roles in {this.Context.Guild.Name}: \n";
             foreach (var role in this.Context.Guild.Roles)
             {
                 message += role.Name + " - " + role.Members.Count() + " members with this role.\n";
@@ -24,7 +25,7 @@ namespace ERIK.Bot.Modules
 
             foreach (var mes in splitMessage)
             {
-                await ReplyAsync(mes);
+                await author.SendMessageAsync(mes);
             }
         }
         

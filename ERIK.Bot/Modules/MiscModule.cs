@@ -12,6 +12,7 @@ using ERIK.Bot.Context;
 using ERIK.Bot.Extensions;
 using ERIK.Bot.Models;
 using ERIK.Bot.Models.Reactions;
+using Microsoft.Extensions.Logging;
 
 namespace ERIK.Bot.Modules
 {
@@ -20,13 +21,17 @@ namespace ERIK.Bot.Modules
         private readonly CommandService _commandService;
         private readonly Responses _responses;
         private EntityContext _context;
+        private readonly CatContext _catContext;
+        private readonly ILogger<MiscModule> _logger;
 
 
-        public MiscModule(CommandService commandService, IOptions<Responses> responses, EntityContext context)
+        public MiscModule(CommandService commandService, IOptions<Responses> responses, EntityContext context, ILogger<MiscModule> logger, CatContext catContext)
         {
             _commandService = commandService;
             _context = context;
             _responses = responses.Value;
+            _logger = logger;
+            _catContext = catContext;
         }
 
         [Command("help")]
@@ -84,6 +89,26 @@ namespace ERIK.Bot.Modules
             await ReplyAsync(response);
         }
 
+        [Command("cat")]
+        [Summary("returns a cat")]
+        public async Task Cat()
+        {
+            var result = await _catContext.RandomCats(1);
+
+            if (result != null)
+            {
+                foreach (var cat in result)
+                {
+                    _logger.LogDebug("Url to send: {url}", cat.url);
+                    await ReplyAsync($"Look how cute! " + cat.url);
+                }
+            }
+            else
+            {
+                ReplyAsync("Couldn't find any cats :(");
+            }
+        }
+
         [Command("serverinfo")]
         [Summary("Shows some guild information that was retreived from discord.")]
         public async Task Serverinfo()
@@ -108,27 +133,27 @@ namespace ERIK.Bot.Modules
             await ReplyAsync(embed: embed.Build());
         }
 
-        //test code for bot response
-        [Command("reply", RunMode = RunMode.Async)]
-        [Summary("the bot talks back")]
-        public async Task response()
-        {
-            await ReplyAsync("What is 2+2?");
-            var response = await NextMessageAsync();
-            if (response != null)
-                await ReplyAsync($"You replied: {response.Content}");
-            else
-                await ReplyAsync("You did not reply before the timeout");
-        }
+        ////test code for bot response
+        //[Command("reply", RunMode = RunMode.Async)]
+        //[Summary("the bot talks back")]
+        //public async Task response()
+        //{
+        //    await ReplyAsync("What is 2+2?");
+        //    var response = await NextMessageAsync();
+        //    if (response != null)
+        //        await ReplyAsync($"You replied: {response.Content}");
+        //    else
+        //        await ReplyAsync("You did not reply before the timeout");
+        //}
 
 
-        [Command("alter", RunMode = RunMode.Async)]
-        [Summary("the bot talks back")]
-        public async Task altermessage()
-        {
-            var Message = await Context.Channel.SendMessageAsync("test message");
+        //[Command("alter", RunMode = RunMode.Async)]
+        //[Summary("the bot talks back")]
+        //public async Task altermessage()
+        //{
+        //    var Message = await Context.Channel.SendMessageAsync("test message");
 
-            await Message.ModifyAsync(msg => msg.Content = "test [edited]");
-        }
+        //    await Message.ModifyAsync(msg => msg.Content = "test [edited]");
+        //}
     }
 }
