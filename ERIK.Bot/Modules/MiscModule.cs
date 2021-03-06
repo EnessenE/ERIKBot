@@ -5,6 +5,7 @@ using Discord.Addons.Interactive;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using ERIK.Bot.Configurations;
@@ -12,6 +13,7 @@ using ERIK.Bot.Context;
 using ERIK.Bot.Extensions;
 using ERIK.Bot.Models;
 using ERIK.Bot.Models.Reactions;
+using ERIK.Bot.Services;
 using Microsoft.Extensions.Logging;
 
 namespace ERIK.Bot.Modules
@@ -23,15 +25,17 @@ namespace ERIK.Bot.Modules
         private EntityContext _context;
         private readonly CatContext _catContext;
         private readonly ILogger<MiscModule> _logger;
+        private AudioService _audioService;
 
 
-        public MiscModule(CommandService commandService, IOptions<Responses> responses, EntityContext context, ILogger<MiscModule> logger, CatContext catContext)
+        public MiscModule(CommandService commandService, IOptions<Responses> responses, EntityContext context, ILogger<MiscModule> logger, CatContext catContext, AudioService audioService)
         {
             _commandService = commandService;
             _context = context;
             _responses = responses.Value;
             _logger = logger;
             _catContext = catContext;
+            _audioService = audioService;
         }
 
         [Command("help")]
@@ -62,6 +66,24 @@ namespace ERIK.Bot.Modules
         {
             await ReplyAsync(_responses.Pong.PickRandom());
         }
+
+        
+        [Command("dab")]
+        [Summary("Dabs")]
+        public async Task Dab()
+        {
+            await ReplyAsync("*dabs*");
+        }
+
+        [Command("soldierboy", RunMode = RunMode.Async)]
+        [Summary("Plays Soulja Boy Tell'em - Crank That (Soulja Boy)")]
+        public async Task SoldierBoy()
+        {
+            await _audioService.ConnectToVoice((Context.User as IVoiceState).VoiceChannel);
+            await Context.Channel.SendMessageAsync("!play https://www.youtube.com/watch?v=8UFIYGkROII");
+            Thread.Sleep(5000);
+        }
+
 
         [Command("martijn")]
         [Summary("Gives details about martijn")]
