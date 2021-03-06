@@ -55,7 +55,7 @@ namespace ERIK.Bot.Services
             }
             catch (Exception error)
             {
-                throw error;
+                throw;
             }
         }
 
