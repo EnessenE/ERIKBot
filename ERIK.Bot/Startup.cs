@@ -50,6 +50,8 @@ namespace ERIK.Bot
             services.AddTransient<SpecialStuffHandler>();
             services.AddTransient<CatContext>();
 
+            services.AddSingleton<AudioService>();
+
             services.AddTransient<EntityContext>();
 
             //Add the DBContext
