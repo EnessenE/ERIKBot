@@ -16,7 +16,6 @@ WORKDIR "/src/ERIK.Bot"
 
 #include voice libs
 COPY "/src/ERIK.Bot/opus.dll" /app/build/opus.dll
-COPY "opus.dll" /app/build/opus.dll
 
 RUN dotnet build "ERIK.Bot.csproj" -c Release -o /app/build
 
