@@ -15,8 +15,12 @@ COPY . .
 WORKDIR "/src/ERIK.Bot"
 RUN dotnet build "ERIK.Bot.csproj" -c Release -o /app/build
 
+ADD *.dll /app/build
+
 FROM build AS publish
 RUN dotnet publish "ERIK.Bot.csproj" -c Release -o /app/publish
+
+ADD *.dll /app/publish
 
 FROM base AS final
 WORKDIR /app
