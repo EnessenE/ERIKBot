@@ -22,10 +22,6 @@ ADD libsodium.dll /app/build
 FROM build AS publish
 RUN dotnet publish "ERIK.Bot.csproj" -c Release -o /app/publish
 
-#include voice libs
-ADD opus.dll /app/publish
-ADD libsodium.dll /app/publish
-
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
