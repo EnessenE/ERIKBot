@@ -16,8 +16,8 @@ WORKDIR "/src/ERIK.Bot"
 RUN dotnet build "ERIK.Bot.csproj" -c Release -o /app/build
 
 #include voice libs
-ADD opus.dll /app/build
-ADD libsodium.dll /app/build
+COPY "opus.dll" /app/build
+COPY "libsodium.dll" /app/build
 
 FROM build AS publish
 RUN dotnet publish "ERIK.Bot.csproj" -c Release -o /app/publish
