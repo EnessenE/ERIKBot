@@ -14,11 +14,12 @@ RUN dotnet restore "ERIK.Bot/ERIK.Bot.csproj"
 COPY . .
 WORKDIR "/src/ERIK.Bot"
 
+CMD ls
+
 #include voice libs
 COPY "opus.dll" /app/build/opus.dll
 
 RUN dotnet build "ERIK.Bot.csproj" -c Release -o /app/build
-
 
 FROM build AS publish
 RUN dotnet publish "ERIK.Bot.csproj" -c Release -o /app/publish
