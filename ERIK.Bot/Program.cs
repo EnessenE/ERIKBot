@@ -18,6 +18,7 @@ namespace ERIK.Bot
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Debug)
+                .WriteTo.File("/logs/erik_bot/erik_bot.log")
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
                 .CreateLogger();
