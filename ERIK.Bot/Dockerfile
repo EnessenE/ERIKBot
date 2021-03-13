@@ -20,7 +20,6 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 
-FROM ubuntu:latest
 RUN apt-get update && apt-get install -y libsodium23 libsodium-dev libopus0 libopus-dev
 
-ENTRYPOINT ["dotnet", "ERIK.Bot.dll", "opus.dll"]
+ENTRYPOINT ["dotnet", "ERIK.Bot.dll"]
