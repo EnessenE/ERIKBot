@@ -63,6 +63,7 @@ namespace ERIK.Bot.Services
             {
                 x.SelfDeaf = false;
                 x.Authorization = _botOptions.LavaKey;
+                x.Hostname = _botOptions.LavaHost;
             });
 
             _serviceProvider = _services.BuildServiceProvider();

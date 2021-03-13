@@ -1,11 +1,7 @@
 version: "3"
 services:
-  erik:
-    image: "enes1/erik:latest"
-    container_name: erik
-    volumes:
-      - /files/logs/erik.bot/:/logs/erik_bot/
   lavalink:
+    hostname: lavalink
     image: fredboat/lavalink:master-v3
     environment:
       LAVALINK_SERVER_PASSWORD: fdsaolkjpdeswfnoikdejohgtlnty54oiu54y908pi54tytjhyt5
@@ -13,3 +9,10 @@ services:
       SERVER_HOST: 0.0.0.0
     ports:
        - 2333:2333
+  erik:
+    hostname: erik
+    image: "enes1/erik:latest"
+    container_name: erik
+    volumes:
+      - /files/logs/erik.bot/:/logs/erik_bot/
+
