@@ -27,10 +27,21 @@ namespace ERIK.Bot.Extensions
             return message;
         }
 
-        public static List<string> SplitMessage(this string message)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="filterMessage">Should the message automaticly be filtered</param>
+        /// <returns></returns>
+        public static List<string> SplitMessage(this string message, bool filterMessage = true)
         {
-            message = message.FilterMessage();
+            if (filterMessage)
+            {
+                message = message.FilterMessage();
+            }
+
             return message.Split( 1999).ToList();
+
         }
 
         public static IEnumerable<string> Split(this string s, int partLength)

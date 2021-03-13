@@ -154,13 +154,19 @@ namespace ERIK.Bot.Services
             // rather an object stating if the command executed successfully.
             try
             {
+                _logger.LogInformation($"[CMD] Accepted command: {message.Content}");
                 var result = await _commands.ExecuteAsync(
                     context: context,
                     argPos: argPos,
                     services: _serviceProvider);
-
+                if (result.IsSuccess)
+                {
+                    _logger.LogInformation($"[CMD] Successfully executed command");
+                }
                 if (!result.IsSuccess && result.Error != CommandError.UnknownCommand)
                 {
+                    _logger.LogError($"[CMD] Failed executing your command.  {result.ErrorReason}");
+
                     await context.Channel.SendMessageAsync("Failed executing your command. \n" + result.ErrorReason);
                 }
             }

@@ -1,6 +1,4 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
-FROM node:alpine
-RUN apk add  --no-cache ffmpeg
 
 FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS base
 WORKDIR /app
@@ -13,10 +11,7 @@ COPY ["ERIK.Bot/ERIK.Bot.csproj", "ERIK.Bot/"]
 RUN dotnet restore "ERIK.Bot/ERIK.Bot.csproj"
 COPY . .
 WORKDIR "/src/ERIK.Bot"
-
-#include voice libs
 RUN dotnet build "ERIK.Bot.csproj" -c Release -o /app/build
-
 
 FROM build AS publish
 RUN dotnet publish "ERIK.Bot.csproj" -c Release -o /app/publish
@@ -24,4 +19,8 @@ RUN dotnet publish "ERIK.Bot.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "ERIK.Bot.dll"]
+
+FROM ubuntu:latest
+RUN apt-get update && apt-get install -y libsodium23 libsodium-dev libopus0 libopus-dev
+
+ENTRYPOINT ["dotnet", "ERIK.Bot.dll", "opus.dll"]

@@ -21,7 +21,7 @@ namespace ERIK.Bot.Modules
                 message += role.Name + " - " + role.Members.Count() + " members with this role.\n";
             }
 
-            var splitMessage = message.SplitMessage();
+            var splitMessage = message.SplitMessage(false);
 
             foreach (var mes in splitMessage)
             {

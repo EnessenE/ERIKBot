@@ -38,26 +38,31 @@ namespace ERIK.Bot.Modules
             _audioService = audioService;
         }
 
-        [Command("help")]
+        [Command("help", RunMode = RunMode.Async)]
         [Summary("A summary of all available commands")]
         public async Task Help()
         {
             var prefix = _context.GetOrCreateGuild(this.Context.Guild.Id).Prefix;
 
             List<CommandInfo> commands = _commandService.Commands.ToList();
-            EmbedBuilder embedBuilder = new EmbedBuilder();
+            string message = "";
 
             foreach (CommandInfo command in commands)
             {
                 // Get the command Summary attribute information
-                string embedFieldText = String.Empty;
+                string descriptionText = String.Empty;
 
-                embedFieldText += command.Summary ?? "No description available\n";
+                descriptionText += command.Summary ?? "No description available";
 
-                embedBuilder.AddField($"{prefix}{command.Name}", embedFieldText);
+                message += ($"{prefix}{command.Name}            {descriptionText}\n");
             }
 
-            await ReplyAsync("Here's a list of commands and their description: ", false, embedBuilder.Build());
+            //replyandeleteasync is broken atm
+            var tempMsg = await ReplyAsync("Sent you a PM with all commands!");
+            this.Context.User.SendMessageAsync("Here's a list of commands and their description: ```"+message+"```", false);
+            this.Context.Message.DeleteAsync();
+            Thread.Sleep(TimeSpan.FromSeconds(5));
+            tempMsg.DeleteAsync();
         }
 
         [Command("ping")]
