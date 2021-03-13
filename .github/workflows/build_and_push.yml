@@ -11,12 +11,29 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: ${{ github.head_ref }}   # checkout the correct branch name
+        fetch-depth: 0                # fetch the whole repo history
+        
+    - name: Git Version
+      # You may pin to the exact commit or the version.
+      # uses: codacy/git-version@fa06788276d7492a2af01662649696d249ecf4cb
+      uses: codacy/git-version@2.4.0
+      with:
+        # The name of the release branch
+        release-branch: master # default is master
+        # The name of the dev branch
+        dev-branch: develop # default is dev
+        # The prefix to use in the version
+        
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1.7.2
       with:
         dotnet-version: 5.0.100
+        
     - name: Install dependencies
       run: dotnet restore
+      
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Test
@@ -24,14 +41,14 @@ jobs:
       
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
-    -
-      name: Login to DockerHub
+      
+    - name: Login to DockerHub
       uses: docker/login-action@v1
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-    -
-      name: Build and push
+        
+    - name: Build and push
       uses: docker/build-push-action@v2
       with:
         context: .
@@ -40,4 +57,4 @@ jobs:
         push: true
         cache-from: type=registry,ref=enes1/erik:latest
         cache-to: type=inline
-        tags: enes1/erik:latest
+        tags: enes1/erik:latest, steps.get-version.outputs.version
