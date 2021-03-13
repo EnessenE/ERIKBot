@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -16,7 +18,7 @@ namespace ERIK.Bot
 
         public static void Main(string[] args)
         {
-
+            var currentPath = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location);
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Debug)
@@ -28,6 +30,7 @@ namespace ERIK.Bot
             try
             {
                 Log.Information("Starting host");
+                Log.Information($"Currently running under: {currentPath}");
                 CreateHostBuilder(args).Build().Run();
             }
             catch (Exception ex)

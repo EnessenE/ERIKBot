@@ -63,7 +63,7 @@ namespace ERIK.Bot
             //Add automated API doc generation
             services.AddSwaggerDocument(document =>
             {
-                document.Title = "Guild API";
+                document.Title = "ERIK API";
 
                 document.AddSecurity("bearer", Enumerable.Empty<string>(), new OpenApiSecurityScheme
                 {
