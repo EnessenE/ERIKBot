@@ -57,4 +57,4 @@ jobs:
         push: true
         cache-from: type=registry,ref=enes1/erik:latest
         cache-to: type=inline
-        tags: enes1/erik:latest, enes1/erik:steps.get-version.outputs.version
+        tags: enes1/erik:latest, enes1/erik:${{steps.get-version.outputs.version}}
