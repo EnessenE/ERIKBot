@@ -1,11 +1,15 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
 using Discord;
 using Discord.Audio;
 using Microsoft.Extensions.Logging;
+using Victoria;
+using Victoria.EventArgs;
 
 namespace ERIK.Bot.Services
 {
@@ -13,19 +17,19 @@ namespace ERIK.Bot.Services
 
     public class AudioService
     {
-        private readonly ConcurrentDictionary<ulong, IAudioClient> ConnectedChannels = new ConcurrentDictionary<ulong, IAudioClient>();
         private readonly ILogger<AudioService> _logger;
+        private readonly ConcurrentDictionary<ulong, CancellationTokenSource> _disconnectTokens;
+        private readonly LavaNode _lavaNode;
 
-        public AudioService(ILogger<AudioService> logger)
+        public AudioService(ILogger<AudioService> logger, LavaNode lavaNode)
         {
             _logger = logger;
+            _lavaNode = lavaNode;
+            _lavaNode.OnTrackEnded += OnTrackEnded;
+            _lavaNode.OnTrackStarted += OnTrackStarted;
+            _disconnectTokens = new ConcurrentDictionary<ulong, CancellationTokenSource>();
         }
 
-        /// <summary>
-        /// Connect to a voice channel
-        /// </summary>
-        /// <param name="voiceChannel"></param>
-        /// <returns></returns>
         public async Task<IAudioClient> ConnectToVoice(IVoiceChannel voiceChannel)
         {
             if (voiceChannel == null)
@@ -37,68 +41,71 @@ namespace ERIK.Bot.Services
             return connection;
         }
 
-        public async Task JoinAudio(IGuild guild, IVoiceChannel target)
+        private async Task OnTrackStarted(TrackStartEventArgs arg)
         {
-            IAudioClient client;
-            if (ConnectedChannels.TryGetValue(guild.Id, out client))
-            {
-                return;
-            }
-            if (target == null || target.Guild.Id != guild.Id)
+            if (!_disconnectTokens.TryGetValue(arg.Player.VoiceChannel.Id, out var value))
             {
                 return;
             }
 
-            var audioClient = await target.ConnectAsync();
-
-            if (ConnectedChannels.TryAdd(guild.Id, audioClient))
+            if (value.IsCancellationRequested)
             {
-                // If you add a method to log happenings from this service,
-                // you can uncomment these commented lines to make use of that.
-                _logger.LogInformation($"Connected to voice on {guild.Name}.");
-            }
-        }
-
-        public async Task LeaveAudio(IGuild guild)
-        {
-            IAudioClient client;
-            if (ConnectedChannels.TryRemove(guild.Id, out client))
-            {
-                await client.StopAsync();
-                //await Log(LogSeverity.Info, $"Disconnected from voice on {guild.Name}.");
-            }
-        }
-
-        public async Task SendAudioAsync(IGuild guild, IMessageChannel channel, string path)
-        {
-            // Your task: Get a full path to the file if the value of 'path' is only a filename.
-            if (!File.Exists(path))
-            {
-                await channel.SendMessageAsync("File does not exist.");
                 return;
             }
-            IAudioClient client;
-            if (ConnectedChannels.TryGetValue(guild.Id, out client))
-            {
-                //await Log(LogSeverity.Debug, $"Starting playback of {path} in {guild.Name}");
-                using (var ffmpeg = CreateProcess(path))
-                using (var stream = client.CreatePCMStream(AudioApplication.Music))
-                {
-                    try { await ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream); }
-                    finally { await stream.FlushAsync(); }
-                }
-            }
+
+            value.Cancel(true);
+            await arg.Player.TextChannel.SendMessageAsync("Auto disconnect has been cancelled!");
         }
 
-        private Process CreateProcess(string path)
+        private async Task InitiateDisconnectAsync(LavaPlayer player, TimeSpan timeSpan)
         {
-            return Process.Start(new ProcessStartInfo
+            if (!_disconnectTokens.TryGetValue(player.VoiceChannel.Id, out var value))
             {
-                FileName = "ffmpeg.exe",
-                Arguments = $"-hide_banner -loglevel panic -i \"{path}\" -ac 2 -f s16le -ar 48000 pipe:1",
-                UseShellExecute = false,
-                RedirectStandardOutput = true
-            });
+                value = new CancellationTokenSource();
+                _disconnectTokens.TryAdd(player.VoiceChannel.Id, value);
+            }
+            else if (value.IsCancellationRequested)
+            {
+                _disconnectTokens.TryUpdate(player.VoiceChannel.Id, new CancellationTokenSource(), value);
+                value = _disconnectTokens[player.VoiceChannel.Id];
+            }
+
+            await player.TextChannel.SendMessageAsync($"Auto disconnect initiated! Disconnecting in {timeSpan}...");
+            var isCancelled = SpinWait.SpinUntil(() => value.IsCancellationRequested, timeSpan);
+            if (isCancelled)
+            {
+                return;
+            }
+
+            await _lavaNode.LeaveAsync(player.VoiceChannel);
+            await player.TextChannel.SendMessageAsync("Invite me again sometime, sugar.");
         }
+
+        private async Task OnTrackEnded(TrackEndedEventArgs args)
+        {
+            if (!args.Reason.ShouldPlayNext())
+            {
+                return;
+            }
+
+            var player = args.Player;
+            if (!player.Queue.TryDequeue(out var queueable))
+            {
+                await player.TextChannel.SendMessageAsync("Queue completed! Please add more tracks to rock n' roll!");
+                _ = InitiateDisconnectAsync(args.Player, TimeSpan.FromSeconds(10));
+                return;
+            }
+
+            if (!(queueable is LavaTrack track))
+            {
+                await player.TextChannel.SendMessageAsync("Next item in queue is not a track.");
+                return;
+            }
+
+            await args.Player.PlayAsync(track);
+            await args.Player.TextChannel.SendMessageAsync(
+                $"{args.Reason}: {args.Track.Title}\nNow playing: {track.Title}");
+        }
+
     }
 }

@@ -4,5 +4,6 @@
     {
         public string Token { get; set; }
         public string IconDirectory { get; set; }
+        public string LavaKey { get; set; }
     }
 }

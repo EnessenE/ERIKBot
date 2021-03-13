@@ -17,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Victoria;
 
 namespace ERIK.Bot.Services
 {
@@ -30,6 +31,7 @@ namespace ERIK.Bot.Services
         private readonly ReactionService _reactionService;
         private ServiceProvider _serviceProvider;
         private readonly SpecialStuffHandler _specialStuffHandler;
+        private LavaNode _lavaNode;
 
         public BotService(ILogger<BotService> logger, IOptions<DiscordBotSettings> botOptions, ReactionService reactionService, IServiceCollection services, SpecialStuffHandler specialStuffHandler)
         {
@@ -50,15 +52,25 @@ namespace ERIK.Bot.Services
             //logger
             _client.Log += Log;
 
-
             //THIS IS HORRIBLE, but shamefully needed because bad library implementation of dep injection
             //Gotta run core 3.1
             _services.AddSingleton(_client);
             _services.AddSingleton<InteractiveService>();
             _services.AddTransient<StatusService>();
             _services.AddTransient<IconService>();
+
+            _services.AddLavaNode(x =>
+            {
+                x.SelfDeaf = false;
+                x.Authorization = _botOptions.LavaKey;
+            });
+
             _serviceProvider = _services.BuildServiceProvider();
 
+            //We need to retrieve this later so we can start the bot
+            _lavaNode = _serviceProvider.GetService<LavaNode>();
+
+            
             //connect events
             InstallCommandsAsync();
 
@@ -81,6 +93,7 @@ namespace ERIK.Bot.Services
 
         public async Task InstallCommandsAsync()
         {
+            _client.Ready += OnReadyAsync;
             // Hook the MessageReceived event into our command handler
             _client.MessageReceived += HandleCommandAsync;
             _client.ReactionAdded += HandleReaction;
@@ -95,6 +108,15 @@ namespace ERIK.Bot.Services
             // See Dependency Injection guide for more information.
             await _commands.AddModulesAsync(assembly: Assembly.GetEntryAssembly(),
                                             services: _serviceProvider);
+        }
+
+        private async Task OnReadyAsync()
+        {
+            if (!_lavaNode.IsConnected)
+            {
+                _lavaNode.ConnectAsync();
+            }
+
         }
 
         private Task HandleReaction(Cacheable<IUserMessage, ulong> cachedMessage, ISocketMessageChannel channel, SocketReaction socketReaction)

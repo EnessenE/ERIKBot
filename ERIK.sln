@@ -8,6 +8,13 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{290D202C-E710-48DD-A009-2E967FCE1119}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		docker-compose.full.yaml = docker-compose.full.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lavalink", "Lavalink", "{D64F301A-5699-4D4B-A6F2-63781C4ABAB2}"
+	ProjectSection(SolutionItems) = preProject
+		application.yml = application.yml
+		docker-compose.yml = docker-compose.yml
 	EndProjectSection
 EndProject
 Global
@@ -23,6 +30,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D64F301A-5699-4D4B-A6F2-63781C4ABAB2} = {290D202C-E710-48DD-A009-2E967FCE1119}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9F1899A8-B41D-415B-A25E-6B8135EB174A}

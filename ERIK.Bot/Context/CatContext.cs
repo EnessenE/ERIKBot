@@ -16,7 +16,7 @@ namespace ERIK.Bot.Context
     public class CatContext
     {
         private readonly ILogger<CatContext> _logger;
-        private CatAPI _catOptions;
+        private readonly CatAPI _catOptions;
 
         public CatContext(ILogger<CatContext> logger, IOptions<CatAPI> catOptionsData)
         {

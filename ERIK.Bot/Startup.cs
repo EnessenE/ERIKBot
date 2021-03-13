@@ -19,11 +19,15 @@ using Microsoft.Extensions.Logging;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using Serilog;
+using Victoria;
 
 namespace ERIK.Bot
 {
     public class Startup
     {
+        //Great implementation by Victoria
+        public static LavaNode LavaNode;
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -34,12 +38,14 @@ namespace ERIK.Bot
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
             services.Configure<DiscordBotSettings>(Configuration.GetSection("DiscordBot"));
             services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
             services.Configure<SQLSettings>(Configuration.GetSection("SQLSettings"));
             services.Configure<Responses>(Configuration.GetSection("Responses"));
 
-            // services.AddSingleton<DiscordSocketClient>();
+            services.AddSingleton<DiscordSocketClient>();
+
 
             services.AddSingleton(services);
 
@@ -51,6 +57,9 @@ namespace ERIK.Bot
             services.AddTransient<CatContext>();
 
             services.AddSingleton<AudioService>();
+
+            services.AddSingleton<LavaNode>();
+            services.AddSingleton<LavaConfig>();
 
             services.AddTransient<EntityContext>();
 
