@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using ERIK.Bot.Services;
 using Victoria;
 using Victoria.Enums;
@@ -79,84 +80,43 @@ namespace ERIK.Bot.Modules
         [Description("Plays Soulja Boy Tell'em - Crank That")]
         public async Task SoldierBoy()
         {
-            PlayAsync("https://www.youtube.com/watch?v=8UFIYGkROII");
+            Play("https://www.youtube.com/watch?v=8UFIYGkROII");
         }
 
-        [Command("eplay", RunMode = RunMode.Async)]
-        [Description("Play a song <3. Usage: !play [url]")]
-        public async Task PlayAsync([Remainder] string searchQuery)
-        {
-            if (string.IsNullOrWhiteSpace(searchQuery))
-            {
-                await ReplyAsync("Please provide search terms.");
-                return;
-            }
+        [Command("Join")]
+        public async Task JoinAndPlay()
+            => await ReplyAsync(embed: await _audioService.JoinAsync(Context.Guild, Context.User as IVoiceState, Context.Channel as ITextChannel));
 
-            if (!_lavaNode.HasPlayer(Context.Guild))
-            {
-                //await ReplyAsync("I'm not connected to a voice channel.");
-                _lavaNode.JoinAsync((Context.User as IVoiceState)?.VoiceChannel);
-            }
+        [Command("Leave")]
+        public async Task Leave()
+            => await ReplyAsync(embed: await _audioService.LeaveAsync(Context.Guild));
 
-            var queries = searchQuery.Split(' ');
-            foreach (var query in queries)
-            {
-                var searchResponse = await _lavaNode.SearchAsync(query);
-                if (searchResponse.LoadStatus == LoadStatus.LoadFailed ||
-                    searchResponse.LoadStatus == LoadStatus.NoMatches)
-                {
-                    await ReplyAsync($"I wasn't able to find anything for `{query}`.");
-                    return;
-                }
+        [Command("Play")]
+        public async Task Play([Remainder] string search)
+            => await ReplyAsync(embed: await _audioService.PlayAsync(Context.User as SocketGuildUser, Context.Guild, search));
 
-                var player = _lavaNode.GetPlayer(Context.Guild);
+        [Command("Stop")]
+        public async Task Stop()
+            => await ReplyAsync(embed: await _audioService.StopAsync(Context.Guild));
 
-                if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused)
-                {
-                    if (!string.IsNullOrWhiteSpace(searchResponse.Playlist.Name))
-                    {
-                        foreach (var track in searchResponse.Tracks)
-                        {
-                            player.Queue.Enqueue(track);
-                        }
+        [Command("List")]
+        public async Task List()
+            => await ReplyAsync(embed: await _audioService.ListAsync(Context.Guild));
 
-                        await ReplyAsync($"Enqueued {searchResponse.Tracks.Count} tracks.");
-                    }
-                    else
-                    {
-                        var track = searchResponse.Tracks[0];
-                        player.Queue.Enqueue(track);
-                        await ReplyAsync($"Enqueued: {track.Title}");
-                    }
-                }
-                else
-                {
-                    var track = searchResponse.Tracks[0];
+        [Command("Skip")]
+        public async Task Skip()
+            => await ReplyAsync(embed: await _audioService.SkipTrackAsync(Context.Guild));
 
-                    if (!string.IsNullOrWhiteSpace(searchResponse.Playlist.Name))
-                    {
-                        for (var i = 0; i < searchResponse.Tracks.Count; i++)
-                        {
-                            if (i == 0)
-                            {
-                                await player.PlayAsync(track);
-                                await ReplyAsync($"Now Playing: {track.Title}");
-                            }
-                            else
-                            {
-                                player.Queue.Enqueue(searchResponse.Tracks[i]);
-                            }
-                        }
+        [Command("Volume")]
+        public async Task Volume(int volume)
+            => await ReplyAsync(await _audioService.SetVolumeAsync(Context.Guild, volume));
 
-                        await ReplyAsync($"Enqueued {searchResponse.Tracks.Count} tracks.");
-                    }
-                    else
-                    {
-                        await player.PlayAsync(track);
-                        await ReplyAsync($"Now Playing: {track.Title}");
-                    }
-                }
-            }
-        }
+        [Command("Pause")]
+        public async Task Pause()
+            => await ReplyAsync(await _audioService.PauseAsync(Context.Guild));
+
+        [Command("Resume")]
+        public async Task Resume()
+            => await ReplyAsync(await _audioService.ResumeAsync(Context.Guild));
     }
 }
