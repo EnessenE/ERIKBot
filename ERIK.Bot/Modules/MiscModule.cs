@@ -4,9 +4,12 @@ using Discord.WebSocket;
 using Discord.Addons.Interactive;
 using System.Collections.Generic;
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CliWrap;
+using Discord.Audio;
 using Microsoft.Extensions.Options;
 using ERIK.Bot.Configurations;
 using ERIK.Bot.Context;
@@ -15,6 +18,8 @@ using ERIK.Bot.Models;
 using ERIK.Bot.Models.Reactions;
 using ERIK.Bot.Services;
 using Microsoft.Extensions.Logging;
+using YoutubeExplode;
+using YoutubeExplode.Videos.Streams;
 
 namespace ERIK.Bot.Modules
 {
@@ -84,9 +89,28 @@ namespace ERIK.Bot.Modules
         [Summary("Plays Soulja Boy Tell'em - Crank That (Soulja Boy)")]
         public async Task SoldierBoy()
         {
-            await _audioService.ConnectToVoice((Context.User as IVoiceState).VoiceChannel);
-            await Context.Channel.SendMessageAsync("!play https://www.youtube.com/watch?v=8UFIYGkROII");
-            Thread.Sleep(5000);
+            var audioClient = await _audioService.ConnectToVoice((Context.User as IVoiceState).VoiceChannel);
+
+            YoutubeClient youtube = new YoutubeClient();
+            var streamManifest = await youtube.Videos.Streams.GetManifestAsync("https://www.youtube.com/watch?v=8UFIYGkROII");
+
+            // Select streams (1080p60 / highest bitrate audio)
+            var audioStreamInfo = streamManifest.GetAudio().WithHighestBitrate();
+
+            var stream = await youtube.Videos.Streams.GetAsync(audioStreamInfo);
+
+            var memoryStream = new MemoryStream();
+            await Cli.Wrap("ffmpeg")
+                .WithArguments(" -hide_banner -loglevel panic -i pipe:0 -ac 2 -f s16le -ar 48000 pipe:1")
+                .WithStandardInputPipe(PipeSource.FromStream(stream))
+                .WithStandardOutputPipe(PipeTarget.ToStream(memoryStream))
+                .ExecuteAsync();
+
+            using (var discord = audioClient.CreatePCMStream(AudioApplication.Mixed))
+            {
+                try { await discord.WriteAsync(memoryStream.ToArray(), 0, (int)memoryStream.Length); }
+                finally { await discord.FlushAsync(); }
+            }
         }
 
 

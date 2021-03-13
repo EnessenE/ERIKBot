@@ -26,14 +26,15 @@ namespace ERIK.Bot.Services
         /// </summary>
         /// <param name="voiceChannel"></param>
         /// <returns></returns>
-        public async Task ConnectToVoice(IVoiceChannel voiceChannel)
+        public async Task<IAudioClient> ConnectToVoice(IVoiceChannel voiceChannel)
         {
             if (voiceChannel == null)
-                return;
+                return null;
 
             _logger.LogInformation($"Connecting to channel [{voiceChannel.Id}]{voiceChannel.Name}");
             var connection = await voiceChannel.ConnectAsync();
             _logger.LogInformation($"Connected to channel [{voiceChannel.Id}]{voiceChannel.Name}");
+            return connection;
         }
 
         public async Task JoinAudio(IGuild guild, IVoiceChannel target)

@@ -20,6 +20,6 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 
-RUN apt-get update && apt-get install -y libsodium23 libsodium-dev libopus0 libopus-dev
+RUN apt-get update && apt-get install -y libsodium23 libsodium-dev libopus0 libopus-dev ffmpeg
 
 ENTRYPOINT ["dotnet", "ERIK.Bot.dll"]
