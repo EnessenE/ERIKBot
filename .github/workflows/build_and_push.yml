@@ -39,7 +39,7 @@ jobs:
       uses: roryprimrose/set-vs-sdk-project-version@v1.0.3
       with:
         # Maps to the Version element
-        version: ${{steps.changelog.outputs.version}}
+        informationalVersion: ${{steps.changelog.outputs.version}}
     
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1.7.2
