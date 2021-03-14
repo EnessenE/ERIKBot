@@ -349,7 +349,8 @@ namespace ERIK.Bot.Services
 
             if (!args.Player.Queue.TryDequeue(out var queueable))
             {
-                //await args.Player.TextChannel.SendMessageAsync("Playback Finished.");
+                await args.Player.TextChannel.SendMessageAsync("Queue completed! Please add more tracks to rock n' roll!");
+                _ = InitiateDisconnectAsync(args.Player, TimeSpan.FromSeconds(10));
                 return;
             }
 
@@ -363,6 +364,31 @@ namespace ERIK.Bot.Services
             await args.Player.TextChannel.SendMessageAsync(
                 embed: await EmbedHandler.CreateBasicEmbed("Now Playing", $"[{track.Title}]({track.Url})", Color.Blue));
         }
+
+        private async Task InitiateDisconnectAsync(LavaPlayer player, TimeSpan timeSpan)
+        {
+            if (!_disconnectTokens.TryGetValue(player.VoiceChannel.Id, out var value))
+            {
+                value = new CancellationTokenSource();
+                _disconnectTokens.TryAdd(player.VoiceChannel.Id, value);
+            }
+            else if (value.IsCancellationRequested)
+            {
+                _disconnectTokens.TryUpdate(player.VoiceChannel.Id, new CancellationTokenSource(), value);
+                value = _disconnectTokens[player.VoiceChannel.Id];
+            }
+
+            await player.TextChannel.SendMessageAsync($"Auto disconnect initiated! Disconnecting in {timeSpan}...");
+            var isCancelled = SpinWait.SpinUntil(() => value.IsCancellationRequested, timeSpan);
+            if (isCancelled)
+            {
+                return;
+            }
+
+            await _lavaNode.LeaveAsync(player.VoiceChannel);
+            await player.TextChannel.SendMessageAsync("Invite me again sometime.");
+        }
+
     }
 
 }
