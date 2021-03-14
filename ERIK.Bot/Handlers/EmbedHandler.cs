@@ -29,10 +29,13 @@ namespace ERIK.Bot.Handlers
 
         public static async Task<Embed> CreateErrorEmbed(string source, string error)
         {
+            string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
             var embed = await Task.Run(() => new EmbedBuilder()
                 .WithTitle($"ERROR OCCURRED FROM - {source}")
                 .WithDescription($"**Error Details**: \n{error}")
                 .WithColor(Color.DarkRed)
+                .WithFooter(version);
                 .WithCurrentTimestamp().Build());
             return embed;
         }
