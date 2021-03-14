@@ -2,7 +2,8 @@ name: Build Project and push to docker
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - "master"
 
 jobs:
   build:
@@ -15,17 +16,15 @@ jobs:
         ref: ${{ github.head_ref }}   # checkout the correct branch name
         fetch-depth: 0                # fetch the whole repo history
         
-    - name: Git Version
+    - name: Bump version and push tag
       id: get-version
-      # You may pin to the exact commit or the version.
-      # uses: codacy/git-version@fa06788276d7492a2af01662649696d249ecf4cb
-      uses: codacy/git-version@2.4.0
+      uses: TriPSs/conventional-changelog-action@master
       with:
-        # The name of the release branch
-        release-branch: master # default is master
-        # The name of the dev branch
-        dev-branch: develop # default is dev
-        # The prefix to use in the version
+        github-token: ${{ secrets.GIT_TOKEN_ACTIONS }}
+        git-message: 'chore(release): {version}'
+        preset: 'angular'
+        tag-prefix: ''
+        output-file: 'CHANGELOG.md'
         
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1.7.2
