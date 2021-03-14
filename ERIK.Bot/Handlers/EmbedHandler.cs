@@ -35,7 +35,7 @@ namespace ERIK.Bot.Handlers
                 .WithTitle($"ERROR OCCURRED FROM - {source}")
                 .WithDescription($"**Error Details**: \n{error}")
                 .WithColor(Color.DarkRed)
-                .WithFooter(version);
+                .WithFooter(version)
                 .WithCurrentTimestamp().Build());
             return embed;
         }
