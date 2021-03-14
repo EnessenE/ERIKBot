@@ -1,3 +1,7 @@
+## [0.1.3](https://github.com/EnessenE/ERIKBot/compare/v0.1.2...v0.1.3) (2021-03-14)
+
+
+
 ## [0.1.2](https://github.com/EnessenE/ERIKBot/compare/v0.1.1...v0.1.2) (2021-03-14)
 
 
