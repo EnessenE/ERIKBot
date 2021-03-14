@@ -21,8 +21,7 @@ jobs:
       uses: TriPSs/conventional-changelog-action@v3
       with:
         github-token: ${{ secrets.GIT_TOKEN_ACTIONS }}
-        output-file: "false"
-
+        
     - name: Create Release
       uses: actions/create-release@v1
       if: ${{ steps.changelog.outputs.skipped == 'false' }}
@@ -33,7 +32,15 @@ jobs:
         release_name: ${{ steps.changelog.outputs.tag }}
         body: ${{ steps.changelog.outputs.clean_changelog }}
     
-        
+    - name: Version Visual Studio SDK projects
+      if: ${{ steps.changelog.outputs.skipped == 'false' }}
+      # You may pin to the exact commit or the version.
+      # uses: roryprimrose/set-vs-sdk-project-version@2bbda74f2e13745ec2e128fd8f51e7dcaca840c7
+      uses: roryprimrose/set-vs-sdk-project-version@v1.0.3
+      with:
+        # Maps to the Version element
+        informationalVersion: ${{steps.changelog.outputs.version}}
+    
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1.7.2
       with:
