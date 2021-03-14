@@ -269,6 +269,7 @@ namespace ERIK.Bot.Services
                 if (player.PlayerState is PlayerState.Playing)
                 {
                     await player.StopAsync();
+                    _ = InitiateDisconnectAsync(player, TimeSpan.FromSeconds(10));
                 }
 
                 _logger.LogInformation("Music", $"Bot has stopped playback.");
