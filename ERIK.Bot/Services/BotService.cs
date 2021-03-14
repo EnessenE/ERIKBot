@@ -59,6 +59,7 @@ namespace ERIK.Bot.Services
             _services.AddTransient<StatusService>();
             _services.AddTransient<IconService>();
 
+            _logger.LogInformation($"Attempting to connect to lavalink host: {_botOptions.LavaHost}");
             _services.AddLavaNode(x =>
             {
                 x.SelfDeaf = false;

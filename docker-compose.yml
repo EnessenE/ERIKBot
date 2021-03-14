@@ -1,6 +1,7 @@
 version: "3"
 services:
   lavalink:
+    hostname: lavalink
     image: fredboat/lavalink:master-v3
     environment:
       LAVALINK_SERVER_PASSWORD: fdsaolkjpdeswfnoikdejohgtlnty54oiu54y908pi54tytjhyt5
