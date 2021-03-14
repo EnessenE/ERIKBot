@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using CliWrap;
@@ -164,11 +165,14 @@ namespace ERIK.Bot.Modules
         [Summary("Shows some guild information that was retreived from discord.")]
         public async Task Serverinfo()
         {
+            string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
             var guild = this.Context.Guild;
             var embed = new EmbedBuilder();
             embed.WithThumbnailUrl(guild.IconUrl);
             embed.WithTitle($"Server info {guild.Name}");
             embed.WithDescription(guild.Description);
+            embed.WithFooter(version);
             var stats = string.Empty;
             stats += $"**Id:** {guild.Id}\n";
             stats += $"**Total members:** {guild.MemberCount}\n";

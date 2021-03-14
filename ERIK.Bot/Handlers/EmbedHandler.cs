@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
 
@@ -15,10 +16,13 @@ namespace ERIK.Bot.Handlers
              All the Tasks here are also static which means we can call them from anywhere in our program. */
         public static async Task<Embed> CreateBasicEmbed(string title, string description, Color color)
         {
+            string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
             var embed = await Task.Run(() => (new EmbedBuilder()
                 .WithTitle(title)
                 .WithDescription(description)
                 .WithColor(color)
+                .WithFooter(version)
                 .WithCurrentTimestamp().Build()));
             return embed;
         }
