@@ -36,6 +36,8 @@ namespace ERIK.Bot.Services
                     {
                         _logger.LogInformation("Attempting to set the status");
 
+                        //We load the json in eachtime incase stuff has changed
+                        //TODO: Migrate to appsettings or something that supports reload
                         string randomtext = LoadJson().PickRandom();
                         _client.SetGameAsync(randomtext);
                         _logger.LogInformation("Set the status to {msg}!", randomtext);
