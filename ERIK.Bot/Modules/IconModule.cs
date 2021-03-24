@@ -115,7 +115,7 @@ namespace ERIK.Bot.Modules
             {
                 foreach (var icon in guild.Icons) //short hack, fix later by a proper call
                 {
-                    _logger.LogDebug("{guild} Processing Icon [{icon}]",guild, icon.Name);
+                    _logger.LogDebug("{guild} Processing Icon [{icon}]", guild, icon.Name);
 
                     if (icon.Default)
                     {
@@ -164,8 +164,12 @@ namespace ERIK.Bot.Modules
                 Icon defaultIcon = null;
                 foreach (var icon in guild.Icons)
                 {
-                    string date = $"{icon.StartDate.ToLongTimeString()} - {icon.EndDate.ToLongTimeString()}";
-                    if (date != default)
+                    string date = string.Empty;
+                    if (icon.Recurring)
+                    {
+                        date = $"{icon.StartDate.ToLongDateString()} - {icon.EndDate.ToLongDateString()}";
+                    }
+                    else
                     {
                         date = "Not recurring.";
                     }
@@ -190,6 +194,200 @@ namespace ERIK.Bot.Modules
                 embedBuilder.WithCurrentTimestamp();
 
                 ReplyAsync(null, false, embedBuilder.Build());
+            }
+            else
+            {
+                //Not enabled.
+                ReplyAsync(_responses.NotEnabled.PickRandom() + " - Icon Support");
+            }
+        }
+
+
+        [Command("icon add")]
+        [Summary("Add the current url as an icon. Example: !icon add [name] [icon_url]")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task AddIcon(string name, string url)
+        {
+            Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
+
+            if (guild.IconSupport)
+            {
+                ReplyAsync("Adding...");
+
+                try
+                {
+                    Icon icon = new Icon
+                    {
+                        Name = name,
+                        Image = url
+                    };
+                    guild.Icons.Add(icon);
+
+                    _context.Update(guild);
+                    _context.SaveChanges();
+                    ReplyAsync($"Succesfully added {icon.Name}.");
+                }
+                catch (Exception error)
+                {
+                    ReplyAsync("Something horribly failed. Verify if the icon was created with !icon list");
+                    _logger.LogError("Failed creating an icon", error);
+                }
+            }
+            else
+            {
+                //Not enabled.
+                ReplyAsync(_responses.NotEnabled.PickRandom() + " - Icon Support");
+            }
+        }
+
+        [Command("icon remove")]
+        [Summary("Remove an existing icon. Example: !icon remove [name]")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task RemoveIcon(string name)
+        {
+            Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
+
+            if (guild.IconSupport)
+            {
+                ReplyAsync("Deleting...");
+
+                try
+                {
+                    Icon toDelete = null;
+                    foreach (var icon in guild.Icons)
+                    {
+                        if (icon.Name.ToLowerInvariant() == name.ToLowerInvariant())
+                        {
+                            toDelete = icon;
+                        }
+                    }
+
+                    if (toDelete != null)
+                    {
+                        guild.Icons.Remove(toDelete);
+                        _context.Update(guild);
+                        _context.SaveChanges();
+                        ReplyAsync("Successfully deleted");
+                    }
+                    else
+                    {
+                        ReplyAsync("Failed deleting that icon.");
+                    }
+                }
+                catch (Exception error)
+                {
+                    ReplyAsync("Something horribly failed. Verify if the icon was deleted with !icon list");
+                    _logger.LogError("Failed deleting an icon", error);
+                }
+            }
+            else
+            {
+                //Not enabled.
+                ReplyAsync(_responses.NotEnabled.PickRandom() + " - Icon Support");
+            }
+        }
+
+        [Command("icon reoccurring")]
+        [Summary("Set the icon as reoccurring. Example: !icon reoccurring [name] [datefrom] [dateto]")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task IconReoccuring(string name, DateTime dateFrom, DateTime dateTo)
+        {
+            Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
+
+            if (guild.IconSupport)
+            {
+                ReplyAsync("Changing...");
+
+                try
+                {
+                    foreach (var icon in guild.Icons)
+                    {
+                        if (icon.Name.ToLowerInvariant() == name.ToLowerInvariant())
+                        {
+                            icon.Recurring = true;
+                            icon.StartDate = dateFrom;
+                            icon.EndDate = dateTo;
+                            ReplyAsync("Successfully changed");
+                            _context.SaveChanges();
+                        }
+                    }
+                }
+                catch (Exception error)
+                {
+                    ReplyAsync("Something horribly failed. Verify if the icon was created with !icon list");
+                    _logger.LogError("Failed creating an icon", error);
+                }
+            }
+            else
+            {
+                //Not enabled.
+                ReplyAsync(_responses.NotEnabled.PickRandom() + " - Icon Support");
+            }
+        }
+
+        [Command("icon not reoccurring")]
+        [Summary("Set the icon as not reoccurring.")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task IconNotReoccuring(string name)
+        {
+            Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
+
+            if (guild.IconSupport)
+            {
+                try
+                {
+                    foreach (var icon in guild.Icons)
+                    {
+                        if (icon.Name.ToLowerInvariant() == name.ToLowerInvariant())
+                        {
+                            icon.Recurring = false;
+                            ReplyAsync("Successfully changed");
+                            _context.SaveChanges();
+                        }
+                    }
+                }
+                catch (Exception error)
+                {
+                    ReplyAsync("Something horribly failed. Verify if the icon was changed with !icon list");
+                    _logger.LogError("Failed changing an icon", error);
+                }
+            }
+            else
+            {
+                //Not enabled.
+                ReplyAsync(_responses.NotEnabled.PickRandom() + " - Icon Support");
+            }
+        }
+
+        [Command("icon enable")]
+        [Summary("Set the icon as enabled. Example: !icon enable [name] [activate(true / false)]")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task IconEnable(string name, bool enable)
+        {
+            Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
+
+            if (guild.IconSupport)
+            {
+                ReplyAsync("Changing...");
+
+                try
+                {
+                    foreach (var icon in guild.Icons)
+                    {
+                        if (icon.Name.ToLowerInvariant() == name.ToLowerInvariant())
+                        {
+                            icon.Enabled = enable;
+                            icon.Active = false;
+                            ReplyAsync("Successfully changed");
+                            _context.SaveChanges();
+                        }
+                    }
+                }
+                catch (Exception error)
+                {
+                    ReplyAsync("Something horribly failed. Verify if the icon was created with !icon list");
+                    _logger.LogError("Failed creating an icon", error);
+                }
             }
             else
             {
