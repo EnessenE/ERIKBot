@@ -10,6 +10,7 @@ using Discord.WebSocket;
 using ERIK.Bot.Configurations;
 using ERIK.Bot.Context;
 using ERIK.Bot.Extensions;
+using ERIK.Bot.Handlers;
 using ERIK.Bot.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -157,10 +158,9 @@ namespace ERIK.Bot.Modules
 
             if (guild.IconSupport)
             {
-                EmbedBuilder embedBuilder = new EmbedBuilder();
-
-                embedBuilder.WithTitle("All icons set for this guild");
-                embedBuilder.WithDescription("All times in UTC");
+                var fieldsList = new List<EmbedFieldBuilder>();
+                var title = "All icons set for this guild";
+                var desc = "All times in UTC";
                 Icon defaultIcon = null;
                 foreach (var icon in guild.Icons)
                 {
@@ -177,7 +177,13 @@ namespace ERIK.Bot.Modules
                     string setting = $"EN: {icon.Enabled} AC: {icon.Active}";
 
                     string text = $"{date}\n{setting}\n{icon.Image}";
-                    embedBuilder.AddField(icon.Name, text);
+
+                    var embedField = new EmbedFieldBuilder()
+                    {
+                        Name = icon.Name,
+                        Value = text
+                    };
+                    fieldsList.Add(embedField);
 
                     if (icon.Default)
                     {
@@ -185,15 +191,9 @@ namespace ERIK.Bot.Modules
                     }
                 }
 
-                if (defaultIcon != null)
-                {
-                    embedBuilder.WithThumbnailUrl(defaultIcon.Image);
-                }
+                var embed = await EmbedHandler.CreateBasicEmbed(title, desc, Color.Green, fieldsList);
 
-                embedBuilder.WithFooter("All currently registed icons for " + this.Context.Guild.Name);
-                embedBuilder.WithCurrentTimestamp();
-
-                ReplyAsync(null, false, embedBuilder.Build());
+                ReplyAsync(null, false, embed);
             }
             else
             {
