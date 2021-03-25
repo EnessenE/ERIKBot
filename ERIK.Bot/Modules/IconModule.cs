@@ -149,7 +149,7 @@ namespace ERIK.Bot.Modules
         }
 
 
-        [Command("icon list")]
+        [Command("icon list", RunMode = RunMode.Async)]
         [Summary("Lists all current icons.")]
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task List()
