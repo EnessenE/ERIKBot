@@ -85,36 +85,7 @@ namespace ERIK.Bot.Modules
         {
             await ReplyAsync("*dabs*");
         }
-
-        //[Command("soldierboy", RunMode = RunMode.Async)]
-        //[Summary("Plays Soulja Boy Tell'em - Crank That (Soulja Boy)")]
-        //public async Task SoldierBoy()
-        //{
-        //    var audioClient = await _audioService.ConnectToVoice((Context.User as IVoiceState).VoiceChannel);
-
-        //    YoutubeClient youtube = new YoutubeClient();
-        //    var streamManifest = await youtube.Videos.Streams.GetManifestAsync("https://www.youtube.com/watch?v=8UFIYGkROII");
-
-        //    // Select streams (1080p60 / highest bitrate audio)
-        //    var audioStreamInfo = streamManifest.GetAudio().WithHighestBitrate();
-
-        //    var stream = await youtube.Videos.Streams.GetAsync(audioStreamInfo);
-
-        //    var memoryStream = new MemoryStream();
-        //    await Cli.Wrap("ffmpeg")
-        //        .WithArguments(" -hide_banner -loglevel panic -i pipe:0 -ac 2 -f s16le -ar 48000 pipe:1")
-        //        .WithStandardInputPipe(PipeSource.FromStream(stream))
-        //        .WithStandardOutputPipe(PipeTarget.ToStream(memoryStream))
-        //        .ExecuteAsync();
-
-        //    using (var discord = audioClient.CreatePCMStream(AudioApplication.Mixed))
-        //    {
-        //        try { await discord.WriteAsync(memoryStream.ToArray(), 0, (int)memoryStream.Length); }
-        //        finally { await discord.FlushAsync(); }
-        //    }
-        //}
-
-
+        
         [Command("martijn")]
         [Summary("Gives details about martijn")]
         public async Task Martijn()
