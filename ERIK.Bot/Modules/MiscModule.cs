@@ -65,7 +65,7 @@ namespace ERIK.Bot.Modules
 
             //replyandeleteasync is broken atm
             var tempMsg = await ReplyAsync("Sent you a PM with all commands!");
-            this.Context.User.SendMessageAsync("Here's a list of commands and their description: ```"+message+"```", false);
+            this.Context.User.SendMessageAsync("Here's a list of commands and their description: ```" + message + "```", false);
             this.Context.Message.DeleteAsync();
             Thread.Sleep(TimeSpan.FromSeconds(5));
             tempMsg.DeleteAsync();
@@ -78,14 +78,14 @@ namespace ERIK.Bot.Modules
             await ReplyAsync(_responses.Pong.PickRandom());
         }
 
-        
+
         [Command("dab")]
         [Summary("Dabs")]
         public async Task Dab()
         {
             await ReplyAsync("*dabs*");
         }
-        
+
         [Command("martijn")]
         [Summary("Gives details about martijn")]
         public async Task Martijn()
@@ -97,7 +97,7 @@ namespace ERIK.Bot.Modules
         [Summary("What apex character should I play?")]
         public async Task Apex()
         {
-            await ReplyAsync(_responses.ApexCharacters.PickRandom());
+            await ReplyAsync(_responses.ApexSentence.PickRandom() + " " + _responses.ApexCharacters.PickRandom() + "?");
         }
 
         [Command("prefix")]
