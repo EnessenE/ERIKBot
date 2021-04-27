@@ -13,7 +13,15 @@ namespace ERIK.Bot.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
 
+        /// <summary>
+        /// The url of the image
+        /// </summary>
         public string Image { get; set; }
+
+        /// <summary>
+        /// The name of the icon.
+        /// Used for dumb lookup
+        /// </summary>
         public string Name { get; set; }
         
         public DateTime StartDate { get; set; }

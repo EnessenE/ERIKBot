@@ -9,6 +9,7 @@ namespace ERIK.Bot.Configurations
     {
         public List<string> Pong { get; set; }
         public List<string> Martijn { get; set; }
+        public List<string> ApexCharacters { get; set; }
 
         /// <summary>
         /// Default icon saved to db
