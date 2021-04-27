@@ -91,14 +91,7 @@ namespace ERIK.Bot.Modules
         public async Task Martijn()
         {
             await ReplyAsync(_responses.Martijn.PickRandom());
-        }
-
-        [Command("apex")]
-        [Summary("What apex character should I play?")]
-        public async Task Apex()
-        {
-            await ReplyAsync(_responses.ApexSentence.PickRandom() + " **" + _responses.ApexCharacters.PickRandom() + "**?");
-        }
+        } 
 
         [Command("prefix")]
         [Summary("Set the prefix")]

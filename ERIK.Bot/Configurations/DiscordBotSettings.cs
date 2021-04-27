@@ -6,5 +6,7 @@
         public string IconDirectory { get; set; }
         public string LavaKey { get; set; }
         public string LavaHost { get; set; }
+
+        public string ApexToken { get; set; }
     }
 }
