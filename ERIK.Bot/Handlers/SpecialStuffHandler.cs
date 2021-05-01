@@ -1,24 +1,21 @@
-﻿
-
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.WebSocket;
 using ERIK.Bot.Configurations;
-using ERIK.Bot.Models.Cat;
+using ERIK.Bot.Models.Cats;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RestSharp;
 
-namespace ERIK.Bot.Modules
+namespace ERIK.Bot.Handlers
 {
     public class SpecialStuffHandler
     {
         private readonly ILogger<SpecialStuffHandler> _logger;
-        private CatAPI _catOptions;
+        private readonly CatAPI _catOptions;
 
         public SpecialStuffHandler(ILogger<SpecialStuffHandler> logger, IOptions<CatAPI> catOptionsData)
         {
@@ -42,7 +39,7 @@ namespace ERIK.Bot.Modules
             }
             catch (Exception error)
             {
-                _logger.LogError("Failed cat call",error);
+                _logger.LogError("Failed cat call", error);
             }
 
             return null;
@@ -56,21 +53,23 @@ namespace ERIK.Bot.Modules
             {
                 foreach (var cat in result)
                 {
-                    string url = cat.url;
+                    var url = cat.url;
                     _logger.LogInformation("Url to send: {url}", url);
-                    await context.Channel.SendMessageAsync($"Look how cute! " + url);
+                    await context.Channel.SendMessageAsync("Look how cute! " + url);
                 }
             }
             else
             {
-                string url = "https://cataas.com/cat"; _logger.LogInformation("Url to send: {url}", url);
-                await context.Channel.SendMessageAsync($"Look how adorable! " + url);
+                var url = "https://cataas.com/cat";
+                _logger.LogInformation("Url to send: {url}", url);
+                await context.Channel.SendMessageAsync("Look how adorable! " + url);
                 _logger.LogInformation("FALLBACK! Url to send: {url}", url);
-                await context.Channel.SendMessageAsync($"Look how cute! " + url);
+                await context.Channel.SendMessageAsync("Look how cute! " + url);
             }
         }
 
-        public async Task MessageChannelCheck(SocketCommandContext context, SocketUserMessage message, SocketGuild guild)
+        public async Task MessageChannelCheck(SocketCommandContext context, SocketUserMessage message,
+            SocketGuild guild)
         {
             //string result = "https://cataas.com/cat";
             if (context.Channel.Id == 284815121618829312) //#enesfw

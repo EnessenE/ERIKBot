@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -13,21 +11,15 @@ namespace ERIK.Bot.Modules
         [Command("roles")]
         public async Task GetAllRoles()
         {
-            var author = this.Context.Message.Author;
+            var author = Context.Message.Author;
 
-            string message = $"All roles in {this.Context.Guild.Name}: \n";
-            foreach (var role in this.Context.Guild.Roles)
-            {
+            var message = $"All roles in {Context.Guild.Name}: \n";
+            foreach (var role in Context.Guild.Roles)
                 message += role.Name + " - " + role.Members.Count() + " members with this role.\n";
-            }
 
             var splitMessage = message.SplitMessage(false);
 
-            foreach (var mes in splitMessage)
-            {
-                await author.SendMessageAsync(mes);
-            }
+            foreach (var mes in splitMessage) await author.SendMessageAsync(mes);
         }
-        
     }
 }

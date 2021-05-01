@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace ERIK.Bot.Extensions
 {
@@ -10,13 +7,9 @@ namespace ERIK.Bot.Extensions
         public static string ToUserList(this List<ulong> allJoined)
         {
             var allMember = string.Empty;
-            foreach (var joinedUser in allJoined)
-            {
-                allMember += $"\n<@{joinedUser}>";
-            }
+            foreach (var joinedUser in allJoined) allMember += $"\n<@{joinedUser}>";
 
             return allMember;
         }
-
     }
 }

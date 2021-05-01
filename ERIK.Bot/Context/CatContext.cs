@@ -1,22 +1,19 @@
-﻿using Discord.Commands;
-using Discord.WebSocket;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using ERIK.Bot.Configurations;
-using ERIK.Bot.Models.Cat;
+using ERIK.Bot.Models.Cats;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RestSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ERIK.Bot.Context
 {
     public class CatContext
     {
-        private readonly ILogger<CatContext> _logger;
         private readonly CatAPI _catOptions;
+        private readonly ILogger<CatContext> _logger;
 
         public CatContext(ILogger<CatContext> logger, IOptions<CatAPI> catOptionsData)
         {

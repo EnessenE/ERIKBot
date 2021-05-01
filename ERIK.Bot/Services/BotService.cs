@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Addons.Interactive;
@@ -10,30 +7,28 @@ using Discord.Commands;
 using Discord.WebSocket;
 using ERIK.Bot.Configurations;
 using ERIK.Bot.Context;
-using ERIK.Bot.Extensions;
-using ERIK.Bot.Models;
-using ERIK.Bot.Modules;
+using ERIK.Bot.Handlers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using Victoria;
 
 namespace ERIK.Bot.Services
 {
     internal class BotService
     {
+        private readonly DiscordBotSettings _botOptions;
+        private readonly ILogger<BotService> _logger;
+        private readonly ReactionService _reactionService;
+        private readonly IServiceCollection _services;
+        private readonly SpecialStuffHandler _specialStuffHandler;
         private DiscordSocketClient _client;
         private CommandService _commands;
-        private readonly ILogger<BotService> _logger;
-        private readonly DiscordBotSettings _botOptions;
-        private readonly IServiceCollection _services;
-        private readonly ReactionService _reactionService;
-        private ServiceProvider _serviceProvider;
-        private readonly SpecialStuffHandler _specialStuffHandler;
         private LavaNode _lavaNode;
+        private ServiceProvider _serviceProvider;
 
-        public BotService(ILogger<BotService> logger, IOptions<DiscordBotSettings> botOptions, ReactionService reactionService, IServiceCollection services, SpecialStuffHandler specialStuffHandler)
+        public BotService(ILogger<BotService> logger, IOptions<DiscordBotSettings> botOptions,
+            ReactionService reactionService, IServiceCollection services, SpecialStuffHandler specialStuffHandler)
         {
             _logger = logger;
             _botOptions = botOptions.Value;
@@ -45,7 +40,7 @@ namespace ERIK.Bot.Services
         public async Task Start(IServiceProvider services)
         {
             _client = new DiscordSocketClient();
-            CommandServiceConfig config = new CommandServiceConfig();
+            var config = new CommandServiceConfig();
 
             _commands = new CommandService(config);
 
@@ -72,7 +67,7 @@ namespace ERIK.Bot.Services
             //We need to retrieve this later so we can start the bot
             _lavaNode = _serviceProvider.GetService<LavaNode>();
 
-            
+
             //connect events
             InstallCommandsAsync();
 
@@ -108,20 +103,17 @@ namespace ERIK.Bot.Services
             //
             // If you do not use Dependency Injection, pass null.
             // See Dependency Injection guide for more information.
-            await _commands.AddModulesAsync(assembly: Assembly.GetEntryAssembly(),
-                                            services: _serviceProvider);
+            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(),
+                _serviceProvider);
         }
 
         private async Task OnReadyAsync()
         {
-            if (!_lavaNode.IsConnected)
-            {
-                _lavaNode.ConnectAsync();
-            }
-
+            if (!_lavaNode.IsConnected) _lavaNode.ConnectAsync();
         }
 
-        private Task HandleReaction(Cacheable<IUserMessage, ulong> cachedMessage, ISocketMessageChannel channel, SocketReaction socketReaction)
+        private Task HandleReaction(Cacheable<IUserMessage, ulong> cachedMessage, ISocketMessageChannel channel,
+            SocketReaction socketReaction)
         {
             return _reactionService.HandleReactionAsync(_client, cachedMessage, channel, socketReaction);
         }
@@ -146,8 +138,8 @@ namespace ERIK.Bot.Services
             var guild = channel.Guild;
 
 
-
-            _logger.LogInformation("[{time}]{author}: {content}", message.Timestamp.ToString("HH:mm:ss"), message.Author.Username, message.Content);
+            _logger.LogInformation("[{time}]{author}: {content}", message.Timestamp.ToString("HH:mm:ss"),
+                message.Author.Username, message.Content);
 
             try
             {
@@ -159,14 +151,14 @@ namespace ERIK.Bot.Services
             }
 
             // Create a number to track where the prefix ends and the command begins
-            int argPos = 0;
+            var argPos = 0;
 
             // Determine if the message is a command based on the prefix and make sure no bots trigger commands
             var tempContext = _serviceProvider.GetRequiredService<EntityContext>();
             var prefix = tempContext.GetOrCreateGuild(guild.Id).Prefix;
 
             if (!(message.HasStringPrefix(prefix, ref argPos) ||
-                message.HasMentionPrefix(_client.CurrentUser, ref argPos)))
+                  message.HasMentionPrefix(_client.CurrentUser, ref argPos)))
                 return;
 
             // Create a WebSocket-based command context based on the message
@@ -180,13 +172,10 @@ namespace ERIK.Bot.Services
             {
                 _logger.LogInformation($"[CMD] Accepted command: {message.Content}");
                 var result = await _commands.ExecuteAsync(
-                    context: context,
-                    argPos: argPos,
-                    services: _serviceProvider);
-                if (result.IsSuccess)
-                {
-                    _logger.LogInformation($"[CMD] Successfully executed command");
-                }
+                    context,
+                    argPos,
+                    _serviceProvider);
+                if (result.IsSuccess) _logger.LogInformation("[CMD] Successfully executed command");
                 if (!result.IsSuccess && result.Error != CommandError.UnknownCommand)
                 {
                     _logger.LogError($"[CMD] Failed executing your command.  {result.ErrorReason}");
@@ -204,7 +193,6 @@ namespace ERIK.Bot.Services
             // to be executed; however, this may not always be desired,
             // as it may clog up the request queue should a user spam a
             // command.
-
         }
 
         private Task Log(LogMessage msg)

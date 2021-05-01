@@ -19,14 +19,15 @@ namespace ERIK.Bot.Modules
 {
     public class IconModule : InteractiveBase
     {
-        private readonly Responses _responses;
-        private readonly EntityContext _context;
-        private ILogger<IconModule> _logger;
         private readonly DiscordSocketClient _client;
-        private DiscordBotSettings _botSettings;
+        private readonly EntityContext _context;
+        private readonly Responses _responses;
+        private readonly DiscordBotSettings _botSettings;
+        private readonly ILogger<IconModule> _logger;
 
 
-        public IconModule(IOptions<Responses> responses, EntityContext context, ILogger<IconModule> logger, IOptions<DiscordBotSettings> botSettings, DiscordSocketClient client)
+        public IconModule(IOptions<Responses> responses, EntityContext context, ILogger<IconModule> logger,
+            IOptions<DiscordBotSettings> botSettings, DiscordSocketClient client)
         {
             _context = context;
             _logger = logger;
@@ -40,12 +41,11 @@ namespace ERIK.Bot.Modules
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task IconDefault()
         {
-            Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
+            var guild = _context.GetOrCreateGuild(Context.Guild.Id);
 
             if (guild.IconSupport)
             {
-
-                if (this.Context.Guild.IconUrl != null)
+                if (Context.Guild.IconUrl != null)
                 {
                     _logger.LogDebug("{guild} Found an icon set onto the guild", guild);
 
@@ -55,7 +55,7 @@ namespace ERIK.Bot.Modules
                         if (guild.Icons.Count > 0)
                         {
                             _logger.LogDebug("{guild} Found an icon that has been set as default", guild);
-                            var value = guild.Icons.First(item => item.Default == true);
+                            var value = guild.Icons.First(item => item.Default);
                             defaultIcon = value;
                         }
                         else
@@ -71,12 +71,12 @@ namespace ERIK.Bot.Modules
                     if (defaultIcon == null)
                     {
                         _logger.LogDebug("{guild} No default icon set", guild);
-                        Icon icon = new Icon
+                        var icon = new Icon
                         {
                             Name = "Default Icon",
                             Default = true,
                             Enabled = true,
-                            Image = this.Context.Guild.IconUrl
+                            Image = Context.Guild.IconUrl
                         };
                         guild.Icons.Add(icon);
                         _context.Add(icon);
@@ -85,7 +85,7 @@ namespace ERIK.Bot.Modules
                     }
                     else
                     {
-                        defaultIcon.Image = this.Context.Guild.IconUrl;
+                        defaultIcon.Image = Context.Guild.IconUrl;
                         _context.Update(defaultIcon);
                     }
 
@@ -110,19 +110,17 @@ namespace ERIK.Bot.Modules
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task RestoreDefault()
         {
-            Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
+            var guild = _context.GetOrCreateGuild(Context.Guild.Id);
 
             if (guild.IconSupport)
-            {
                 foreach (var icon in guild.Icons) //short hack, fix later by a proper call
                 {
                     _logger.LogDebug("{guild} Processing Icon [{icon}]", guild, icon.Name);
 
                     if (icon.Default)
-                    {
                         if (icon.Enabled)
                         {
-                            SocketGuild socketGuild = _client.GetGuild(guild.Id);
+                            var socketGuild = _client.GetGuild(guild.Id);
 
                             //Icon needs to be actived.
                             var filePath = icon.DownloadAndOrGet(_botSettings, guild);
@@ -138,14 +136,10 @@ namespace ERIK.Bot.Modules
                                 ReplyAsync(_responses.FailedDownload.PickRandom());
                             }
                         }
-                    }
                 }
-            }
             else
-            {
                 //Not enabled.
                 ReplyAsync(_responses.NotEnabled.PickRandom() + " - Icon Support");
-            }
         }
 
 
@@ -154,7 +148,7 @@ namespace ERIK.Bot.Modules
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task List()
         {
-            Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
+            var guild = _context.GetOrCreateGuild(Context.Guild.Id);
 
             if (guild.IconSupport)
             {
@@ -164,31 +158,24 @@ namespace ERIK.Bot.Modules
                 Icon defaultIcon = null;
                 foreach (var icon in guild.Icons)
                 {
-                    string date = string.Empty;
+                    var date = string.Empty;
                     if (icon.Recurring)
-                    {
                         date = $"{icon.StartDate.ToLongDateString()} - {icon.EndDate.ToLongDateString()}";
-                    }
                     else
-                    {
                         date = "Not recurring.";
-                    }
 
-                    string setting = $"EN: {icon.Enabled} AC: {icon.Active}";
+                    var setting = $"EN: {icon.Enabled} AC: {icon.Active}";
 
-                    string text = $"{date}\n{setting}\n{icon.Image}";
+                    var text = $"{date}\n{setting}\n{icon.Image}";
 
-                    var embedField = new EmbedFieldBuilder()
+                    var embedField = new EmbedFieldBuilder
                     {
                         Name = icon.Name,
                         Value = text
                     };
                     fieldsList.Add(embedField);
 
-                    if (icon.Default)
-                    {
-                        defaultIcon = icon;
-                    }
+                    if (icon.Default) defaultIcon = icon;
                 }
 
                 var embed = await EmbedHandler.CreateBasicEmbed(title, desc, Color.Green, fieldsList);
@@ -208,7 +195,7 @@ namespace ERIK.Bot.Modules
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task AddIcon(string name, string url)
         {
-            Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
+            var guild = _context.GetOrCreateGuild(Context.Guild.Id);
 
             if (guild.IconSupport)
             {
@@ -216,7 +203,7 @@ namespace ERIK.Bot.Modules
 
                 try
                 {
-                    Icon icon = new Icon
+                    var icon = new Icon
                     {
                         Name = name,
                         Image = url
@@ -245,7 +232,7 @@ namespace ERIK.Bot.Modules
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task RemoveIcon(string name)
         {
-            Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
+            var guild = _context.GetOrCreateGuild(Context.Guild.Id);
 
             if (guild.IconSupport)
             {
@@ -255,12 +242,8 @@ namespace ERIK.Bot.Modules
                 {
                     Icon toDelete = null;
                     foreach (var icon in guild.Icons)
-                    {
                         if (icon.Name.ToLowerInvariant() == name.ToLowerInvariant())
-                        {
                             toDelete = icon;
-                        }
-                    }
 
                     if (toDelete != null)
                     {
@@ -292,7 +275,7 @@ namespace ERIK.Bot.Modules
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task IconReoccuring(string name, DateTime dateFrom, DateTime dateTo)
         {
-            Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
+            var guild = _context.GetOrCreateGuild(Context.Guild.Id);
 
             if (guild.IconSupport)
             {
@@ -301,7 +284,6 @@ namespace ERIK.Bot.Modules
                 try
                 {
                     foreach (var icon in guild.Icons)
-                    {
                         if (icon.Name.ToLowerInvariant() == name.ToLowerInvariant())
                         {
                             icon.Recurring = true;
@@ -310,7 +292,6 @@ namespace ERIK.Bot.Modules
                             ReplyAsync("Successfully changed");
                             _context.SaveChanges();
                         }
-                    }
                 }
                 catch (Exception error)
                 {
@@ -330,33 +311,27 @@ namespace ERIK.Bot.Modules
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task IconNotReoccuring(string name)
         {
-            Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
+            var guild = _context.GetOrCreateGuild(Context.Guild.Id);
 
             if (guild.IconSupport)
-            {
                 try
                 {
                     foreach (var icon in guild.Icons)
-                    {
                         if (icon.Name.ToLowerInvariant() == name.ToLowerInvariant())
                         {
                             icon.Recurring = false;
                             ReplyAsync("Successfully changed");
                             _context.SaveChanges();
                         }
-                    }
                 }
                 catch (Exception error)
                 {
                     ReplyAsync("Something horribly failed. Verify if the icon was changed with !icon list");
                     _logger.LogError("Failed changing an icon", error);
                 }
-            }
             else
-            {
                 //Not enabled.
                 ReplyAsync(_responses.NotEnabled.PickRandom() + " - Icon Support");
-            }
         }
 
         [Command("icon enable")]
@@ -364,7 +339,7 @@ namespace ERIK.Bot.Modules
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task IconEnable(string name, bool enable)
         {
-            Guild guild = _context.GetOrCreateGuild(this.Context.Guild.Id);
+            var guild = _context.GetOrCreateGuild(Context.Guild.Id);
 
             if (guild.IconSupport)
             {
@@ -373,7 +348,6 @@ namespace ERIK.Bot.Modules
                 try
                 {
                     foreach (var icon in guild.Icons)
-                    {
                         if (icon.Name.ToLowerInvariant() == name.ToLowerInvariant())
                         {
                             icon.Enabled = enable;
@@ -381,7 +355,6 @@ namespace ERIK.Bot.Modules
                             ReplyAsync("Successfully changed");
                             _context.SaveChanges();
                         }
-                    }
                 }
                 catch (Exception error)
                 {
