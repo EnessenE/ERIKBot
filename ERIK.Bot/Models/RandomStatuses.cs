@@ -2,7 +2,7 @@
 
 namespace ERIK.Bot.Models
 {
-    class RandomStatuses
+    internal class RandomStatuses
     {
         public List<string> statuses { get; set; }
     }

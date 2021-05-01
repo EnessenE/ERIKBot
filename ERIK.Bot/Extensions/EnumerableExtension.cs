@@ -1,6 +1,8 @@
-﻿ using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 
 namespace ERIK.Bot.Extensions
 {
@@ -21,13 +23,16 @@ namespace ERIK.Bot.Extensions
             return source.OrderBy(x => Guid.NewGuid());
         }
 
-        public static IAsyncEnumerable<TEntity> AsAsyncEnumerable<TEntity>(this Microsoft.EntityFrameworkCore.DbSet<TEntity> obj) where TEntity : class
+        public static IAsyncEnumerable<TEntity> AsAsyncEnumerable<TEntity>(this DbSet<TEntity> obj)
+            where TEntity : class
         {
-            return Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.AsAsyncEnumerable(obj);
+            return EntityFrameworkQueryableExtensions.AsAsyncEnumerable(obj);
         }
-        public static IQueryable<TEntity> Where<TEntity>(this Microsoft.EntityFrameworkCore.DbSet<TEntity> obj, System.Linq.Expressions.Expression<Func<TEntity, bool>> predicate) where TEntity : class
+
+        public static IQueryable<TEntity> Where<TEntity>(this DbSet<TEntity> obj,
+            Expression<Func<TEntity, bool>> predicate) where TEntity : class
         {
-            return System.Linq.Queryable.Where(obj, predicate);
+            return Queryable.Where(obj, predicate);
         }
 
         //public static IEnumerable<TResult> Select<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)

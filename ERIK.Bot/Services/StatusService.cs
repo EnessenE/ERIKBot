@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Discord.WebSocket;
 using ERIK.Bot.Extensions;
 using ERIK.Bot.Models;
@@ -14,8 +12,8 @@ namespace ERIK.Bot.Services
 {
     public class StatusService
     {
-        private readonly ILogger<StatusService> _logger;
         private readonly DiscordSocketClient _client;
+        private readonly ILogger<StatusService> _logger;
 
         public StatusService(ILogger<StatusService> logger, DiscordSocketClient client)
         {
@@ -25,7 +23,6 @@ namespace ERIK.Bot.Services
 
         public void Start()
         {
-
             _logger.LogInformation("Starting the status setter!");
             new Thread(() =>
             {
@@ -38,27 +35,26 @@ namespace ERIK.Bot.Services
 
                         //We load the json in eachtime incase stuff has changed
                         //TODO: Migrate to appsettings or something that supports reload
-                        string randomtext = LoadJson().PickRandom();
+                        var randomtext = LoadJson().PickRandom();
                         _client.SetGameAsync(randomtext);
                         _logger.LogInformation("Set the status to {msg}!", randomtext);
-
                     }
                     catch (Exception error)
                     {
                         _logger.LogError(error, "Failed to set status");
                     }
-                    Thread.Sleep(900000);
 
+                    Thread.Sleep(900000);
                 }
             }).Start();
         }
 
         public List<string> LoadJson()
         {
-            List<string> list = new List<string>();
-            using (StreamReader r = new StreamReader("status.json")) //Move to appsettings
+            var list = new List<string>();
+            using (var r = new StreamReader("status.json")) //Move to appsettings
             {
-                string json = r.ReadToEnd();
+                var json = r.ReadToEnd();
                 var item = JsonConvert.DeserializeObject<RandomStatuses>(json);
                 list = item.statuses;
             }

@@ -1,21 +1,15 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Discord.Addons.Interactive;
 using Discord.WebSocket;
 using ERIK.Bot.Configurations;
 using ERIK.Bot.Context;
-using ERIK.Bot.Modules;
+using ERIK.Bot.Handlers;
 using ERIK.Bot.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using Serilog;
@@ -38,9 +32,7 @@ namespace ERIK.Bot
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.Configure<DiscordBotSettings>(Configuration.GetSection("DiscordBot"));
-            services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
             services.Configure<SQLSettings>(Configuration.GetSection("SQLSettings"));
             services.Configure<Responses>(Configuration.GetSection("Responses"));
 
@@ -49,7 +41,6 @@ namespace ERIK.Bot
 
             services.AddSingleton(services);
 
-            services.AddTransient<MailService>();
             //services.AddSingleton<InteractiveService>();
             services.AddTransient<BotService>();
             services.AddTransient<ReactionService>();
@@ -97,14 +88,14 @@ namespace ERIK.Bot
 
         public async void RunAsync()
         {
-            var services = new ServiceCollection();             // Create a new instance of a service collection
+            var services = new ServiceCollection(); // Create a new instance of a service collection
             ConfigureServices(services);
 
-            var provider = services.BuildServiceProvider();     // Build the service provider
+            var provider = services.BuildServiceProvider(); // Build the service provider
 
-            await provider.GetRequiredService<BotService>().Start(provider);       // Start the startup service
+            await provider.GetRequiredService<BotService>().Start(provider); // Start the startup service
 
-            await Task.Delay(-1);                               // Keep the program alive
+            await Task.Delay(-1); // Keep the program alive
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -112,10 +103,7 @@ namespace ERIK.Bot
         {
             app.UseCors("OpenPolicy");
 
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
 
             app.UseHttpsRedirection();
 
@@ -126,10 +114,7 @@ namespace ERIK.Bot
             app.UseOpenApi();
             app.UseSwaggerUi3();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 
             RunAsync();
         }

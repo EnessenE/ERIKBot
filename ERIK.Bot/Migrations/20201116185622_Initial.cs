@@ -8,21 +8,18 @@ namespace ERIK.Bot.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Guilds",
-                columns: table => new
+                "Guilds",
+                table => new
                 {
                     Id = table.Column<decimal>(nullable: false),
                     Prefix = table.Column<string>(nullable: true),
                     IconSupport = table.Column<bool>(nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Guilds", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_Guilds", x => x.Id); });
 
             migrationBuilder.CreateTable(
-                name: "Icon",
-                columns: table => new
+                "Icon",
+                table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
                     Image = table.Column<string>(nullable: true),
@@ -39,26 +36,26 @@ namespace ERIK.Bot.Migrations
                 {
                     table.PrimaryKey("PK_Icon", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Icon_Guilds_GuildId",
-                        column: x => x.GuildId,
-                        principalTable: "Guilds",
-                        principalColumn: "Id",
+                        "FK_Icon_Guilds_GuildId",
+                        x => x.GuildId,
+                        "Guilds",
+                        "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Icon_GuildId",
-                table: "Icon",
-                column: "GuildId");
+                "IX_Icon_GuildId",
+                "Icon",
+                "GuildId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Icon");
+                "Icon");
 
             migrationBuilder.DropTable(
-                name: "Guilds");
+                "Guilds");
         }
     }
 }

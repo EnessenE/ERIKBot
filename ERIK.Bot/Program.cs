@@ -1,13 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
 
@@ -15,10 +10,9 @@ namespace ERIK.Bot
 {
     public class Program
     {
-
         public static void Main(string[] args)
         {
-            var currentPath = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location);
+            var currentPath = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location);
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Debug)

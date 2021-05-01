@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -12,17 +9,17 @@ using Discord.WebSocket;
 using ERIK.Bot.Services;
 using Victoria;
 using Victoria.Enums;
-using Victoria.EventArgs;
 
 namespace ERIK.Bot.Modules
 {
     public class AudioModule : ModuleBase<ICommandContext>
     {
+        private static readonly IEnumerable<int> Range = Enumerable.Range(1900, 2000);
+
         // Scroll down further for the AudioService.
         // Like, way down
         private readonly AudioService _audioService;
         private readonly LavaNode _lavaNode;
-        private static readonly IEnumerable<int> Range = Enumerable.Range(1900, 2000);
 
 
         // Remember to add an instance of the AudioService
@@ -60,7 +57,6 @@ namespace ERIK.Bot.Modules
             var splitLyrics = lyrics.Split('\n');
             var stringBuilder = new StringBuilder();
             foreach (var line in splitLyrics)
-            {
                 if (Range.Contains(stringBuilder.Length))
                 {
                     await ReplyAsync($"```{stringBuilder}```");
@@ -70,7 +66,6 @@ namespace ERIK.Bot.Modules
                 {
                     stringBuilder.AppendLine(line);
                 }
-            }
 
             await ReplyAsync($"```{stringBuilder}```");
         }
@@ -85,38 +80,58 @@ namespace ERIK.Bot.Modules
 
         [Command("Join")]
         public async Task JoinAndPlay()
-            => await ReplyAsync(embed: await _audioService.JoinAsync(Context.Guild, Context.User as IVoiceState, Context.Channel as ITextChannel));
+        {
+            await ReplyAsync(embed: await _audioService.JoinAsync(Context.Guild, Context.User as IVoiceState,
+                Context.Channel as ITextChannel));
+        }
 
         [Command("Leave")]
         public async Task Leave()
-            => await ReplyAsync(embed: await _audioService.LeaveAsync(Context.Guild));
+        {
+            await ReplyAsync(embed: await _audioService.LeaveAsync(Context.Guild));
+        }
 
         [Command("Play")]
         public async Task Play([Remainder] string search)
-            => await ReplyAsync(embed: await _audioService.PlayAsync(Context.User as SocketGuildUser, Context.Guild, search));
+        {
+            await ReplyAsync(
+                embed: await _audioService.PlayAsync(Context.User as SocketGuildUser, Context.Guild, search));
+        }
 
         [Command("Stop")]
         public async Task Stop()
-            => await ReplyAsync(embed: await _audioService.StopAsync(Context.Guild));
+        {
+            await ReplyAsync(embed: await _audioService.StopAsync(Context.Guild));
+        }
 
         [Command("List")]
         public async Task List()
-            => await ReplyAsync(embed: await _audioService.ListAsync(Context.Guild));
+        {
+            await ReplyAsync(embed: await _audioService.ListAsync(Context.Guild));
+        }
 
         [Command("Skip")]
         public async Task Skip()
-            => await ReplyAsync(embed: await _audioService.SkipTrackAsync(Context.Guild));
+        {
+            await ReplyAsync(embed: await _audioService.SkipTrackAsync(Context.Guild));
+        }
 
         [Command("Volume")]
         public async Task Volume(int volume)
-            => await ReplyAsync(await _audioService.SetVolumeAsync(Context.Guild, volume));
+        {
+            await ReplyAsync(await _audioService.SetVolumeAsync(Context.Guild, volume));
+        }
 
         [Command("Pause")]
         public async Task Pause()
-            => await ReplyAsync(await _audioService.PauseAsync(Context.Guild));
+        {
+            await ReplyAsync(await _audioService.PauseAsync(Context.Guild));
+        }
 
         [Command("Resume")]
         public async Task Resume()
-            => await ReplyAsync(await _audioService.ResumeAsync(Context.Guild));
+        {
+            await ReplyAsync(await _audioService.ResumeAsync(Context.Guild));
+        }
     }
 }

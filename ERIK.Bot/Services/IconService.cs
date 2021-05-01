@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Castle.Core.Internal;
@@ -19,12 +15,13 @@ namespace ERIK.Bot.Services
 {
     public class IconService
     {
+        private readonly DiscordBotSettings _botSettings;
+        private readonly DiscordSocketClient _client;
         private readonly EntityContext _context;
         private readonly ILogger<IconService> _logger;
-        private readonly DiscordSocketClient _client;
-        private readonly DiscordBotSettings _botSettings;
 
-        public IconService(EntityContext context, ILogger<IconService> logger, DiscordSocketClient client, IOptions<DiscordBotSettings> botSettings)
+        public IconService(EntityContext context, ILogger<IconService> logger, DiscordSocketClient client,
+            IOptions<DiscordBotSettings> botSettings)
         {
             _context = context;
             _logger = logger;
@@ -34,7 +31,7 @@ namespace ERIK.Bot.Services
 
         public void Start()
         {
-            Thread thread = new Thread(Loop);
+            var thread = new Thread(Loop);
             thread.Name = "Icon Thread";
             thread.Start();
         }
@@ -56,13 +53,11 @@ namespace ERIK.Bot.Services
             _logger.LogInformation("Checking for icon changes in {number} guilds", guilds.Count);
 
             foreach (var guild in guilds)
-            {
                 if (guild.IconSupport)
                 {
                     _logger.LogDebug("{id} has icon support enabled", guild.Id);
                     Task.Run(() => { CheckIcons(guild).ConfigureAwait(false); });
                 }
-            }
         }
 
         public async Task CheckIcons(Guild guild)
@@ -85,20 +80,15 @@ namespace ERIK.Bot.Services
                         {
                             if (icon.StartDate >= DateTime.Now && icon.EndDate <= DateTime.Now)
                             {
-                                SocketGuild socketGuild = _client.GetGuild(guild.Id);
+                                var socketGuild = _client.GetGuild(guild.Id);
 
                                 //Icon needs to be actived.
                                 var filePath = icon.DownloadAndOrGet(_botSettings, guild);
 
                                 if (!filePath.IsNullOrEmpty())
-                                {
                                     await socketGuild.ModifyAsync(x => { x.Icon = new Image(filePath); });
-                                }
                                 else
-                                {
                                     _logger.LogDebug("{guild} icon failed at download", guild);
-                                }
-
                             }
                         }
                         else if (icon.Active)
@@ -119,7 +109,6 @@ namespace ERIK.Bot.Services
                     {
                         defaultIcon = icon;
                         _logger.LogDebug("{guild} Is default [{icon}]", guild, icon.Name);
-
                     }
 
                     _logger.LogDebug("{guild} Completed Icon [{icon}]", guild, icon.Name);
@@ -127,7 +116,7 @@ namespace ERIK.Bot.Services
 
                 if (goToDefault)
                 {
-                    SocketGuild socketGuild = _client.GetGuild(guild.Id);
+                    var socketGuild = _client.GetGuild(guild.Id);
                     if (socketGuild == null)
                     {
                         _logger.LogError("Failed retrieving guild {guild}", guild.Id);
