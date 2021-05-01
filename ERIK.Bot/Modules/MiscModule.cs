@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -9,6 +11,7 @@ using Discord.Commands;
 using ERIK.Bot.Configurations;
 using ERIK.Bot.Context;
 using ERIK.Bot.Extensions;
+using ERIK.Bot.Handlers;
 using ERIK.Bot.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -21,19 +24,17 @@ namespace ERIK.Bot.Modules
         private readonly CommandService _commandService;
         private readonly ILogger<MiscModule> _logger;
         private readonly Responses _responses;
-        private AudioService _audioService;
         private readonly EntityContext _context;
 
 
         public MiscModule(CommandService commandService, IOptions<Responses> responses, EntityContext context,
-            ILogger<MiscModule> logger, CatContext catContext, AudioService audioService)
+            ILogger<MiscModule> logger, CatContext catContext)
         {
             _commandService = commandService;
             _context = context;
             _responses = responses.Value;
             _logger = logger;
             _catContext = catContext;
-            _audioService = audioService;
         }
 
         [Command("help", RunMode = RunMode.Async)]
@@ -124,27 +125,54 @@ namespace ERIK.Bot.Modules
         [Summary("Shows some guild information that was retreived from discord.")]
         public async Task Serverinfo()
         {
-            var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-
             var guild = Context.Guild;
-            var embed = new EmbedBuilder();
-            embed.WithThumbnailUrl(guild.IconUrl);
-            embed.WithTitle($"Server info {guild.Name}");
-            embed.WithDescription(guild.Description);
-            embed.WithFooter(version);
-            var stats = string.Empty;
-            stats += $"**Id:** {guild.Id}\n";
-            stats += $"**Total members:** {guild.MemberCount}\n";
-            stats += $"**Owner:** {guild.Owner.Nickname}\n";
-            stats += $"**Region:** {guild.VoiceRegionId}\n";
-            stats += $"**Created at:** {guild.CreatedAt:R}\n";
-            stats += $"**Verification level:** {guild.VerificationLevel}\n";
-            stats += $"**AFK Timeout:** {guild.AFKTimeout} minute(s)\n";
-            stats += $"**Icon:** {guild.IconUrl}\n";
 
-            embed.AddField("Generic stats", stats);
+            var fields = new List<EmbedFieldBuilder>();
 
-            await ReplyAsync(embed: embed.Build());
+            foreach (var p in guild.GetType().GetProperties().Where(p => !p.GetGetMethod().GetParameters().Any()))
+            {
+                var item = new EmbedFieldBuilder();
+                var value = p.GetValue(guild, null);
+                item.Name = p.Name;
+                item.IsInline = true;
+                if (value != null)
+                {
+                    item.Value = "???";
+                    if (typeof(bool).IsAssignableFrom(p.PropertyType) ||
+                        typeof(Int32).IsAssignableFrom(p.PropertyType) ||
+                        typeof(int).IsAssignableFrom(p.PropertyType) ||
+                        typeof(Int16).IsAssignableFrom(p.PropertyType) ||
+                        typeof(double).IsAssignableFrom(p.PropertyType) ||
+                        typeof(string).IsAssignableFrom(p.PropertyType) ||
+                        typeof(DateTimeOffset).IsAssignableFrom(p.PropertyType) ||
+                        typeof(DateTime).IsAssignableFrom(p.PropertyType))
+                    {
+                        item.Value = value.ToString();
+                        fields.Add(item);
+                    }
+                    else if (typeof(IEnumerable).IsAssignableFrom(p.PropertyType))
+                    {
+                        Type enumerableT = typeof(Enumerable);
+
+                        MemberInfo member = enumerableT.GetMember("Count")[0];
+
+                        // create the generic method (instead of int, replace with typeof(yourtype) in your code)
+                        MethodInfo method = ((MethodInfo)member).MakeGenericMethod(typeof(int));
+
+                        // invoke now becomes trivial
+                        int count = ((IReadOnlyCollection<object>)value).Count;
+
+                        item.Value = count.ToString();
+                        fields.Add(item);
+                    }
+                }
+
+            }
+
+
+            var builtEmbed = await EmbedHandler.CreateBasicEmbed($"Server info {guild.Name}", guild.Description, Color.Blue, fields);
+            ReplyAsync(embed: builtEmbed);
+
         }
 
         ////test code for bot response
