@@ -152,14 +152,6 @@ namespace ERIK.Bot.Modules
                     }
                     else if (typeof(IEnumerable).IsAssignableFrom(p.PropertyType))
                     {
-                        Type enumerableT = typeof(Enumerable);
-
-                        MemberInfo member = enumerableT.GetMember("Count")[0];
-
-                        // create the generic method (instead of int, replace with typeof(yourtype) in your code)
-                        MethodInfo method = ((MethodInfo)member).MakeGenericMethod(typeof(int));
-
-                        // invoke now becomes trivial
                         int count = ((IReadOnlyCollection<object>)value).Count;
 
                         item.Value = count.ToString();
