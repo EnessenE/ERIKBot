@@ -53,11 +53,13 @@ namespace ERIK.Bot.Services
             _logger.LogInformation("Checking for icon changes in {number} guilds", guilds.Count);
 
             foreach (var guild in guilds)
+            {
                 if (guild.IconSupport)
                 {
                     _logger.LogDebug("{id} has icon support enabled", guild.Id);
-                    Task.Run(() => { CheckIcons(guild).ConfigureAwait(false); });
+                    CheckIcons(guild).ConfigureAwait(false);
                 }
+            }
         }
 
         public async Task CheckIcons(Guild guild)
