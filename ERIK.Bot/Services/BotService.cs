@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Addons.Interactive;
@@ -9,13 +10,14 @@ using ERIK.Bot.Configurations;
 using ERIK.Bot.Context;
 using ERIK.Bot.Handlers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Victoria;
 
 namespace ERIK.Bot.Services
 {
-    internal class BotService
+    internal class BotService : IHostedService
     {
         private readonly DiscordBotSettings _botOptions;
         private readonly ILogger<BotService> _logger;
@@ -25,67 +27,18 @@ namespace ERIK.Bot.Services
         private DiscordSocketClient _client;
         private CommandService _commands;
         private LavaNode _lavaNode;
-        private ServiceProvider _serviceProvider;
+        private IServiceProvider _serviceProvider;
 
         public BotService(ILogger<BotService> logger, IOptions<DiscordBotSettings> botOptions,
-            ReactionService reactionService, IServiceCollection services, SpecialStuffHandler specialStuffHandler)
+            ReactionService reactionService, IServiceCollection services, SpecialStuffHandler specialStuffHandler, IServiceProvider serviceProvider, LavaNode lavaNode)
         {
             _logger = logger;
             _botOptions = botOptions.Value;
             _reactionService = reactionService;
             _services = services;
             _specialStuffHandler = specialStuffHandler;
-        }
-
-        public async Task Start(IServiceProvider services)
-        {
-            _client = new DiscordSocketClient();
-            var config = new CommandServiceConfig();
-
-            _commands = new CommandService(config);
-
-            //logger
-            _client.Log += Log;
-
-            //THIS IS HORRIBLE, but shamefully needed because bad library implementation of dep injection
-            //Gotta run core 3.1
-            _services.AddSingleton(_client);
-            _services.AddSingleton<InteractiveService>();
-            _services.AddTransient<StatusService>();
-            _services.AddTransient<IconService>();
-
-            _logger.LogInformation($"Attempting to connect to lavalink host: {_botOptions.LavaHost}");
-            _services.AddLavaNode(x =>
-            {
-                x.SelfDeaf = false;
-                x.Authorization = _botOptions.LavaKey;
-                x.Hostname = _botOptions.LavaHost;
-            });
-
-            _serviceProvider = _services.BuildServiceProvider();
-
-            //We need to retrieve this later so we can start the bot
-            _lavaNode = _serviceProvider.GetService<LavaNode>();
-
-
-            //connect events
-            InstallCommandsAsync();
-
-            //end
-
-            await _client.LoginAsync(TokenType.Bot, _botOptions.Token);
-            await _client.StartAsync();
-
-            var statusService = _serviceProvider.GetRequiredService<StatusService>();
-            statusService.Start();
-
-            var iconService = _serviceProvider.GetRequiredService<IconService>();
-            iconService.Start();
-            //Client has started
-            //_logger.LogInformation($"I am {_client.CurrentUser.Username}.");
-
-
-            // Block this task until the program is closed.
+            _serviceProvider = serviceProvider;
+            _lavaNode = lavaNode;
         }
 
         public async Task InstallCommandsAsync()
@@ -103,8 +56,7 @@ namespace ERIK.Bot.Services
             //
             // If you do not use Dependency Injection, pass null.
             // See Dependency Injection guide for more information.
-            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(),
-                _serviceProvider);
+            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _serviceProvider);
         }
 
         private async Task OnReadyAsync()
@@ -221,6 +173,45 @@ namespace ERIK.Bot.Services
                     throw new ArgumentOutOfRangeException();
             }
 
+            return Task.CompletedTask;
+        }
+
+        public async Task StartAsync(CancellationToken cancellationToken)
+        {
+            _client = new DiscordSocketClient();
+            var config = new CommandServiceConfig();
+
+            _commands = new CommandService(config);
+
+            //logger
+            _client.Log += Log;
+
+            _services.AddSingleton(_client);
+
+            _logger.LogInformation($"Attempting to connect to lavalink host: {_botOptions.LavaHost}");
+            _services.AddLavaNode(x =>
+            {
+                x.SelfDeaf = false;
+                x.Authorization = _botOptions.LavaKey;
+                x.Hostname = _botOptions.LavaHost;
+            });
+            //We need to retrieve this later so we can start the bot
+
+            //connect events
+            InstallCommandsAsync();
+
+            //end
+
+            await _client.LoginAsync(TokenType.Bot, _botOptions.Token);
+            await _client.StartAsync();
+
+            //Client has started
+            //_logger.LogInformation($"I am {_client.CurrentUser.Username}.");
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            _client.StopAsync();
             return Task.CompletedTask;
         }
     }

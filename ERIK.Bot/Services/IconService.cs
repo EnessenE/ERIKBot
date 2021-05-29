@@ -8,17 +8,20 @@ using ERIK.Bot.Configurations;
 using ERIK.Bot.Context;
 using ERIK.Bot.Extensions;
 using ERIK.Bot.Models;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace ERIK.Bot.Services
 {
-    public class IconService
+    public class IconService:IHostedService
     {
         private readonly DiscordBotSettings _botSettings;
         private readonly DiscordSocketClient _client;
         private readonly EntityContext _context;
         private readonly ILogger<IconService> _logger;
+        private Thread _iconThread;
+        private bool _stopped;
 
         public IconService(EntityContext context, ILogger<IconService> logger, DiscordSocketClient client,
             IOptions<DiscordBotSettings> botSettings)
@@ -27,18 +30,12 @@ namespace ERIK.Bot.Services
             _logger = logger;
             _client = client;
             _botSettings = botSettings.Value;
-        }
-
-        public void Start()
-        {
-            var thread = new Thread(Loop);
-            thread.Name = "Icon Thread";
-            thread.Start();
+            _stopped = false;
         }
 
         private void Loop()
         {
-            while (true)
+            while (!_stopped)
             {
                 CheckForIconChanges();
                 Thread.Sleep(60 * 1000);
@@ -142,6 +139,22 @@ namespace ERIK.Bot.Services
             {
                 _logger.LogDebug("No icons found for guild {guild}", guild.Id);
             }
+        }
+
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            _iconThread = new Thread(Loop);
+            _iconThread.Name = "Icon Thread";
+            _iconThread.Start();
+            return Task.CompletedTask;
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            _stopped = true;
+            _iconThread.Join();
+            return Task.CompletedTask;
+            
         }
     }
 }

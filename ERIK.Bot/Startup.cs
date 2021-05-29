@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
+using Discord.Addons.Interactive;
 using Discord.WebSocket;
 using ERIK.Bot.Configurations;
 using ERIK.Bot.Context;
@@ -84,18 +85,15 @@ namespace ERIK.Bot
                     .AllowAnyHeader();
             }));
             services.AddControllers();
-        }
 
-        public async void RunAsync()
-        {
-            var services = new ServiceCollection(); // Create a new instance of a service collection
-            ConfigureServices(services);
+            services.AddSingleton<InteractiveService>();
+            services.AddTransient<StatusService>();
+            services.AddTransient<IconService>();
 
-            var provider = services.BuildServiceProvider(); // Build the service provider
+            services.AddHostedService<StatusService>();
+            services.AddHostedService<IconService>();
 
-            await provider.GetRequiredService<BotService>().Start(provider); // Start the startup service
-
-            await Task.Delay(-1); // Keep the program alive
+            services.AddHostedService<BotService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -115,8 +113,6 @@ namespace ERIK.Bot
             app.UseSwaggerUi3();
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
-
-            RunAsync();
         }
     }
 }
