@@ -35,8 +35,7 @@ namespace ERIK.Bot.Modules
         [Summary("What apex character should I play?")]
         public async Task Apex()
         {
-            await ReplyAsync(_responses.ApexSentence.PickRandom() + " **" + _responses.ApexCharacters.PickRandom() +
-                             "**?");
+            await ReplyAsync(_responses.ApexSentence.PickRandom() + " **" + _responses.ApexCharacters.PickRandom() + "**?");
         }
     }
 }

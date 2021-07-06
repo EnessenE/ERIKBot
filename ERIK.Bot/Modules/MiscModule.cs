@@ -166,28 +166,5 @@ namespace ERIK.Bot.Modules
             ReplyAsync(embed: builtEmbed);
 
         }
-
-        ////test code for bot response
-        //[Command("reply", RunMode = RunMode.Async)]
-        //[Summary("the bot talks back")]
-        //public async Task response()
-        //{
-        //    await ReplyAsync("What is 2+2?");
-        //    var response = await NextMessageAsync();
-        //    if (response != null)
-        //        await ReplyAsync($"You replied: {response.Content}");
-        //    else
-        //        await ReplyAsync("You did not reply before the timeout");
-        //}
-
-
-        //[Command("alter", RunMode = RunMode.Async)]
-        //[Summary("the bot talks back")]
-        //public async Task altermessage()
-        //{
-        //    var Message = await Context.Channel.SendMessageAsync("test message");
-
-        //    await Message.ModifyAsync(msg => msg.Content = "test [edited]");
-        //}
     }
 }
