@@ -10,7 +10,7 @@ namespace ERIK.Bot.Extensions
     {
         public static string DownloadAndOrGet(this Icon icon, DiscordBotSettings botSettings, Guild guild)
         {
-            var filePath = $"{botSettings.IconDirectory}/{guild.Id}-{icon.Id}";
+            var filePath = $"{botSettings.IconDirectory}{guild.Id}-{icon.Id}";
             if (!File.Exists(filePath))
                 try
                 {

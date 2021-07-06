@@ -31,7 +31,7 @@ namespace ERIK.Bot.Modules
         }
 
 
-        [Command("Genius", RunMode = RunMode.Async)]
+        [Command("genius", RunMode = RunMode.Async)]
         [Description("Lookup lyrics of a specific track")]
         public async Task ShowGeniusLyrics()
         {
@@ -78,57 +78,57 @@ namespace ERIK.Bot.Modules
             Play("https://www.youtube.com/watch?v=8UFIYGkROII");
         }
 
-        [Command("Join")]
+        [Command("join")]
         public async Task JoinAndPlay()
         {
             await ReplyAsync(embed: await _audioService.JoinAsync(Context.Guild, Context.User as IVoiceState,
                 Context.Channel as ITextChannel));
         }
 
-        [Command("Leave")]
+        [Command("leave")]
         public async Task Leave()
         {
             await ReplyAsync(embed: await _audioService.LeaveAsync(Context.Guild));
         }
 
-        [Command("Play")]
+        [Command("play")]
         public async Task Play([Remainder] string search)
         {
             await ReplyAsync(
                 embed: await _audioService.PlayAsync(Context.User as SocketGuildUser, Context.Guild, search));
         }
 
-        [Command("Stop")]
+        [Command("stop")]
         public async Task Stop()
         {
             await ReplyAsync(embed: await _audioService.StopAsync(Context.Guild));
         }
 
-        [Command("List")]
+        [Command("list")]
         public async Task List()
         {
             await ReplyAsync(embed: await _audioService.ListAsync(Context.Guild));
         }
 
-        [Command("Skip")]
+        [Command("skip")]
         public async Task Skip()
         {
             await ReplyAsync(embed: await _audioService.SkipTrackAsync(Context.Guild));
         }
 
-        [Command("Volume")]
+        [Command("volume")]
         public async Task Volume(int volume)
         {
             await ReplyAsync(await _audioService.SetVolumeAsync(Context.Guild, volume));
         }
 
-        [Command("Pause")]
+        [Command("pause")]
         public async Task Pause()
         {
             await ReplyAsync(await _audioService.PauseAsync(Context.Guild));
         }
 
-        [Command("Resume")]
+        [Command("resume")]
         public async Task Resume()
         {
             await ReplyAsync(await _audioService.ResumeAsync(Context.Guild));
