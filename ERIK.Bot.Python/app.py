@@ -40,6 +40,6 @@ async def on_message(message):
 @client.event
 async def on_component(ctx: ComponentContext):
     # you may want to filter or change behaviour based on custom_id or message
-    print("A user has interacted with a component")
+    await commands.HandleInteraction(ctx)
 
 client.run(config['bot']['token'])
