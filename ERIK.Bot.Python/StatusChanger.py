@@ -1,5 +1,9 @@
-{
-  "statuses": [
+from RepeatedTimer import RepeatedTimer
+import numpy as np    
+import discord
+from loader import client
+
+Statuses= [
     "Hi?",
     "Bye?",
     "Fun fact, I am out of them",
@@ -31,4 +35,14 @@
     "Risk of Storm 2",
     "Checkmate, the chessening"
   ]
-}
+
+class StatusChanger():
+
+  async def SetStatus(self):
+      status = np.random.choice(Statuses)  
+      await client.change_presence(activity=discord.Game(name=status))
+      print(f"Setting status to: {status}")
+
+  async def Start(self):
+    await self.SetStatus()
+    RepeatedTimer(10000, self.SetStatus, "Status")
