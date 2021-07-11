@@ -3,12 +3,16 @@ from discord_slash.context import ComponentContext
 import loader
 import logging
 import configparser
+import os
 
 client = discord.Client(intents=discord.Intents.all())
 loader.init(client)
 
 config = configparser.ConfigParser()
-config.read('config.ini')
+env = os.getenv("BOT_ENV")
+config.read(f"config.{env}.ini")
+
+print(f"Running in environment {env}")
 
 logging.basicConfig(level=logging.INFO)
 

@@ -83,21 +83,28 @@ class Commands():
         # await button_ctx.origin_message.add_reaction("🤔")
 
         roles = button_ctx.guild.roles
+        try:
+            chosenButton = next(rolebutton for rolebutton in rolebuttons if rolebutton["custom_id"] == button_ctx.custom_id )
+        except:
+            chosenButton = None
 
-        chosenButton = next(rolebutton for rolebutton in rolebuttons if rolebutton["custom_id"] == button_ctx.custom_id )
-        chosenRole = next(role for role in roles if role.name == chosenButton["label"])
-        interacter = button_ctx.author
-        reasoning = "Requested through the slash command /role"
-
-        print(f"{interacter.display_name} wants to change role {chosenRole.name}")
-        text = "??"
-        if (chosenRole in interacter.roles):
-            await interacter.remove_roles(chosenRole, reason = reasoning)
-            text = f"{interacter.display_name} - {chosenRole.name} ✅"
+        if chosenButton == None:
+            await button_ctx.origin_message.delete()
+            await button_ctx.send("Please re-execute this command. This message has expired", hidden = True)
         else:
-            await interacter.add_roles(chosenRole, reason= reasoning)
-            text = f"{interacter.display_name} + {chosenRole.name} ✅"
-        await button_ctx.send(text, hidden = True)
+            chosenRole = next(role for role in roles if role.name == chosenButton["label"])
+            interacter = button_ctx.author
+            reasoning = "Requested through the slash command /role"
+
+            print(f"{interacter.display_name} wants to change role {chosenRole.name}")
+            text = "??"
+            if (chosenRole in interacter.roles):
+                await interacter.remove_roles(chosenRole, reason = reasoning)
+                text = f"{interacter.display_name} removed {chosenRole.name} ✅"
+            else:
+                await interacter.add_roles(chosenRole, reason= reasoning)
+                text = f"{interacter.display_name} added {chosenRole.name} ✅"
+            await button_ctx.send(text, hidden = True)
 
     @slash.slash(name='apex', description="Returns a random apex character for you to play.")
     async def ping(ctx):
