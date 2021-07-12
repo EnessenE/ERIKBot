@@ -43,7 +43,7 @@ async def server_messages(server: discord.Guild, to_edit: discord.Message) -> li
 		server.text_channels
 	))
 	for i, channel in tqdm(list(enumerate(channels)), desc=f"Channels {server.name}", file=sys.stdout):
-		await to_edit.edit(content=f"> Reading {channel.mention} ({i+1}/{len(channels)}) (total messages: {len(messages)}")
+		await to_edit.edit(content=f"> Reading {channel.mention} ({i+1}/{len(channels)}) (total messages: {len(messages)})")
 		# for every message in the channel up to a limit
 		async for message in tqdm_asyncio(
 				channel.history(after=date_after), desc=channel.name,
