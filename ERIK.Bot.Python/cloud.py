@@ -4,10 +4,8 @@ import sys
 from typing import Dict, List
 import json
 
-from discord.http import json_or_text
-import Image.make_image as make_image
-from Image.emoji_loader import EmojiResolver
-from Models.baseline import WCBaseline as WCModel
+from discord_slash.context import ComponentContext
+
 from preprocessing import resolve_tags, get_emojis
 from loader import *
 from datetime import datetime, timedelta
@@ -18,24 +16,7 @@ import traceback
 from loader import *
 import discord
 
-
-global models
-global emojis
-global emoji_resolver
-
-emoji_resolver: EmojiResolver = None
-models: Dict[discord.Guild, WCModel] = {}
-emojis: Dict[discord.Guild, Dict[str, int]] = {}
-
-async def emojiInitServer(server):
-	emoji_resolver.load_server_emojis(server)
-
-async def emojiInit():
-	global emoji_resolver
-	emoji_resolver = EmojiResolver(client)
-	await emoji_resolver.load_server_emojis()
-
-async def server_messages(server: discord.Guild, to_edit: discord.Message) -> list:
+async def server_messages(server: discord.Guild, to_edit: discord.Message, authorid) -> list:
 	date_after = server.created_at
 	messages = []
 	# get all readable channels
@@ -48,112 +29,90 @@ async def server_messages(server: discord.Guild, to_edit: discord.Message) -> li
 		print(len(messages))
 		await to_edit.edit(content=f"> Reading {channel.mention} ({i+1}/{len(channels)}) (total up til now: {len(messages)} messages)")
 		# for every message in the channel up to a limit
-		async for message in tqdm_asyncio(
-				channel.history(limit=100000, after=date_after), desc=channel.name, file=sys.stdout, leave=False
-		):
+		async for message in tqdm_asyncio(channel.history(limit=1000000, after=date_after), desc=channel.name, file=sys.stdout, leave=False):
 			if not message.author.bot:
-				messages.append((message.author.id, message.content))
-			for reaction in message.reactions:
-				reaction_str = str(reaction.emoji)
-				async for user in reaction.users():
-					messages.append((user.id, reaction_str))
-	return messages
+				messages.append(message)
+	
+	authorMessages = dict()
+	for message in messages:
+		if not message.author.bot:
+			if not message.author.id in authorMessages:
+				authorMessages[message.author.id] = []
+			authorMessages[message.author.id].append(message.content)
+
+	return authorMessages[authorid], authorMessages
 
 
-async def add_server(server: discord.Guild, messages):
-	# create and train a new model
-	models[server] = WCModel()
-	models[server].train(messages)
-
-	# count the emojis
-	semojis = set(str(emoji) for emoji in server.emojis)
-	emojis[server] = {e: 0 for e in semojis}
-	for _, message in messages:
-		for emoji in get_emojis(message, semojis):
-			emojis[server][emoji] += 1
-
-
-async def load(ctx, days=None):
+async def load(ctx, authorid, days=None):
 	finalmessages = []
-	await ctx.channel.send(f"Loading messages since the server creation", delete_after=20 * 60)
-	to_edit = await ctx.channel.send(".", delete_after=20 * 60)
+	await ctx.channel.send(f"Loading messages since the server creation")
+	to_edit = await ctx.channel.send(".")
 	server = ctx.guild
 	
 	preload = False
-	filepath = f"files/save_{server.id}.json"
-
-	if (os.path.isfile(filepath)):
+	authorFilepath = f"files/save_{server.id}_{authorid}.json"
+	if (os.path.isfile(authorFilepath)):
 		preload = True
 
 	if not preload:
-		messages = await server_messages(server, to_edit)
+		messages, authorMessages = await server_messages(server, to_edit, authorid)
 		# we save messages for fast reloading
-		with open(filepath, "w") as fmessages:
-			json.dump(messages, fmessages)
+		for lauthorid, value in authorMessages.items():
+			with open(f"files/save_{server.id}_{lauthorid}.json", "w") as fmessages:
+				json.dump(value, fmessages)
+				
 		finalmessages = messages
 		await to_edit.edit(content=f"Done, loaded new data from {len(server.channels)} channels!")
 	else:
 		await to_edit.edit(content=f"Loading preloaded data...")
-		with open(filepath) as jsonfile:
+		with open(authorFilepath) as jsonfile:
 			data = json.load(jsonfile)
 			for x in data:
-				finalmessages.append((x[0], x[1]))
+				finalmessages.append(x)
 		await to_edit.edit(content=f"Done, loaded preloaded data: {len(finalmessages)} messages!")
-	await add_server(server, finalmessages)
 	return finalmessages
 
 
 
-@slash.slash(name='cloud', description="Generate a worldcloud with your most recently said words!")
-async def cloud(ctx):
+@slash.slash(name='cloud', description="[ALPHA] Generate a worldcloud with your most recently said words!")
+async def cloud(ctx: ComponentContext):
 	try:
 		await ctx.defer()
-		server: discord.Guild = ctx.channel.guild
-		messages = await load(ctx)
-
-		print(f"TYPE IS ({type(messages)})")
-
-		messages_filtered = [message for message in messages if message[0] == ctx.author.id]
-
-		counter = collections.Counter(messages_filtered)
-
-		members = []
-		# get all unique members targeted in this command
-		# members = set(ctx.message.mentions)
-		# for user_id in args:
-		# 	try:
-		# 		member = server.get_member(int(user_id))
-		# 		if member:
-		# 			members.add(member)
-		# 	except ValueError:
-		# 		pass
-		# if there's none it's for the author of the command
-		if not members:
-			members.append(ctx.author)
+		print(f"A request has been made to generate a wordcloud by {ctx.author.display_name}")
 		async with ctx.channel.typing():
-			for member in members:
-				wc = models[server].word_cloud(member.id)
-				if not wc:
-					await ctx.send(
-						content=f"Sorry I don't have any data on {member.mention} ...",
-						allowed_mentions=discord.AllowedMentions.none()
-					)
-					continue
-				result = await make_image.wc_image(
-					resolve_tags(server, wc),
-					emoji_resolver
-				)
 
-				image = result[0]
-				text = f"{member.mention}'s Word Cloud: \n"
+			server: discord.Guild = ctx.channel.guild
+			messages = await load(ctx, ctx.author.id)
+
+			# messages_filtered = [message for message in messages if message[0] == ctx.author.id]
+
+			counter = collections.Counter(messages)
+
+			members = []
+			# get all unique members targeted in this command
+			# members = set(ctx.message.mentions)
+			# for user_id in args:
+			# 	try:
+			# 		member = server.get_member(int(user_id))
+			# 		if member:
+			# 			members.add(member)
+			# 	except ValueError:
+			# 		pass
+			# if there's none it's for the author of the command
+			if not members:
+				members.append(ctx.author)
+
+			for member in members:
+				#image = result[0]
+				text = f"{member.mention}'s Word cloud: \n"
 				for item in counter.most_common(10):
-					text += f"**{item[0][1]}** - {item[1]} used \n"
+					text += f"[{item[0]}] - {item[1]} times used \n"
 				
-				text += f"Checked {len(messages_filtered)} messages"
+				text += f"Checked {len(messages)} messages for this user"
 
 				await ctx.send(
 					content=text, allowed_mentions=discord.AllowedMentions.none(),
-					file=discord.File(fp=image, filename=f"{member.display_name}_word_cloud.png")
+					# file=discord.File(fp=image, filename=f"{member.display_name}_word_cloud.png")
 				)
 	except:
 		print("FAILED CLOUD ERROR:", sys.exc_info()[0])

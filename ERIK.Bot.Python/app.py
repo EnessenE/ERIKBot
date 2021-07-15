@@ -1,5 +1,4 @@
 from wcmodel import WCModel
-from Image.emoji_loader import EmojiResolver
 from typing import Dict, List
 import discord
 from discord_slash.context import ComponentContext
@@ -38,7 +37,6 @@ DEFAULT_DAYS = 50
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
     await statuses.Start()
-    await emojiInit()
 
 @client.event
 async def on_message(message):
@@ -56,7 +54,7 @@ async def on_message(message):
 
 @client.event
 async def on_guild_join(server: discord.Guild):
-    await emojiInitServer(server)
+    print(f"JOINED A NEW GUILD: {server.name}")
 
 @client.event
 async def on_component(ctx: ComponentContext):
@@ -64,10 +62,3 @@ async def on_component(ctx: ComponentContext):
     await commands.HandleInteraction(ctx)
 
 client.run(config['bot']['token'])
-
-@emojis.error
-async def emojis_error(ctx, error):
-	if isinstance(error, NoPrivateMessage):
-		await ctx.channel.send("This command can only be used in a server channel")
-	else:
-		traceback.print_exc()
