@@ -50,7 +50,7 @@ def get_emojis(msg: str, emojis: Set[str]) -> Set[str]:
 	return res
 
 
-def resolve_tags(guild: Guild, wordcloud: List[Tuple[str, float]]) -> List[Tuple[str, float]]:
+def resolve_tags(guild: Guild, listofstrings):
 	"""
 	Make discord tags readable: <@user.id> -> @user.name, <#channel.id> -> #channel.name and so on
 	:param guild: the Guild the request was from
@@ -74,4 +74,9 @@ def resolve_tags(guild: Guild, wordcloud: List[Tuple[str, float]]) -> List[Tuple
 			channel = guild.get_channel(channel_id)
 			return '#'+channel.name if channel is not None else match[0]
 		return match[0]
-	return [(re_discord_tag.sub(repl_tag, txt), val) for txt, val in wordcloud]
+
+	x = []
+	for txt in listofstrings:
+		t = re_discord_tag.sub(repl_tag, txt)
+		x.append(t)
+	return x

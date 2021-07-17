@@ -1,4 +1,3 @@
-from wcmodel import WCModel
 from typing import Dict, List
 import discord
 from discord_slash.context import ComponentContext
@@ -30,9 +29,6 @@ from cloud import *
 commands = Commands()
 statuses = StatusChanger()
 
-MAX_MESSAGES = 10_000
-DEFAULT_DAYS = 50
-
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
@@ -44,6 +40,7 @@ async def on_message(message):
         return
 
     messageattachments = message.attachments
+
     if len(messageattachments) > 0:
         for attachment in messageattachments:
             if attachment.filename.endswith('.exe'):
@@ -58,7 +55,9 @@ async def on_guild_join(server: discord.Guild):
 
 @client.event
 async def on_component(ctx: ComponentContext):
-    # you may want to filter or change behaviour based on custom_id or message
-    await commands.HandleInteraction(ctx)
+    # you may want to filter or change behaviour based on custom_id or message 
+    if (len(ctx.custom_id) > 30):
+        #GUID Interaction, otherwise drop it
+        await commands.HandleInteraction(ctx)
 
 client.run(config['bot']['token'])
