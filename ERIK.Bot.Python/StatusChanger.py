@@ -45,4 +45,4 @@ class StatusChanger():
 
   async def Start(self):
     await self.SetStatus()
-    RepeatedTimer(1000, self.SetStatus, "Status", self)
+    RepeatedTimer(1000, self.SetStatus)

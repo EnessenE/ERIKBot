@@ -1,9 +1,11 @@
+import time
 from discord_slash.context import ComponentContext
 from loader import *
 from discord_slash.utils.manage_commands import create_option, create_permission
 import numpy as np
 from discord_slash.model import ButtonStyle, SlashCommandPermissionType
 from discord_slash.utils.manage_components import wait_for_component, spread_to_rows, create_button, create_actionrow
+import math
 
 ApexCharacters = [
     'Bloodhound',
@@ -46,6 +48,10 @@ class Commands():
     async def test(ctx, optone: str):
         await ctx.send(content=f'I got you, you said {optone}!')
 
+    @slash.slash(name='age', description="How long have you been here?", guild_ids=[474590032267837471])
+    async def age(ctx:ComponentContext):
+        await ctx.send(content=f"You have been here for <t:{math.floor(time.mktime(ctx.author.joined_at.timetuple()))}:R>. Since {ctx.author.joined_at}")
+   
     @slash.slash(name='ping', description="Shows the bot latency")
     async def ping(ctx):
         await ctx.send(f'Pong! ({client.latency*1000}ms)')

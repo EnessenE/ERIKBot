@@ -152,7 +152,7 @@ async def cloud(ctx: ComponentContext, includecommands=False, includefullsentenc
 
 			excludeConnectives = ["and", "also", "besides", "further", "furthermore", "too", "moreover", "in addition", "then", "of equal importance", "equally important", "another,next", "afterward", "finally", "later", "last", "lastly", "at last", "now", "subsequently", "then", "when", "soon", "thereafter", "after a short time", "the next week (month", "day", "etc.)", "a minute later", "in the meantime", "meanwhile", "on the following day", "at length", "ultimately", "presently,first", "second", "(etc.)", "finally", "hence", "next", "then", "from here on", "to begin with", "last of all", "after", "before", "as soon as", "in the end", "gradually,above", "behind", "below", "beyond", "here", "there", "to the right (left)", "nearby", "opposite", "on the other side", "in the background", "directly ahead", "along the wall", "as you turn right",
 																																																																																								"at the top", "across the hall", "at this point", "adjacent to,for example", "to illustrate", "for instance", "to be specific", "such as", "moreover", "furthermore", "just as important", "similarly", "in the same way,as a result", "hence", "so", "accordingly", "as a consequence", "consequently", "thus", "since", "therefore", "for this reason", "because of this,to this end", "for this purpose", "with this in mind", "for this reason(s),like", "in the same manner (way)", "as so", "similarly,but", "in contrast", "conversely", "however", "still", "nevertheless", "nonetheless", "yet", "and yet", "on the other hand", "on the contrary", "or", "in spite of this", "actually", "in fact,in summary", "to sum up", "to repeat", "briefly", "in short", "finally", "on the whole", "therefore", "as I have said", "in conclusion", "as you can see"]
-			excludeCommands = ["!", "?", "/", "$", ";", ":", ">", "~", "1"]
+			excludeCommands = ["!", "?", "/", "$", ";", ":", ">", "~", "1", "."]
 			excludeArticles = ["a", "an", "the"]
 			excludeCommonPronouns = ["he", "she", "i", "you", "they", "it", "me", "her", "him", "us", "you", "them", "us", "your", "yours", "ours", "hers", "his", "its", "our", "theirs", "i'm", "am"]
 			excludePrepositions = ["above", "across", "after", "at", "around", "before", "behind", "below", "beside", "between", "by", "down", "during", "for", "from", "in", "inside", "onto", "of", "off", "on", "out", "through", "to", "under", "up", "with"]
@@ -178,7 +178,7 @@ async def cloud(ctx: ComponentContext, includecommands=False, includefullsentenc
 				includeverbs = True
 
 			if not includecommands:
-				messages = [elem for elem in messages if elem[:1]not in excludeCommands]
+				messages = [elem for elem in messages if elem[:1]not in excludeCommands and len(elem) < 8]
 
 
 			if not includeconnectives:
@@ -269,7 +269,7 @@ async def dmcloudimage(ctx: ComponentContext):
 				content="Here is your latest worldcloud!",
 				file=discord.File(fp, filename=f"{ctx.author.id}_word_cloud.png"))
 	else:
-		ctx.author.send(content="Sorry, couldn't find a image that is connected to your user. Have you run /cloud? If not, run it in the desired guild.")
+		await ctx.author.send(content="Sorry, couldn't find a image that is connected to your user. Have you run /cloud? If not, run it in the desired guild.")
 
 @cloud.error
 async def cloud_error(ctx, error):
