@@ -1,10 +1,11 @@
+import time
 from discord_slash.context import ComponentContext
 from loader import *
 from discord_slash.utils.manage_commands import create_option, create_permission
 import numpy as np
-from discord_slash.utils.manage_components import create_button, create_actionrow
 from discord_slash.model import ButtonStyle, SlashCommandPermissionType
-from discord_slash.utils.manage_components import wait_for_component, spread_to_rows
+from discord_slash.utils.manage_components import wait_for_component, spread_to_rows, create_button, create_actionrow
+import math
 
 ApexCharacters = [
     'Bloodhound',
@@ -47,17 +48,15 @@ class Commands():
     async def test(ctx, optone: str):
         await ctx.send(content=f'I got you, you said {optone}!')
 
+    @slash.slash(name='age', description="How long have you been here?", guild_ids=[474590032267837471])
+    async def age(ctx:ComponentContext):
+        await ctx.send(content=f"You have been here for <t:{math.floor(time.mktime(ctx.author.joined_at.timetuple()))}:R>. Since {ctx.author.joined_at}")
+   
     @slash.slash(name='ping', description="Shows the bot latency")
     async def ping(ctx):
         await ctx.send(f'Pong! ({client.latency*1000}ms)')
 
-    @slash.slash(name='role', description="Add or remove yourself from a gamerole",
-        #     permissions={
-        #       250621419325489153: [
-        #         create_permission(287639043351773184, SlashCommandPermissionType.ROLE, True),
-        #       ]
-        #    }
-           )
+    @slash.slash(name='role', description="Add or remove yourself from a gamerole")
     async def rolesetter(ctx):
         roles = ctx.guild.roles
         rows = []
@@ -71,7 +70,6 @@ class Commands():
                 rolebuttons.append(button)
                 tempButtons.append(button)
 
-        # round(rolebuttons.count / 5)
         rows = spread_to_rows(*tempButtons)
 
         await ctx.send("Choose the role you want to change", components=rows)
@@ -100,10 +98,10 @@ class Commands():
             text = "??"
             if (chosenRole in interacter.roles):
                 await interacter.remove_roles(chosenRole, reason = reasoning)
-                text = f"{interacter.display_name} removed {chosenRole.name} ✅"
+                text = f"{interacter.display_name} left {chosenRole.name} ✅"
             else:
                 await interacter.add_roles(chosenRole, reason= reasoning)
-                text = f"{interacter.display_name} added {chosenRole.name} ✅"
+                text = f"{interacter.display_name} joined {chosenRole.name} ✅"
             await button_ctx.send(text, hidden = True)
 
     @slash.slash(name='apex', description="Returns a random apex character for you to play.")

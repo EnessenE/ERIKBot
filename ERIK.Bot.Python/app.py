@@ -1,3 +1,4 @@
+from typing import Dict, List
 import discord
 from discord_slash.context import ComponentContext
 import loader
@@ -24,7 +25,7 @@ logger.addHandler(handler)
 
 from StatusChanger import StatusChanger
 from commands import Commands
-
+from cloud import *
 commands = Commands()
 statuses = StatusChanger()
 
@@ -38,12 +39,25 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.content.startswith('$hello'):
-        await message.channel.send('Hello!')
+    messageattachments = message.attachments
+
+    if len(messageattachments) > 0:
+        for attachment in messageattachments:
+            if attachment.filename.endswith('.exe'):
+                await message.add_reaction('❗')
+                await message.reply("Careful, this is a .exe file!")
+            else:
+                break
+
+@client.event
+async def on_guild_join(server: discord.Guild):
+    print(f"JOINED A NEW GUILD: {server.name}")
 
 @client.event
 async def on_component(ctx: ComponentContext):
-    # you may want to filter or change behaviour based on custom_id or message
-    await commands.HandleInteraction(ctx)
+    # you may want to filter or change behaviour based on custom_id or message 
+    if (len(ctx.custom_id) > 30):
+        #GUID Interaction, otherwise drop it
+        await commands.HandleInteraction(ctx)
 
 client.run(config['bot']['token'])
