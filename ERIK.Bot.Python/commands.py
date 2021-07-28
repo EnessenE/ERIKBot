@@ -48,9 +48,9 @@ class Commands():
     async def test(ctx, optone: str):
         await ctx.send(content=f'I got you, you said {optone}!')
 
-    @slash.slash(name='age', description="How long have you been here?", guild_ids=[474590032267837471])
+    @slash.slash(name='age', description="How long have you been here?")
     async def age(ctx:ComponentContext):
-        await ctx.send(content=f"You have been here for <t:{math.floor(time.mktime(ctx.author.joined_at.timetuple()))}:R>. Since {ctx.author.joined_at}")
+        await ctx.send(content=f"You have joined <t:{math.floor(time.mktime(ctx.author.joined_at.timetuple()))}:R>. Since {ctx.author.joined_at} exactly.")
    
     @slash.slash(name='ping', description="Shows the bot latency")
     async def ping(ctx):
@@ -109,4 +109,3 @@ class Commands():
         char = np.random.choice(ApexCharacters)
         sent = np.random.choice(ApexSentence)
         await ctx.send(f'{str(sent)} **{str(char)}**?')
-

@@ -25,7 +25,7 @@ Statuses= [
     "Buildremove",
     "Boringline Florida",
     "Watcher 3: The Normal Hunt",
-    "Apex Predators",
+    "Alpha Predators",
     "Goal 2",
     "Sid Meier's Hex Game",
     "Car League",
@@ -33,7 +33,16 @@ Statuses= [
     "Cold Brass",
     "SWAT 5: The one with magic",
     "Risk of Storm 2",
-    "Checkmate, the chessening"
+    "Checkmate, the chessening",
+    "Cup of losers",
+    "with a berlin sausage",
+    "with a german sausage",
+    "with a french bakery",
+    "with some noodles",
+    "with some dumplings",
+    "with delaying vital choices"
+
+    "with some volatile compounds in storage"
   ]
 
 class StatusChanger():
