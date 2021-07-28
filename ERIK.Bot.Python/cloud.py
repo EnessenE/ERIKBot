@@ -1,8 +1,10 @@
 import collections
 from enum import auto
+import io
 import os
 
 from PIL import Image
+from discord.message import Message
 from discord_slash.utils.manage_components import create_actionrow, create_button
 from preprocessing import resolve_tags
 import sys
@@ -36,8 +38,6 @@ async def server_messages(server: discord.Guild, to_edit: discord.Message, autho
 		server.text_channels
 	))
 	for i, channel in tqdm(list(enumerate(channels)), desc=f"Channels {server.name}", file=sys.stdout):
-		print(channel.name)
-		print(len(messages))
 		await to_edit.edit(content=f"> Reading {channel.mention} ({i+1}/{len(channels)}) (total up til now: {len(messages)} messages)")
 		# for every message in the channel up to a limit
 		async for message in tqdm_asyncio(channel.history(limit=1000000, after=date_after), desc=channel.name, file=sys.stdout, leave=False):
@@ -46,16 +46,20 @@ async def server_messages(server: discord.Guild, to_edit: discord.Message, autho
 
 	authorMessages = dict()
 	for message in messages:
+		message:Message = message
+
 		if not message.author.bot:
 			if not message.author.id in authorMessages:
 				authorMessages[message.author.id] = []
-			authorMessages[message.author.id].append(message.content)
+			item = [message.content, message.created_at]
+			authorMessages[message.author.id].append(item)
 
 	return authorMessages[authorid], authorMessages
 
 
 async def load(ctx: ComponentContext, authorid, to_edit):
-	finalmessages = []
+	strippedMessages = []
+	fullMessages = []
 	await to_edit.edit(content=f"Loading messages since the server creation")
 	server = ctx.guild
 
@@ -69,14 +73,12 @@ async def load(ctx: ComponentContext, authorid, to_edit):
 
 		scanning[ctx.guild.id] = True
 
-		messages, authorMessages = await server_messages(server, to_edit, authorid)
+		fullMessages, authorMessages = await server_messages(server, to_edit, authorid)
 		# we save messages for fast reloading
 		for lauthorid, value in authorMessages.items():
-			with open(f"files/save_{server.id}_{lauthorid}.json", "w") as fmessages:
-				json.dump(value, fmessages)
-
-		finalmessages = messages
-
+			with io.open(f"files/save_{server.id}_{lauthorid}.json", 'w', encoding='utf-8') as f:
+  				f.write(json.dumps(value, indent=4, sort_keys=True, default=str))
+		
 		scanning[ctx.guild.id] = False
 
 		await to_edit.edit(content=f"Done, loaded new data from {len(server.channels)} channels!")
@@ -85,9 +87,13 @@ async def load(ctx: ComponentContext, authorid, to_edit):
 		with open(authorFilepath) as jsonfile:
 			data = json.load(jsonfile)
 			for x in data:
-				finalmessages.append(x)
-		await to_edit.edit(content=f"Done, loaded preloaded data: {len(finalmessages)} messages!")
-	return finalmessages
+				fullMessages.append(x)
+		await to_edit.edit(content=f"Done, loaded preloaded data: {len(fullMessages)} messages!")
+	
+	for message in fullMessages:
+		strippedMessages.append(message[0])
+		
+	return strippedMessages, fullMessages
 
 
 @slash.slash(name='cloud', description="Generate a worldcloud with your most recently said words!",
@@ -154,7 +160,7 @@ async def cloud(ctx: ComponentContext, includecommands=False, includefullsentenc
 		
 		global scanning
 		if ctx.guild.id in scanning and scanning[ctx.guild.id] == True:
-			await ctx.send("Sorry, currently already scanning a guild. This is quite an intensive process so I can only do one at the time. Try again later.")
+			await ctx.send("Sorry, currently already scanning a guild. This is quite an intensive process so I can only do one at the time. Try again later.", hidden=True)
 			return
 
 		print(f"A request has been made to generate a wordcloud by {ctx.author.mention}")
@@ -162,7 +168,7 @@ async def cloud(ctx: ComponentContext, includecommands=False, includefullsentenc
 
 		server: discord.Guild = ctx.channel.guild
 		to_edit = await ctx.send("Starting data retrieval...")
-		messages = await load(ctx, ctx.author.id, to_edit)
+		messages, fullMessages = await load(ctx, ctx.author.id, to_edit)
 		ctx.channel.typing()
 
 		await to_edit.edit(content="All required data retrieved, processing...")
@@ -264,7 +270,7 @@ async def cloud(ctx: ComponentContext, includecommands=False, includefullsentenc
 		action_row = create_actionrow(*buttons)
 
 		with open(filepath, 'rb') as fp:
-			await ctx.send(
+			await to_edit.edit(
 				content=text, allowed_mentions=discord.AllowedMentions.none(),
 				file=discord.File(
 					fp, filename=f"{member.mention}_word_cloud.png"),
