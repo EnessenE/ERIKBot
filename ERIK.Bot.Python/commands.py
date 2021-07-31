@@ -1,10 +1,10 @@
 import time
 from discord_slash.context import ComponentContext
 from loader import *
-from discord_slash.utils.manage_commands import create_option, create_permission
+from discord_slash.utils.manage_commands import create_option
 import numpy as np
 from discord_slash.model import ButtonStyle, SlashCommandPermissionType
-from discord_slash.utils.manage_components import wait_for_component, spread_to_rows, create_button, create_actionrow
+from discord_slash.utils.manage_components import spread_to_rows, create_button
 import math
 
 ApexCharacters = [
@@ -54,7 +54,7 @@ class Commands():
    
     @slash.slash(name='ping', description="Shows the bot latency")
     async def ping(ctx):
-        await ctx.send(f'Pong! ({client.latency*1000}ms)')
+        await ctx.send(f'Pong! ({client.latency*1000} ms)')
 
     @slash.slash(name='role', description="Add or remove yourself from a gamerole")
     async def rolesetter(ctx):

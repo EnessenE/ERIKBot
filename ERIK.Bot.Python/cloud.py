@@ -1,7 +1,10 @@
 import collections
 from enum import auto
 import io
+import math
 import os
+import time
+from dateutil import parser
 
 from PIL import Image
 from discord.message import Message
@@ -51,7 +54,7 @@ async def server_messages(server: discord.Guild, to_edit: discord.Message, autho
 		if not message.author.bot:
 			if not message.author.id in authorMessages:
 				authorMessages[message.author.id] = []
-			item = [message.content, message.created_at]
+			item = [message.content, message.created_at, message.author.id ,len(message.reactions), len(message.mentions)]
 			authorMessages[message.author.id].append(item)
 
 	return authorMessages[authorid], authorMessages
@@ -160,7 +163,7 @@ async def cloud(ctx: ComponentContext, includecommands=False, includefullsentenc
 		
 		global scanning
 		if ctx.guild.id in scanning and scanning[ctx.guild.id] == True:
-			await ctx.send("Sorry, currently already scanning a guild. This is quite an intensive process so I can only do one at the time. Try again later.", hidden=True)
+			await ctx.send("Sorry, currently already scanning this guild. This is quite an intensive process so this can take a bit.", hidden=True)
 			return
 
 		print(f"A request has been made to generate a wordcloud by {ctx.author.mention}")
@@ -232,19 +235,8 @@ async def cloud(ctx: ComponentContext, includecommands=False, includefullsentenc
 
 		counter = collections.Counter(messages)
 
-		# get all unique members targeted in this command
-		# members = set(ctx.message.mentions)
-		# for user_id in args:
-		# 	try:
-		# 		member = server.get_member(int(user_id))
-		# 		if member:
-		# 			members.add(member)
-		# 	except ValueError:
-		# 		pass
-		# if there's none it's for the author of the command
-
 		member = ctx.author
-		# image = result[0]
+
 		text = f"{member.mention}'s Word cloud: \n"
 		for item in counter.most_common(mostcommonsize):
 			itemtext = item[0]
@@ -281,6 +273,74 @@ async def cloud(ctx: ComponentContext, includecommands=False, includefullsentenc
 		print("FAILED CLOUD ERROR:", sys.exc_info()[0])
 		await ctx.send(content="Failed to create a worldcloud for you :(")
 		raise
+
+
+@slash.slash(name='chatstats', description="Get random statistics about chats in this guild!")
+async def historygraph(ctx: ComponentContext):
+	try:
+		await ctx.defer()
+		
+		global scanning
+		if ctx.guild.id in scanning and scanning[ctx.guild.id] == True:
+			await ctx.send("Sorry, currently already scanning this guild. This is quite an intensive process so this can take a bit.", hidden=True)
+			return
+
+		print(f"A request has been made to generate a wordcloud by {ctx.author.mention}")
+		ctx.channel.typing()
+
+		server: discord.Guild = ctx.channel.guild
+		to_edit = await ctx.send("Starting data retrieval...")
+		a, fullMessages = await load(ctx, ctx.author.id, to_edit)
+		ctx.channel.typing()
+
+		await to_edit.edit(content="All required data retrieved, processing...")
+
+		# image = result[0]
+		text = f"**{server.name}**'s chat statistics: \n"
+
+		text += f"Checked {len(fullMessages)} items for this guild \n"
+
+		highestReactedChat = ""
+		highestReactedAmount = 0
+
+		for message in fullMessages:
+			if highestReactedAmount < message[3]:
+				highestReactedChat = message[0]
+				highestReactedAmount = message[3]
+
+		if highestReactedAmount == 0:
+			highestReactedChat = "No chat with reactions found"
+
+		highestMentionedChat = ""
+		highestMentionedAmount = 0
+
+		for message in fullMessages:
+			if highestMentionedAmount < message[4]:
+				highestMentionedChat = message[0]
+				highestMentionedAmount = message[4]
+
+		if highestMentionedAmount == 0:
+			highestMentionedChat = "No chat with mentions found"
+
+		text += f"{len(fullMessages)} chats were sent since creation \n"
+
+		if len(highestReactedChat) > 253:
+			highestReactedChat = highestReactedChat[:250] + "..."
+		if len(highestMentionedChat) > 253:
+			highestMentionedChat = highestMentionedChat[:250] + "..."
+
+		text += f"```{highestReactedChat}``` by <@{message[2]}> has the most reactions with {highestReactedAmount} reactions sent <t:{math.floor(time.mktime(parser.parse(message[1]).timetuple()))}:R>.\n"
+		text += f"```{highestMentionedChat}``` by <@{message[2]}> has the most mentions with {highestMentionedAmount} mentions sent <t:{math.floor(time.mktime(parser.parse(message[1]).timetuple()))}:R>.\n"
+		
+		await to_edit.edit(
+			content=text, allowed_mentions=discord.AllowedMentions.none()
+		)
+
+	except:
+		print("FAILED CLOUD ERROR:", sys.exc_info()[0])
+		await ctx.send(content="Failed to get a stats for you")
+		raise
+
 
 @slash.component_callback()
 async def dmcloudimage(ctx: ComponentContext):
