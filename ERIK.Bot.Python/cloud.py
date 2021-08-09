@@ -18,7 +18,8 @@ from wordcloud import WordCloud
 from discord_slash.context import ComponentContext
 from discord_slash.model import ButtonStyle, SlashCommandOptionType
 from discord_slash.utils.manage_commands import create_option
-
+from os import listdir
+from os.path import isfile, join
 from loader import *
 from datetime import datetime, timedelta
 from tqdm import tqdm
@@ -54,13 +55,18 @@ async def server_messages(server: discord.Guild, to_edit: discord.Message, autho
 		if not message.author.bot:
 			if not message.author.id in authorMessages:
 				authorMessages[message.author.id] = []
-			item = [message.content, message.created_at, message.author.id ,len(message.reactions), len(message.mentions)]
+			
+			reactiontotal = 0
+			for reaction in message.reactions:
+				reactiontotal += reaction.count
+
+			item = [message.content, message.created_at, message.author.id , reactiontotal, len(message.mentions)]
 			authorMessages[message.author.id].append(item)
 
 	return authorMessages[authorid], authorMessages
 
 
-async def load(ctx: ComponentContext, authorid, to_edit):
+async def load(ctx: ComponentContext, authorid, to_edit, alldata = False):
 	strippedMessages = []
 	fullMessages = []
 	await to_edit.edit(content=f"Loading messages since the server creation")
@@ -95,7 +101,18 @@ async def load(ctx: ComponentContext, authorid, to_edit):
 	
 	for message in fullMessages:
 		strippedMessages.append(message[0])
+
+	if alldata:
+		mypath = f"files/"
+		for f in listdir(mypath):
+			fullpath = join(mypath, f)
+			if isfile(fullpath) and str(ctx.guild.id) in f:
+				with open(fullpath) as jsonfile:
+					data = json.load(jsonfile)
+					for x in data:
+						fullMessages.append(x)
 		
+
 	return strippedMessages, fullMessages
 
 
@@ -275,8 +292,16 @@ async def cloud(ctx: ComponentContext, includecommands=False, includefullsentenc
 		raise
 
 
-@slash.slash(name='chatstats', description="Get random statistics about chats in this guild!")
-async def historygraph(ctx: ComponentContext):
+@slash.slash(name='chatstats', description="Get random statistics about you in this guild!",
+			 options=[
+				 create_option(
+					 name="scanguild",
+					 description="Target the entire guild?",
+					 option_type=SlashCommandOptionType.BOOLEAN,
+					 required=False,
+				 ),
+			 ])
+async def chatstats(ctx: ComponentContext, scanguild: bool = False):
 	try:
 		await ctx.defer()
 		
@@ -290,13 +315,19 @@ async def historygraph(ctx: ComponentContext):
 
 		server: discord.Guild = ctx.channel.guild
 		to_edit = await ctx.send("Starting data retrieval...")
-		a, fullMessages = await load(ctx, ctx.author.id, to_edit)
+		a, fullMessages = await load(ctx, ctx.author.id, to_edit, alldata=scanguild)
 		ctx.channel.typing()
 
 		await to_edit.edit(content="All required data retrieved, processing...")
 
+		target = None
+		if scanguild:
+			target = server
+		else:
+			target = ctx.author
+
 		# image = result[0]
-		text = f"**{server.name}**'s chat statistics: \n"
+		text = f"**{target.name or target.display_name}**'s chat statistics: \n"
 
 		text += f"Checked {len(fullMessages)} items for this guild \n"
 
@@ -305,32 +336,38 @@ async def historygraph(ctx: ComponentContext):
 
 		for message in fullMessages:
 			if highestReactedAmount < message[3]:
-				highestReactedChat = message[0]
+				highestReactedChat = message
 				highestReactedAmount = message[3]
-
-		if highestReactedAmount == 0:
-			highestReactedChat = "No chat with reactions found"
 
 		highestMentionedChat = ""
 		highestMentionedAmount = 0
 
 		for message in fullMessages:
 			if highestMentionedAmount < message[4]:
-				highestMentionedChat = message[0]
+				highestMentionedChat = message
 				highestMentionedAmount = message[4]
-
-		if highestMentionedAmount == 0:
-			highestMentionedChat = "No chat with mentions found"
 
 		text += f"{len(fullMessages)} chats were sent since creation \n"
 
 		if len(highestReactedChat) > 253:
 			highestReactedChat = highestReactedChat[:250] + "..."
+		elif len(highestReactedChat) == 0:
+			highestReactedChat = "(this is an image, I can't display this at the moment) ~erik "
 		if len(highestMentionedChat) > 253:
 			highestMentionedChat = highestMentionedChat[:250] + "..."
+		elif len(highestMentionedChat) == 0:
+			highestMentionedChat = "(this is an image, I can't display this at the moment) ~erik "
 
-		text += f"```{highestReactedChat}``` by <@{message[2]}> has the most reactions with {highestReactedAmount} reactions sent <t:{math.floor(time.mktime(parser.parse(message[1]).timetuple()))}:R>.\n"
-		text += f"```{highestMentionedChat}``` by <@{message[2]}> has the most mentions with {highestMentionedAmount} mentions sent <t:{math.floor(time.mktime(parser.parse(message[1]).timetuple()))}:R>.\n"
+		if highestMentionedAmount == 0:
+			text += "No chat with mentions found.\n"
+		else:
+			text += f"```{highestMentionedChat[0]}``` by <@{highestMentionedChat[2]}> has the most mentions with {highestMentionedAmount} mentions sent <t:{math.floor(time.mktime(parser.parse(highestMentionedChat[1]).timetuple()))}:R>.\n"
+
+		if highestReactedAmount == 0:
+			text += "No chat with reactions found.\n"
+		else:
+			text += f"```{highestReactedChat[0]}``` by <@{highestReactedChat[2]}> has the most reactions with {highestReactedAmount} reactions sent <t:{math.floor(time.mktime(parser.parse(highestReactedChat[1]).timetuple()))}:R>.\n"
+
 		
 		await to_edit.edit(
 			content=text, allowed_mentions=discord.AllowedMentions.none()

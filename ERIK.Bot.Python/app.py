@@ -1,5 +1,8 @@
 from typing import Dict, List
 import discord
+from discord.channel import TextChannel
+from discord.role import Role
+from discord.user import User
 from discord_slash.context import ComponentContext
 import loader
 import logging
@@ -59,5 +62,28 @@ async def on_component(ctx: ComponentContext):
     if (len(ctx.custom_id) > 30):
         #GUID Interaction, otherwise drop it
         await commands.HandleInteraction(ctx)
+
+monitoredGuildsRecentJoins = []
+
+@client.event 
+async def on_member_join(member:discord.Member):
+  print("A new user has joined a guild")
+
+  if member.guild.id in monitoredGuild:
+      print("A user has joined a monitored guild")
+      #monitoredGuildsRecentJoins[member.guild.id] = monitoredGuildsRecentJoins[member.guild.id] + 1
+      if member.id in flaggedUsers:
+            print("A flagged user has joined a monitored guild")
+
+            role:Role = discord.utils.get(member.guild.roles,name="restricted")
+            await member.add_roles(role)
+            warnMessage = f"Warning, a flagged user has joined the guild **{member.guild.name}**. \nTheir permissions have been restricted. Please manually review permissions of {member.mention} (display name: {member.display_name}, id: {member.id})"
+            textChannel:TextChannel = discord.utils.get(member.guild.channels, name="admin_channel")
+            if (textChannel!=None):
+                await textChannel.send(warnMessage)
+            else:
+                owner:User = client.get_user(botOwner)
+                await owner.send(warnMessage)
+            
 
 client.run(config['bot']['token'])

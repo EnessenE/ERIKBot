@@ -24,10 +24,13 @@ ApexCharacters = [
     'Rampart',
     'Horizon',
     'Fuse',
-    'Valkyrie'
+    'Valkyrie',
+    'Seeker'
 ]
-ApexSentence = ['Have you tried', 'How about', 'Try', 'Maybe', 'Ever tried', '', 'Maybe try', 'Just play',
-                'Have you tried pressing Q quicker with', 'Slide more as', 'Abuse the charge tower with', 'Lose your rp with']
+ApexSentence = ['Have you tried', 'How about', 'Try', 'Maybe', 'Ever tried', 'Hmmm, ', 'Maybe try', 'Just play',
+                'Have you tried pressing Q quicker with', 'Slide more as', 'Abuse the charge tower with', 'Lose your rp with', 'Complain about balancing with',
+                'Get oneshot with', 'Lose with', 'Win with', 'Go back to the lobby with', 'Rant about playing with masters because of poor matchmaking with',
+                'Misstime your ultimate with', "Thought about", "Get spotted through a wall with"]
 
 rolebuttons = []
 
