@@ -76,7 +76,8 @@ async def on_member_join(member:discord.Member):
             print("A flagged user has joined a monitored guild")
 
             role:Role = discord.utils.get(member.guild.roles,name="restricted")
-            await member.add_roles(role)
+            await member.add_roles(role, reason="Flagged user")
+            
             warnMessage = f"Warning, a flagged user has joined the guild **{member.guild.name}**. \nTheir permissions have been restricted. Please manually review permissions of {member.mention} (display name: {member.display_name}, id: {member.id})"
             textChannel:TextChannel = discord.utils.get(member.guild.channels, name="admin_channel")
             if (textChannel!=None):
