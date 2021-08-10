@@ -263,7 +263,7 @@ async def cloud(ctx: ComponentContext, includecommands=False, includefullsentenc
 
 		text += f"Checked {len(messages)} items for this user"
 
-		mask = np.array(Image.open("tree.png"))
+		mask = np.array(Image.open("images/tree.png"))
 
 		await to_edit.edit(content="All required data retrieved and processed, generating wordcloud...")
 
