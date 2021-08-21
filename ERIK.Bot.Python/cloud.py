@@ -33,6 +33,7 @@ import numpy as np
 global scanning
 scanning = dict()
 
+
 async def server_messages(server: discord.Guild, to_edit: discord.Message, authorid) -> list:
 	date_after = server.created_at
 	messages = []
