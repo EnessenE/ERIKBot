@@ -1,6 +1,7 @@
 from RepeatedTimer import RepeatedTimer
 import numpy as np    
 import discord
+import time
 from loader import client
 
 Statuses= [
@@ -37,7 +38,7 @@ Statuses= [
     "Cup of losers",
     "with a berlin sausage",
     "with a german sausage",
-    "with a french bakery",
+    "with a french pastry",
     "with some noodles",
     "with some dumplings",
     "with delaying vital choices"
@@ -45,13 +46,17 @@ Statuses= [
     "with some volatile compounds in storage"
   ]
 
+global tim
+
 class StatusChanger():
 
   async def SetStatus(self):
+      print(f"Attempting to set status to a status")
       status = np.random.choice(Statuses)  
       await client.change_presence(activity=discord.Game(name=status))
       print(f"Setting status to: {status}")
 
   async def Start(self):
-    await self.SetStatus()
-    RepeatedTimer(1000, self.SetStatus)
+    while 1:
+        await self.SetStatus()
+        time.sleep(600)
