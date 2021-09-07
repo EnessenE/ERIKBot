@@ -59,4 +59,4 @@ class StatusChanger():
   async def Start(self):
     while 1:
         await self.SetStatus()
-        time.sleep(600)
+        time.sleep(3600)
