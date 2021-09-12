@@ -56,7 +56,8 @@ class StatusChanger():
       await client.change_presence(activity=discord.Game(name=status))
       print(f"Setting status to: {status}")
 
-  async def Start(self):
+  async def Start(self) -> None:
+    print(f"Started status changer")
     while 1:
         await self.SetStatus()
-        time.sleep(3600)
+        time.sleep(10)

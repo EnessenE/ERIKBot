@@ -4,6 +4,8 @@ from discord.channel import TextChannel
 from discord.role import Role
 from discord.user import User
 from discord_slash.context import ComponentContext
+from threading import Thread
+
 import loader
 import logging
 import configparser
@@ -29,13 +31,16 @@ logger.addHandler(handler)
 from StatusChanger import StatusChanger
 from commands import Commands
 from cloud import *
+import asyncio
 commands = Commands()
 statuses = StatusChanger()
 
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
-    await statuses.Start()
+    
+    thread = Thread(target = startStatusThread)
+    thread.start()
 
 @client.event
 async def on_message(message):
@@ -86,5 +91,7 @@ async def on_member_join(member:discord.Member):
                 owner:User = client.get_user(botOwner)
                 await owner.send(warnMessage)
             
+def startStatusThread():
+    asyncio.run(statuses.Start())
 
 client.run(config['bot']['token'])
