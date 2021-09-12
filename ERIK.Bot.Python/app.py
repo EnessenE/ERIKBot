@@ -94,4 +94,4 @@ async def on_member_join(member:discord.Member):
 def startStatusThread():
     asyncio.run(statuses.Start())
 
-client.run(config['bot']['token'])
+client.run(os.getenv("BOT_TOKEN"))

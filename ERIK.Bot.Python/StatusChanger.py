@@ -14,6 +14,7 @@ Statuses= [
     "We from E&I would like to...",
     "?!",
     "!?",
+
     "Apocalypse Drifting",
     "Traintickets please",
     "Starstruck Waterfall",
@@ -34,6 +35,7 @@ Statuses= [
     "Cold Brass",
     "SWAT 5: The one with magic",
     "Risk of Storm 2",
+
     "Checkmate, the chessening",
     "Cup of losers",
     "with a berlin sausage",
@@ -43,7 +45,8 @@ Statuses= [
     "with some dumplings",
     "with delaying vital choices"
 
-    "with some volatile compounds in storage"
+    "with some volatile compounds in storage",
+    "with stability of a region full of war lords",
   ]
 
 global tim
@@ -60,4 +63,4 @@ class StatusChanger():
     print(f"Started status changer")
     while 1:
         await self.SetStatus()
-        time.sleep(10)
+        time.sleep(3600)
