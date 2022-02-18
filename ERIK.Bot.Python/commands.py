@@ -26,7 +26,8 @@ ApexCharacters = [
     'Fuse',
     'Valkyrie',
     'Seer',
-    'Ash'
+    'Ash',
+    'Mad Maggie'
 ]
 ApexSentence = ['Have you tried', 'How about', 'Try', 'Maybe', 'Ever tried', 'Hmmm, ', 'Maybe try', 'Just play',
                 'Have you tried pressing Q quicker with', 'Slide more as', 'Abuse the charge tower with', 'Lose your rp with', 'Complain about balancing with',
