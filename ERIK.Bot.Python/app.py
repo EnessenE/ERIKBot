@@ -5,6 +5,10 @@ from discord.role import Role
 from discord.user import User
 from discord_slash.context import ComponentContext
 from threading import Thread
+from StatusChanger import StatusChanger
+from commands import Commands
+from cloud import *
+import asyncio
 
 import loader
 import logging
@@ -28,10 +32,6 @@ handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w'
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
 
-from StatusChanger import StatusChanger
-from commands import Commands
-from cloud import *
-import asyncio
 commands = Commands()
 statuses = StatusChanger()
 
