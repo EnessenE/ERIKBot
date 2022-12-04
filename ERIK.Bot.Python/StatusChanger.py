@@ -47,6 +47,16 @@ Statuses= [
 
     "with some volatile compounds in storage",
     "with stability of a region full of war lords",
+    "with a whiste",
+    "with a toy plane",
+    "with a toy train",
+    "Nend Sudes",
+    "Send Noods",
+    "<3",
+    "</3",
+    "<?3",
+    "KLM855",
+    "with our privacy policy"
   ]
 
 global tim
