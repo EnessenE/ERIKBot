@@ -7,7 +7,6 @@ from discord_slash.context import ComponentContext
 from threading import Thread
 from StatusChanger import StatusChanger
 from commands import Commands
-from cloud import *
 import asyncio
 
 import loader
