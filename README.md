@@ -1,0 +1,2 @@
+### Erik bot
+A discord bot to just mess around with the new slash command feature. Now on iteration four, following up Iris and Wora which were writting in javascript with Discord.js. Also follows up three earlier iterations of Erik that were made in C# and python.
