@@ -17,7 +17,8 @@ namespace Erik.Modules
         [SlashCommand("apex", "Choose a random apex character to play")]
         public async Task Apex()
         {
-            await RespondAsync(_apexConfiguration.Characters.PickRandom());
+            var sentence = $"{_apexConfiguration.Prefixes.PickRandom()} {_apexConfiguration.Characters.PickRandom()}?";
+            await RespondAsync(sentence);
         }
     }
 }
