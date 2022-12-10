@@ -56,6 +56,7 @@ namespace Erik
 
         private void AddConfigurations(IServiceCollection services)
         {
+            services.Configure<ApexConfiguration>(Configuration.GetSection("ApexConfiguration"));
             services.Configure<StatusConfiguration>(Configuration.GetSection("StatusConfiguration"));
             services.Configure<BotConfiguration>(Configuration.GetSection("BotConfiguration"));
         }

@@ -8,17 +8,17 @@ namespace Erik.Controllers
     [Route("[controller]")]
     public class ConfigController : ControllerBase
     {
-        private readonly StatusConfiguration _statusSettings;
+        private readonly ApexConfiguration _apexSettings;
 
-        public ConfigController(IOptions<StatusConfiguration> statusOptions)
+        public ConfigController(IOptions<ApexConfiguration> statusOptions)
         {
-            _statusSettings = statusOptions.Value;
+            _apexSettings = statusOptions.Value;
         }
 
         [HttpGet(Name = "apex")]
         public List<string> Get()
         {
-            return _statusSettings.Statuses;
+            return _apexSettings.Characters;
         }
     }
 }
