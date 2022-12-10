@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Text.Json.Serialization;
+using Erik.Configurations;
 
 namespace Erik
 {
@@ -20,7 +21,10 @@ namespace Erik
 
         public void ConfigureServices(IServiceCollection services)
         {
+            AddConfigurations(services);
             AddDiscordServices(services);
+            services.AddHostedService<StatusManager>();
+
             // ********************
             // Setup CORS
             // ********************
@@ -50,9 +54,14 @@ namespace Erik
             });
         }
 
+        private void AddConfigurations(IServiceCollection services)
+        {
+            services.Configure<StatusConfiguration>(Configuration.GetSection("StatusConfiguration"));
+            services.Configure<BotConfiguration>(Configuration.GetSection("BotConfiguration"));
+        }
+
         private void AddDiscordServices(IServiceCollection services)
         {
-
             var config = new DiscordSocketConfig()
             {
                 //...
@@ -68,7 +77,8 @@ namespace Erik
             services.AddSingleton<CommandService>();
             services.AddHostedService<DiscordClientManager>();
             services.AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()));
-            services.AddSingleton<InteractionHandler>();
+            services.AddHostedService<InteractionHandler>();
+            
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

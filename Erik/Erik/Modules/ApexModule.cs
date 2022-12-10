@@ -4,7 +4,7 @@ namespace Erik.Modules
 {
     public class ApexModule : InteractionModuleBase
     {
-        [SlashCommand("things", "Shows things")]
+        [SlashCommand("apex", "Choose a random apex character to play")]
         public async Task ThingsAsync()
         {
             await RespondAsync("hai!");
