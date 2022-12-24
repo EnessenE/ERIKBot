@@ -32,7 +32,7 @@ namespace Erik
             // Since Global Commands take around 1 hour to register, we should use a test guild to instantly update and test our commands.
 
 #if DEBUG
-            await _handler.RegisterCommandsToGuildAsync(474590032267837471);
+            await _handler.RegisterCommandsToGuildAsync(250621419325489153);
 #else
             await _handler.RegisterCommandsGloballyAsync(true);
 #endif
