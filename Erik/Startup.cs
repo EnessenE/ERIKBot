@@ -59,6 +59,7 @@ namespace Erik
             services.Configure<ApexConfiguration>(Configuration.GetSection("ApexConfiguration"));
             services.Configure<StatusConfiguration>(Configuration.GetSection("StatusConfiguration"));
             services.Configure<BotConfiguration>(Configuration.GetSection("BotConfiguration"));
+            services.Configure<MusicConfiguration>(Configuration.GetSection("MusicConfiguration"));
         }
 
         private void AddDiscordServices(IServiceCollection services)
