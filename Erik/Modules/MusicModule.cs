@@ -7,6 +7,7 @@ using Erik.Configurations;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualBasic;
 using YoutubeExplode;
+using YoutubeExplode.Common;
 using YoutubeExplode.Videos.Streams;
 
 
@@ -17,12 +18,21 @@ namespace Erik.Modules
         private readonly MusicConfiguration _musicConfiguration;
 
         private readonly ILogger<MusicModule> _logger;
+
         //runtime
-        private static readonly IDictionary<ulong, IVoiceChannel> _currentVoiceChannels = new ConcurrentDictionary<ulong, IVoiceChannel>();
-        private static readonly IDictionary<ulong, IAudioClient> _currentAudioClients = new ConcurrentDictionary<ulong, IAudioClient>();
-        private static readonly IDictionary<ulong, List<QueueData>> _queues = new ConcurrentDictionary<ulong, List<QueueData>>();
+        private static readonly IDictionary<ulong, IVoiceChannel> _currentVoiceChannels =
+            new ConcurrentDictionary<ulong, IVoiceChannel>();
+
+        private static readonly IDictionary<ulong, IAudioClient> _currentAudioClients =
+            new ConcurrentDictionary<ulong, IAudioClient>();
+
+        private static readonly IDictionary<ulong, List<QueueData>> _queues =
+            new ConcurrentDictionary<ulong, List<QueueData>>();
+
         private static readonly IDictionary<ulong, bool> _guildData = new ConcurrentDictionary<ulong, bool>();
-        private static readonly IDictionary<ulong, CancellationTokenSource> _cancellationTokens = new ConcurrentDictionary<ulong, CancellationTokenSource>();
+
+        private static readonly IDictionary<ulong, CancellationTokenSource> _cancellationTokens =
+            new ConcurrentDictionary<ulong, CancellationTokenSource>();
 
         public MusicModule(IOptions<MusicConfiguration> apexOptions, ILogger<MusicModule> logger)
         {
@@ -46,6 +56,25 @@ namespace Erik.Modules
                 await ConnectToChannel(Context.Guild, channel);
             }
 
+        }
+
+
+
+        [SlashCommand("plays", "Search on youtube for a thing and play it!")]
+        public async Task PlayQuery(string text)
+        {
+            var youtube = new YoutubeClient();
+            _logger.LogInformation("search for {text}", text);
+            var data = await youtube.Search.GetResultsAsync(text);
+            var item = data.FirstOrDefault();
+            if (item != null)
+            {
+                await Play(item.Url);
+            }
+            else
+            {
+                await RespondAsync("Found nothing for this query! Sorry.");
+            }
         }
 
         [SlashCommand("play", "Plays this youtube url")]
@@ -215,10 +244,10 @@ namespace Erik.Modules
                     queueData.Url
                 );
             var streamInfo = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
-            var stream = await youtube.Videos.Streams.GetAsync(streamInfo);
+            using var stream = await youtube.Videos.Streams.GetAsync(streamInfo);
 
             _logger.LogInformation("Starting ffmpeg hax");
-            var memoryStream = new MemoryStream();
+            using var memoryStream = new MemoryStream();
             await Cli.Wrap("ffmpeg")
                     .WithArguments(" -hide_banner -loglevel panic -i pipe:0 -ac 2 -f s16le -ar 48000 pipe:1")
                     .WithStandardInputPipe(PipeSource.FromStream(stream))
@@ -240,6 +269,7 @@ namespace Erik.Modules
                 finally
                 {
                     await audioStream.FlushAsync();
+                    await memoryStream.FlushAsync();
                 }
             }
         }
