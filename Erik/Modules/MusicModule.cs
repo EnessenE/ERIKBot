@@ -215,7 +215,7 @@ namespace Erik.Modules
                         {
                             var data = Queues[guildId].First();
                             _logger.LogInformation($"Playing {data.GuildUser.Mention} - {data.Title} queue");
-                            await Context.Channel.SendMessageAsync($"Playing {data.Title} from {data.GuildUser.Mention}");
+                            await Context.Channel.SendMessageAsync($"Playing **{data.Title}** from {data.GuildUser.Mention}");
                             await PlayYoutubeVideo(data, source.Token);
                         }
                         catch (OperationCanceledException error)
@@ -224,7 +224,10 @@ namespace Erik.Modules
                         }
                         finally
                         {
-                            Queues[guildId].RemoveAt(0);
+                            if (Queues[guildId]?.Count > 0)
+                            {
+                                Queues[guildId].RemoveAt(0);
+                            }
                             await Task.Delay(500);
                         }
                     }
