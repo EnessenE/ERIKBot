@@ -120,13 +120,32 @@ namespace Erik.Modules
             }
         }
 
+
+        [SlashCommand("stop", "Stop playing and clear the queue")]
+        public async Task Stop()
+        {
+            await Skip(true);
+        }
+
+
         [SlashCommand("skip", "Skip the current song")]
-        public async Task Skip()
+        public async Task Skip(bool skipAll = false)
         {
             if (CancellationTokens.TryGetValue(Context.Guild.Id, out var task))
             {
+                if (skipAll)
+                {
+                    Queues[Context.Guild.Id]?.Clear();
+                }
                 task.Cancel();
-                await RespondAsync("Skipped current song");
+                if (!skipAll)
+                {
+                    await RespondAsync("Skipped current song");
+                }
+                else
+                {
+                    await RespondAsync("Skipped ALL songs.");
+                }
             }
             else
             {
@@ -159,6 +178,8 @@ namespace Erik.Modules
         [SlashCommand("leave", "Leaves a channel")]
         public async Task LeaveChannel()
         {
+            Queues[Context.Guild.Id]?.Clear();
+            CancellationTokens[Context.Guild.Id]?.Cancel();
             await RespondAsync($"Leaving {CurrentVoiceChannels[Context.Guild.Id].Name}!");
             await CurrentVoiceChannels[Context.Guild.Id].DisconnectAsync();
             CurrentVoiceChannels.Remove(Context.Guild.Id);
@@ -194,6 +215,7 @@ namespace Erik.Modules
                         {
                             var data = Queues[guildId].First();
                             _logger.LogInformation($"Playing {data.GuildUser.Mention} - {data.Title} queue");
+                            await Context.Channel.SendMessageAsync($"Playing {data.Title} from {data.GuildUser.Mention}");
                             await PlayYoutubeVideo(data, source.Token);
                         }
                         catch (OperationCanceledException error)
@@ -206,6 +228,7 @@ namespace Erik.Modules
                             await Task.Delay(500);
                         }
                     }
+                    GuildData[guildId] = false;
                     CancellationTokens[guildId] = null;
                     _logger.LogInformation("Finished queue");
                 }).Start();
@@ -270,20 +293,10 @@ namespace Erik.Modules
                 {
                     await audioStream.FlushAsync();
                     await memoryStream.FlushAsync();
+                    await memoryStream.DisposeAsync();
+                    await stream.DisposeAsync();
                 }
             }
         }
-    }
-
-    internal class GuildData
-    {
-        public bool Playing { get; set; }
-    }
-
-    internal class QueueData
-    {
-        public IGuildUser GuildUser { get; set; }
-        public string Url { get; set; }
-        public string Title { get; set; }
     }
 }

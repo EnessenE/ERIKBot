@@ -2,8 +2,14 @@
 
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
+
 EXPOSE 80
 EXPOSE 443
+
+RUN apt -y update
+RUN apt install -y ffmpeg
+RUN apt install -y libsodium-dev
+RUN apt install -y libopus-dev
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src

@@ -9,6 +9,7 @@
     <Version>1.2.0</Version>
   </PropertyGroup>
 
+
   <ItemGroup>
     <PackageReference Include="CliWrap" Version="3.6.0" />
     <PackageReference Include="Discord.Net" Version="3.9.0" />
@@ -21,10 +22,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="libsodium.dll">
+    <None Update="opus.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="opus.dll">
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="libsodium.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
