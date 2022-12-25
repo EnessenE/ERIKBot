@@ -20,18 +20,18 @@ namespace Erik.Modules
         private readonly ILogger<MusicModule> _logger;
 
         //runtime
-        private static readonly IDictionary<ulong, IVoiceChannel> _currentVoiceChannels =
+        private static readonly IDictionary<ulong, IVoiceChannel> CurrentVoiceChannels =
             new ConcurrentDictionary<ulong, IVoiceChannel>();
 
-        private static readonly IDictionary<ulong, IAudioClient> _currentAudioClients =
+        private static readonly IDictionary<ulong, IAudioClient> CurrentAudioClients =
             new ConcurrentDictionary<ulong, IAudioClient>();
 
-        private static readonly IDictionary<ulong, List<QueueData>> _queues =
+        private static readonly IDictionary<ulong, List<QueueData>> Queues =
             new ConcurrentDictionary<ulong, List<QueueData>>();
 
-        private static readonly IDictionary<ulong, bool> _guildData = new ConcurrentDictionary<ulong, bool>();
+        private static readonly IDictionary<ulong, bool> GuildData = new ConcurrentDictionary<ulong, bool>();
 
-        private static readonly IDictionary<ulong, CancellationTokenSource> _cancellationTokens =
+        private static readonly IDictionary<ulong, CancellationTokenSource> CancellationTokens =
             new ConcurrentDictionary<ulong, CancellationTokenSource>();
 
         public MusicModule(IOptions<MusicConfiguration> apexOptions, ILogger<MusicModule> logger)
@@ -83,7 +83,7 @@ namespace Erik.Modules
             var guildUser = (Context.User as IGuildUser);
             try
             {
-                if (_currentVoiceChannels.TryGetValue(Context.Guild.Id, out var client))
+                if (CurrentVoiceChannels.TryGetValue(Context.Guild.Id, out var client))
                 {
                     var youtube = new YoutubeClient();
 
@@ -123,7 +123,7 @@ namespace Erik.Modules
         [SlashCommand("skip", "Skip the current song")]
         public async Task Skip()
         {
-            if (_cancellationTokens.TryGetValue(Context.Guild.Id, out var task))
+            if (CancellationTokens.TryGetValue(Context.Guild.Id, out var task))
             {
                 task.Cancel();
                 await RespondAsync("Skipped current song");
@@ -136,9 +136,9 @@ namespace Erik.Modules
 
 
         [SlashCommand("queue", "Shows the current queue")]
-        public async Task showQueue()
+        public async Task ShowQueue()
         {
-            if (_queues.TryGetValue(Context.Guild.Id, out var queue) && queue.Count > 0)
+            if (Queues.TryGetValue(Context.Guild.Id, out var queue) && queue.Count > 0)
             {
                 var text = "The queue:\n";
                 for (int i = 0; i < queue.Count; i++)
@@ -159,20 +159,20 @@ namespace Erik.Modules
         [SlashCommand("leave", "Leaves a channel")]
         public async Task LeaveChannel()
         {
-            await RespondAsync($"Leaving {_currentVoiceChannels[Context.Guild.Id].Name}!");
-            await _currentVoiceChannels[Context.Guild.Id].DisconnectAsync();
-            _currentVoiceChannels.Remove(Context.Guild.Id);
-            _currentAudioClients.Remove(Context.Guild.Id);
+            await RespondAsync($"Leaving {CurrentVoiceChannels[Context.Guild.Id].Name}!");
+            await CurrentVoiceChannels[Context.Guild.Id].DisconnectAsync();
+            CurrentVoiceChannels.Remove(Context.Guild.Id);
+            CurrentAudioClients.Remove(Context.Guild.Id);
         }
 
 
         private async Task<IAudioClient> ConnectToChannel(IGuild guild, IVoiceChannel channel)
         {
-            _currentVoiceChannels.Add(guild.Id, channel);
+            CurrentVoiceChannels.Add(guild.Id, channel);
             var audioClient = await channel.ConnectAsync(false, false, false);
             _logger.LogInformation("Connected to {channel} with a latency of {ms} ms", channel.Name, audioClient.Latency);
 
-            _currentAudioClients.Add(guild.Id, audioClient);
+            CurrentAudioClients.Add(guild.Id, audioClient);
 
             return audioClient;
         }
@@ -183,16 +183,16 @@ namespace Erik.Modules
             var playing = AreWePlaying(guildId);
             if (!playing)
             {
-                _guildData[guildId] = true;
+                GuildData[guildId] = true;
                 new Task(async () =>
                 {
-                    while (_queues[guildId].Count > 0)
+                    while (Queues[guildId].Count > 0)
                     {
                         var source = new CancellationTokenSource();
-                        _cancellationTokens[guildId] = source;
+                        CancellationTokens[guildId] = source;
                         try
                         {
-                            var data = _queues[guildId].First();
+                            var data = Queues[guildId].First();
                             _logger.LogInformation($"Playing {data.GuildUser.Mention} - {data.Title} queue");
                             await PlayYoutubeVideo(data, source.Token);
                         }
@@ -202,11 +202,11 @@ namespace Erik.Modules
                         }
                         finally
                         {
-                            _queues[guildId].RemoveAt(0);
+                            Queues[guildId].RemoveAt(0);
                             await Task.Delay(500);
                         }
                     }
-                    _cancellationTokens[guildId] = null;
+                    CancellationTokens[guildId] = null;
                     _logger.LogInformation("Finished queue");
                 }).Start();
             }
@@ -214,7 +214,7 @@ namespace Erik.Modules
 
         private bool AreWePlaying(ulong guildId)
         {
-            if (_guildData.TryGetValue(guildId, out var playing))
+            if (GuildData.TryGetValue(guildId, out var playing))
             {
                 return playing;
             }
@@ -223,13 +223,13 @@ namespace Erik.Modules
 
         private int AddToQueue(ulong guildId, QueueData queueData)
         {
-            if (_queues.TryGetValue(guildId, out var data))
+            if (Queues.TryGetValue(guildId, out var data))
             {
                 data.Add(queueData);
             }
             else
             {
-                _queues.Add(guildId, new List<QueueData>());
+                Queues.Add(guildId, new List<QueueData>());
                 return AddToQueue(guildId, queueData);
             }
 
@@ -238,7 +238,7 @@ namespace Erik.Modules
 
         private async Task PlayYoutubeVideo(QueueData queueData, CancellationToken token)
         {
-            _currentAudioClients.TryGetValue(Context.Guild.Id, out var client);
+            CurrentAudioClients.TryGetValue(Context.Guild.Id, out var client);
             var youtube = new YoutubeClient();
             var streamManifest = await youtube.Videos.Streams.GetManifestAsync(
                     queueData.Url
