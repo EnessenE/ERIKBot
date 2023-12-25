@@ -23,8 +23,11 @@ namespace Erik
             _logger = logger;
         }
 
-        private async Task LogAsync(LogMessage log)
-            => _logger.LogInformation(log.ToString());
+        private Task LogAsync(LogMessage log)
+        {
+            _logger.LogInformation(log.ToString());
+            return Task.CompletedTask;
+        }
 
         private async Task ReadyAsync()
         {

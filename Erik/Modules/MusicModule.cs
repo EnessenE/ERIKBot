@@ -189,6 +189,7 @@ namespace Erik.Modules
 
         private async Task<IAudioClient> ConnectToChannel(IGuild guild, IVoiceChannel channel)
         {
+            AddToChannel(guild, channel);
             CurrentVoiceChannels.Add(guild.Id, channel);
             var audioClient = await channel.ConnectAsync(false, false, false);
             _logger.LogInformation("Connected to {channel} with a latency of {ms} ms", channel.Name, audioClient.Latency);
@@ -196,6 +197,20 @@ namespace Erik.Modules
             CurrentAudioClients.Add(guild.Id, audioClient);
 
             return audioClient;
+        }
+
+        private void AddToChannel(IGuild guild, IVoiceChannel channel)
+        {
+            if (CurrentVoiceChannels.ContainsKey(guild.Id))
+            {
+                _logger.LogInformation("Bot was already in this channel, maybe it was not properly disconnected/ Forcefully removing an audioclient");
+
+                CurrentAudioClients.Remove(guild.Id);
+            }
+            else
+            {
+                CurrentVoiceChannels.Add(guild.Id, channel);
+            }
         }
 
 
