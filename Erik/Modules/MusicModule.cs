@@ -190,7 +190,6 @@ namespace Erik.Modules
         private async Task<IAudioClient> ConnectToChannel(IGuild guild, IVoiceChannel channel)
         {
             AddToChannel(guild, channel);
-            CurrentVoiceChannels.Add(guild.Id, channel);
             var audioClient = await channel.ConnectAsync(false, false, false);
             _logger.LogInformation("Connected to {channel} with a latency of {ms} ms", channel.Name, audioClient.Latency);
 
