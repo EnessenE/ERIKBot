@@ -49,8 +49,8 @@ namespace reasulus.api
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", false, true)
-                .AddJsonFile($"appsettings.{env}.json", true, true)
+                .AddJsonFile("appsettings.json", false, false)
+                .AddJsonFile($"appsettings.{env}.json", true, false)
                 .AddEnvironmentVariables();
 
             return builder.Build();
