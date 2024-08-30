@@ -6,19 +6,19 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>b404d1dd-7e2d-4920-87a7-cae19b437568</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <Version>1.4.0</Version>
+    <Version>1.5.0</Version>
   </PropertyGroup>
 
 
   <ItemGroup>
     <PackageReference Include="CliWrap" Version="3.6.6" />
-    <PackageReference Include="Discord.Net" Version="3.15.2" />
-    <PackageReference Include="Discord.Net.WebSocket" Version="3.15.2" />
+    <PackageReference Include="Discord.Net" Version="3.15.3" />
+    <PackageReference Include="Discord.Net.WebSocket" Version="3.15.3" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
-    <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.2" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
-    <PackageReference Include="YoutubeExplode" Version="6.3.16" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.3" />
+    <PackageReference Include="YoutubeExplode" Version="6.4.0" />
   </ItemGroup>
 
   <ItemGroup>
